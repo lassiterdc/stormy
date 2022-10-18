@@ -1,0 +1,7 @@
+# code being run:
+(rainyday) /gpfs/gpfs0/project/quinnlab/dcl3nd/norfolk/RainyDay2/Source$ python RainyDay_Py3.py /project/quinnlab/dcl3nd/norfolk/RainyDay2/norfolk_mrms/norfolk_example.sst
+
+# RainyDay_functions.py mods
+1378, 1379, 1429, 1430 - commented out to eliminate error "RainyDay requires daily input files, but has detected something different."
+
+# RainyDay_Py3.py mods
