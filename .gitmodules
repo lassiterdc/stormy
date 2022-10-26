@@ -1,0 +1,6 @@
+[submodule "stochastic_storm_transposition/RainyDay"]
+	path = stochastic_storm_transposition/RainyDay
+	url = https://github.com/danielbwright/RainyDay.git
+[submodule "stochastic_storm_transposition/RainyDay2"]
+	path = stochastic_storm_transposition/RainyDay2
+	url = https://github.com/lassiterdc/RainyDay2.git
