@@ -5,7 +5,8 @@ cd /project/quinnlab/dcl3nd/norfolk/stormy/stochastic_storm_transposition
 #%% running on Rivanna
 # using a subset of mrms data
 python "RainyDay2/Source/RainyDay_Py3.py" "norfolk/norfolk_mrms_subset_rivanna.sst"
-
+# using a subset of hourly data
+python "RainyDay2/Source/RainyDay_Py3.py" "norfolk/norfolk_mrms_hourly_subset_rivanna.sst"
 
 
 
