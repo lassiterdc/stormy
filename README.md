@@ -17,7 +17,7 @@ git checkout $BRANCH
 ## checking out branched RainyDay repo
 based on: https://stackoverflow.com/questions/1811730/how-do-i-work-with-a-git-repository-within-another-repository
 ```
-cd stochastic_storm_transposition/RainyDay2
+cd stochastic_storm_transposition
 REMOTE_REPO=https://github.com/lassiterdc/RainyDay2.git
 git init
 git submodule add $REMOTE_REPO

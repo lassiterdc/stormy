@@ -1,10 +1,10 @@
 ijob -c 1 -A quinnlab_paid -p standard --time=1-00:00:00 --mem=175000
 module load anaconda
 source activate rainyday
-
+cd /project/quinnlab/dcl3nd/norfolk/stormy/stochastic_storm_transposition
 #%% running on Rivanna
 # using a subset of mrms data
-
+python "RainyDay2/Source/RainyDay_Py3.py" "norfolk/norfolk_mrms_subset_rivanna.sst"
 
 
 
