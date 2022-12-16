@@ -1,10 +1,11 @@
 """
-This script downloads tide gage data and tide prediction data (the difference
-between the two is storm surge) and save them to a .csv. This script also 
+This script downloads tide gage data and tide prediction data. It also
+computes storm surge (the difference
+between the two) and saves the data to a .csv. This script also 
 downloads the station metadata and saves it to a JSON and it creates a shapefile
 at the location of the gage.
 
-Last significant edits: 5/27/2022
+Last significant edits: 12/16/22
 """
 #%% import libraries and define parameters
 from _directories import def_fpaths_for_a
@@ -15,17 +16,23 @@ import json
 import geopandas as gp
 import noaa_coops as nc
 import numpy as np
+from datetime import date
 
 begin_year = 2001
-end_year = 2023
-
 fld_out_a = def_fpaths_for_a()
 
+# parameters for downloading data
+b_md = "0101" # start date of each year downloaded
+e_md = "1231" # end date of each year downloaded
+record_start = "19270701" # beginning of record for station
+sta_id = 8638610 # sewells point gage id
 #%% download tide gage and tide prediction data
-years = np.arange(begin_year+1, end_year+1, 1) 
-md = "0101"
-record_start = "19270701"
-sta_id = 8638610 # sewells point
+tday = date.today()
+end_year = tday.year
+end_md = "{}{}".format(tday.month, tday.day)
+
+years = np.arange(begin_year, end_year+1, 1) 
+
 prods = ["water_level", 'predictions', "wind", "air_pressure", "one_minute_water_level", "datums"]
 datum = "NAVD"
 units = "english"
@@ -38,15 +45,18 @@ dfs_wl = []
 dfs_tide_pred = []
 
 for y in years:
-    b_yr = str(y-1)
-    e_yr = str(y)
+    yr = str(y)
+    # e_yr = str(y)
     
-    if y != 1927+1:
-        b_date = b_yr + md
-    else:
+    if y == 1927:
         b_date = record_start
+    else:
+        b_date = yr + b_md
 
-    e_date = e_yr + md
+    if y == end_year:
+        e_date = yr + end_md
+    else:
+        e_date = yr + e_md
     
     print("Begin: {}, End: {}".format(b_date, e_date))
 
@@ -77,14 +87,18 @@ df_wl = df_wl[~df_wl.index.duplicated(keep='first')]
 
 df_tide_pred = pd.concat(dfs_tide_pred)
 df_tide_pred = df_tide_pred[~df_tide_pred.index.duplicated(keep='first')]
+
+df_comb = df_wl.join(df_tide_pred, on="date_time", how='left')
+df_comb['surge_ft']=df_comb.water_level - df_comb.predicted_wl
 #%% saving tide data and metadata
-with open(fldr_out + 'sewells_pt_water_level_metadatap.json', 'w', encoding='utf-8') as outfile:
+with open(fld_out_a + 'sewells_pt_water_level_metadatap.json', 'w', encoding='utf-8') as outfile:
     json.dump(metadata,outfile,ensure_ascii=False, indent=4)
 
 yrs = "_{}_to_{}".format(str(min(years-1)), str(max(years)))
 
-df_wl.to_csv(fldr_out+"a_water_level{}.csv".format(yrs))
-df_tide_pred.to_csv(fldr_out+"a_tide_preds{}.csv".format(yrs))
+# df_wl.to_csv(fld_out_a+"a_water_level{}.csv".format(yrs))
+# df_tide_pred.to_csv(fld_out_a+"a_tide_preds{}.csv".format(yrs))
+df_comb.to_csv(fld_out_a+"a_water-lev_tide_surge{}.csv".format(yrs))
 
 keys=['name', 'lat', 'lng']
 geo_data={key:metadata[key] for key in keys}
@@ -94,4 +108,4 @@ df = pd.DataFrame(geo_data, index=[0])
 gdf = gp.GeoDataFrame(df,
                              geometry=gp.points_from_xy(df.lat, df.lng))
 
-gdf.to_file(fldr_out+"sewells_pt.shp")
+gdf.to_file(fld_out_a+"sewells_pt.shp")
