@@ -3,7 +3,7 @@
 *.png
 *.lock
 *.jpg4
-# *.csv
+*.csv
 _temp
 *_archive*
 # data/raw_data/*
