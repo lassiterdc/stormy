@@ -13,4 +13,12 @@ declare -A assar_dirs
 
 # populate associative array with folder and filepaths; this should be the only thing that has to be changed
 assar_dirs[repo]="/project/quinnlab/dcl3nd/norfolk/stormy/"
+assar_dirs[sst]=${assar_dirs[repo]}"stochastic_storm_transposition/"
+
+# scripts
+assar_dirs[hpc_b_py]=${assar_dirs[sst]}"RainyDay2/Source/RainyDay_Py3.py"
+
+# RainyDay Inputs
+## for testing
+assar_dirs[hpc_b_SST_in]=${assar_dirs[sst]}"norfolk/norfolk_mrms_subset_rivanna.sst"
 
