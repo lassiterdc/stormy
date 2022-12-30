@@ -7,7 +7,8 @@
 _temp
 *_archive*
 # data/raw_data/*
-# *.out
+*.out
+*_backup*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
