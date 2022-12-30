@@ -8,7 +8,7 @@ at the location of the gage.
 Last significant edits: 12/16/22
 """
 #%% import libraries and define parameters
-from _directories import def_fpaths_for_a
+from _inputs import def_inputs_for_a
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 import pandas as pd
@@ -18,8 +18,8 @@ import noaa_coops as nc
 import numpy as np
 from datetime import date
 
-begin_year = 2001
-fld_out_a = def_fpaths_for_a()
+
+begin_year, f_out_a_meta, f_out_a_all, f_out_a_shp = def_inputs_for_a()
 
 # parameters for downloading data
 b_md = "0101" # start date of each year downloaded
@@ -91,21 +91,20 @@ df_tide_pred = df_tide_pred[~df_tide_pred.index.duplicated(keep='first')]
 df_comb = df_wl.join(df_tide_pred, on="date_time", how='left')
 df_comb['surge_ft']=df_comb.water_level - df_comb.predicted_wl
 #%% saving tide data and metadata
-with open(fld_out_a + 'sewells_pt_water_level_metadatap.json', 'w', encoding='utf-8') as outfile:
+with open(f_out_a_meta, 'w', encoding='utf-8') as outfile:
     json.dump(metadata,outfile,ensure_ascii=False, indent=4)
 
-yrs = "_{}_to_{}".format(str(min(years-1)), str(max(years)))
+# yrs = "_{}_to_{}".format(str(min(years-1)), str(max(years)))
 
 # df_wl.to_csv(fld_out_a+"a_water_level{}.csv".format(yrs))
 # df_tide_pred.to_csv(fld_out_a+"a_tide_preds{}.csv".format(yrs))
-df_comb.to_csv(fld_out_a+"a_water-lev_tide_surge{}.csv".format(yrs))
+df_comb.to_csv(f_out_a_all)
 
 keys=['name', 'lat', 'lng']
 geo_data={key:metadata[key] for key in keys}
 
 df = pd.DataFrame(geo_data, index=[0])
 
-gdf = gp.GeoDataFrame(df,
-                             geometry=gp.points_from_xy(df.lat, df.lng))
+gdf = gp.GeoDataFrame(df, geometry=gp.points_from_xy(df.lat, df.lng))
 
-gdf.to_file(fld_out_a+"sewells_pt.shp")
+gdf.to_file(f_out_a_shp)
