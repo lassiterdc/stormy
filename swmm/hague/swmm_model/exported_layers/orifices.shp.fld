@@ -1,0 +1,23 @@
+﻿
+[TatukGIS Fields]
+CAPDEPTH=CapDepth
+CTRLRULES=CtrlRules
+DESCRIPT=Descript
+DSCHRGCOEF=DschrgCoef
+FLAPGATE=FlapGate
+HEIGHT=Height
+IMPCONAREA=ImpConArea
+INLETNODE=InletNode
+INOFFSET=InOffset
+MAXFLOW=MaxFlow
+NAME=Name
+OPENRATE=OpenRate
+OUTLETNODE=OutletNode
+TAG=Tag
+TIMEMAXFLW=TimeMaxFlw
+TOTCONAREA=TotConArea
+TYPE=Type
+UNITFLOW=UnitFlow
+WIDTH=Width
+XSECTION=XSection
+
