@@ -13,12 +13,12 @@ RAINPATH	/project/quinnlab/dcl3nd/norfolk/highres-radar-rainfall-processing/data
 
 # SST PARAMETERS
 ISLASSITER		true											
-CATALOGNAME		norfolk_mrms_sst_subset_hourly_rivanna.nc							# THE STORM CATALOG IN NETCDF FORMAT TO BE READ OR CREATED
+CATALOGNAME		norfolk_mrms_sst_subset_rivanna.nc							# THE STORM CATALOG IN NETCDF FORMAT TO BE READ OR CREATED
 CREATECATALOG	true										# IF FALSE, IT WILL LOOK FOR THE STORM CATALOG. IF TRUE, IT WILL CREATE THE STORM CATALOG
 DURATION		72													# STORM DURATION IN HOURS
 DURATIONCORRECTION false		
 NYEARS			10										# HOW MANY YEARS OF RAINFALL SHOULD BE GENERATED
-NSTORMS			50
+NSTORMS			50                                        # Total number of storms in storm catalog - should be at least 20 times the number of years on record
 NREALIZATIONS	10														# HOW MANY REPLICATIONS/REALIZATIONS DO YOU WANT?
 TIMESEPARATION	12														# MINIMUM TIME SEPARATION BETWEEN STORMS IN CATALOG IN HOURS
 DOMAINTYPE		irregular												# "irregular" or "rectangular"
