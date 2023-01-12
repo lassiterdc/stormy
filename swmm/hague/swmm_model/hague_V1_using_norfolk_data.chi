@@ -7,33 +7,37 @@ Version=3
 Package Path=C:\Users\dcl3nd\Dropbox\_GradSchool\_norfolk\norfolk_ffa\swmm\hague\V1_using_norfolk_data_directly\hague_V1_using_norfolk_data.pcz
 Map EPSG=102747
 CS Name=NAD 1983 StatePlane Virginia South FIPS 4502 Feet
-Last Report Date=05/09/2022 3:55:40 PM
+Last Report Date=01/05/2023 11:40:48 AM
 [2D]
 2DModeling=False
 [Project Summary]
-Compute Time=2 minutes and 29 seconds
-Routing Error=-0.994
-Runoff Error=-0.416
+Compute Time=4 minutes and 57 seconds
+Routing Error=-0.104
+Runoff Error=-0.103
+Run Incomplete=False
 [Authors]
-Author0=Daniel Lassiter,44690.6690132292
+Author0=Daniel Lassiter,44931.4831622685
 [Layers]
-layer0=C:\Users\Daniel\Dropbox\_GradSchool\_norfolk\norfolk_ffa\data\processed\for_pcswmm\lidar_usgs_2013_voidfill_clipped_to_watershed.tif
-layer1=C:\Users\Daniel\Dropbox\_GradSchool\_norfolk\norfolk_ffa\data\processed\for_pcswmm\sub_iterations\flowpaths_v1.SHP
-layer2=C:\Users\Daniel\Dropbox\_GradSchool\_norfolk\norfolk_ffa\swmm\hague\V1_using_norfolk_data_directly\exported_layers\storages.shp
-layer3=C:\Users\Daniel\Dropbox\_GradSchool\_norfolk\norfolk_ffa\swmm\hague\node_parameterization\storage_contours.shp
-layer4=C:\Users\Daniel\Dropbox\_GradSchool\_norfolk\norfolk_ffa\swmm\hague\node_parameterization\storage_polys.SHP
-layer5=Outlets
-layer6=Subcatchments
-layer7=Weirs
-layer8=Orifices
-layer9=Pumps
-layer10=Conduits
-layer11=Dividers
-layer12=Outfalls
-layer13=Junctions
-layer14=C:\Users\Daniel\Dropbox\_GradSchool\_norfolk\norfolk_ffa\data\processed\for_pcswmm\stormwater_structures_clipped.shp
-layer15=Storages
-layer16=C:\Users\Daniel\Dropbox\_GradSchool\_norfolk\norfolk_ffa\data\processed\for_pcswmm\stormwater_pipes_clipped.shp
+layer0=Outlets
+layer1=Subcatchments
+layer2=Weirs
+layer3=Orifices
+layer4=Pumps
+layer5=Conduits
+layer6=Dividers
+layer7=Outfalls
+layer8=Junctions
+layer9=Storages
+[Scenarios]
+"Scenarios0"="D:\Dropbox\_GradSchool\_norfolk\stormy\swmm\hague\swmm_model\hague_V1_using_norfolk_data.inp",False,False,hague_V1_using_norfolk_data
+"Scenarios1"="D:\Dropbox\_GradSchool\_norfolk\norfolk_ffa\swmm\hague\swmm_model\hague_V1_using_norfolk_data.inp",False,False,hague_V1_using_norfolk_data
+"Scenarios2"="C:\Users\Daniel\Dropbox\_GradSchool\_norfolk\norfolk_ffa\swmm\hague\swmm_model\hague_V1_using_norfolk_data.inp",False,False,hague_V1_using_norfolk_data
+"Scenarios3"="C:\Users\dcl3nd\Dropbox\_GradSchool\_norfolk\norfolk_ffa\swmm\hague\swmm_model\hague_V1_using_norfolk_data.inp",False,False,hague_V1_using_norfolk_data
+"Scenarios4"="C:\Users\Daniel\Dropbox\_GradSchool\Courses\SYS6582\assignments\final_project_less_rain\swmm\hague_sub_model.inp",False,False,hague_sub_model
+"Scenarios5"="C:\Users\Daniel\Dropbox\_GradSchool\_norfolk\norfolk_ffa\swmm\hague\hague_V1.inp",False,False,hague_V1
+"Scenarios6"="C:\Users\Daniel\Dropbox\_GradSchool\_norfolk\norfolk_ffa\swmm\hague\V1_using_norfolk_data_directly\hague_V1_using_norfolk_data.inp",False,False,hague_V1_using_norfolk_data
+"Scenarios7"="C:\Users\Daniel\Dropbox\_GradSchool\Courses\SYS6582\assignments\final_project\swmm\hague_sub_model.inp",False,False,hague_sub_model
+"Scenarios8"="C:\Users\Daniel\Dropbox\_GradSchool\Courses\SYS6582\assignments\final_project_less_rain\rivanna_scripts\hague_sub_model.inp",False,False,hague_sub_model
 [Graph]
 Plotting Position=Gringorten
 [Erosion]
@@ -41,12 +45,3 @@ ErosionOn=False
 Use C TS=False
 Calculate LS=False
 Use TSS=False
-[Scenarios]
-"Scenarios0"="D:\Dropbox\_GradSchool\_norfolk\norfolk_ffa\swmm\hague\swmm_model\hague_V1_using_norfolk_data.inp",False,False,hague_V1_using_norfolk_data
-"Scenarios1"="C:\Users\Daniel\Dropbox\_GradSchool\_norfolk\norfolk_ffa\swmm\hague\swmm_model\hague_V1_using_norfolk_data.inp",False,False,hague_V1_using_norfolk_data
-"Scenarios2"="C:\Users\dcl3nd\Dropbox\_GradSchool\_norfolk\norfolk_ffa\swmm\hague\swmm_model\hague_V1_using_norfolk_data.inp",False,False,hague_V1_using_norfolk_data
-"Scenarios3"="C:\Users\Daniel\Dropbox\_GradSchool\Courses\SYS6582\assignments\final_project_less_rain\swmm\hague_sub_model.inp",False,False,hague_sub_model
-"Scenarios4"="C:\Users\Daniel\Dropbox\_GradSchool\_norfolk\norfolk_ffa\swmm\hague\hague_V1.inp",False,False,hague_V1
-"Scenarios5"="C:\Users\Daniel\Dropbox\_GradSchool\_norfolk\norfolk_ffa\swmm\hague\V1_using_norfolk_data_directly\hague_V1_using_norfolk_data.inp",False,False,hague_V1_using_norfolk_data
-"Scenarios6"="C:\Users\Daniel\Dropbox\_GradSchool\Courses\SYS6582\assignments\final_project\swmm\hague_sub_model.inp",False,False,hague_sub_model
-"Scenarios7"="C:\Users\Daniel\Dropbox\_GradSchool\Courses\SYS6582\assignments\final_project_less_rain\rivanna_scripts\hague_sub_model.inp",False,False,hague_sub_model
