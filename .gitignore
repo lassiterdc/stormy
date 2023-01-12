@@ -10,6 +10,8 @@ _temp
 *.out
 *_backup*
 *parameterization*
+*.tsb
+*.dat
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
