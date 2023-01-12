@@ -18,11 +18,11 @@
             {
                 "status": 1,
                 "refdatum": "",
-                "sensorID": "B1",
-                "name": "Backup WL",
+                "sensorID": "A1",
+                "name": "Acoustic WL",
                 "elevation": null,
                 "message": "",
-                "dcp": 2
+                "dcp": 1
             },
             {
                 "status": 1,
@@ -52,12 +52,12 @@
                 "dcp": 1
             },
             {
-                "status": 0,
+                "status": 1,
                 "refdatum": "",
                 "sensorID": "U1",
                 "name": "Tsunami WL",
                 "elevation": null,
-                "message": "Dec 15 2022  2:10PM&Suspect Data - Data failed to meet QC standards - under review.",
+                "message": "",
                 "dcp": 1
             },
             {
@@ -1496,7 +1496,7 @@
     "timezone": "EST",
     "timezonecorr": -5,
     "observedst": true,
-    "stormsurge": true,
+    "stormsurge": false,
     "nearby": {
         "count": 51,
         "units": null,
@@ -2403,12 +2403,7 @@
         "self": "https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations/8638610/disclaimers.json"
     },
     "notices": {
-        "notices": [
-            {
-                "name": "High Water Condition",
-                "text": "This station is currently in <a href='http://tidesandcurrents.noaa.gov/waterconditions.html#high'>high water condition</a>."
-            }
-        ],
+        "notices": [],
         "self": "https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations/8638610/notices.json"
     },
     "self": "https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations/8638610.json",
