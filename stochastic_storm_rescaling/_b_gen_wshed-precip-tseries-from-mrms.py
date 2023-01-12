@@ -8,7 +8,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 
-f_in_b_nc, f_shp_swmm_subs, f_out_b_csv_rainfall, f_out_b_csv_subs_w_mrms_grid = def_inputs_for_b()
+f_in_b_nc, f_shp_swmm_subs, f_out_b_csv_rainfall, f_out_b_csv_subs_w_mrms_grid, f_out_swmm_rainfall, mm_per_inch = def_inputs_for_b()
 
 #%% load data
 ds_rain = xr.open_dataset(f_in_b_nc)
@@ -71,6 +71,7 @@ for row in df_mrms_at_subs_unique.iterrows():
     data[id]=ds_rain_subset.rainrate.values
 
 df_rain_tseries = pd.DataFrame(data).set_index('time')
+df_rain_tseries['mrms_mean'] = df_rain_tseries.mean(axis=1, skipna=True)
 
 #%% append subcatchment geodataframe with associated rain time series
 raingage_id = df_mrms_at_subs.index.values
@@ -84,4 +85,45 @@ df_subs_raingages.to_csv(f_out_b_csv_subs_w_mrms_grid)
 
 print("finished creating .csv files")
 
-# %%
+#%% creating .dat files for swmmm
+"""
+From SWMM Manual Version 5.1:
+"a standard user-prepared format where each line of the file contains
+the station ID, year, month, day, hour, minute, and non-zero precipitation
+reading, all separated by one or more spaces."
+Also
+"""
+
+# resample to a 5-minute interval
+gage_ids = df_rain_tseries.columns
+df = df_rain_tseries.resample("1min").ffill().resample("5min").mean()
+colnames = df.columns.values
+df = df.reset_index()
+df['date'] = df.time.dt.strftime('%m/%d/%Y')
+df['time'] = df.time.dt.time
+
+# station ID has a ';' which is the comment symbol in SWMM
+df_long = pd.melt(df, id_vars = ["date", "time"], var_name="station_id", value_name="precip")
+
+# df_long["year"] = df_long.time.dt.year
+# df_long["month"] = df_long.time.dt.month
+# df_long["day"] = df_long.time.dt.day
+# df_long["hour"] = df_long.time.dt.hour
+# df_long["minute"] = df_long.time.dt.minute
+# df_long["time"] = df_long.time.dt.time
+df_long["precip_in"] = df_long.precip / mm_per_inch
+df_long = df_long[["station_id", "date", "time", "precip_in"]]
+
+# remove NA values and non-zero values
+df_long = df_long[df_long['precip_in'] > 0]
+#%% export to file
+for g_id in gage_ids:
+    # initialize file with proper header
+    with open(f_out_swmm_rainfall.format(g_id), "w+") as file:
+        file.write(";;MRMS Precipitation Data\n")
+        file.write(";;Rainfall (in/hr)\n")
+    df_long_subset = df_long[df_long['station_id'] == g_id]
+    df_long_subset = df_long_subset.drop(["station_id"], axis=1)
+    df_long_subset.to_csv(f_out_swmm_rainfall.format(g_id), sep = '\t', index = False, header = False, mode="a")
+    
+
