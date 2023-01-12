@@ -13,6 +13,8 @@ _temp
 *.tsb
 *.dat
 *.zip
+*_work*
+*_test*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

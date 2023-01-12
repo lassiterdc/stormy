@@ -20,5 +20,7 @@ assar_dirs[hpc_b_py]=${assar_dirs[sst]}"RainyDay2/Source/RainyDay_Py3.py"
 
 # RainyDay Inputs
 ## for testing
-assar_dirs[hpc_b_SST_in]=${assar_dirs[sst]}"norfolk/norfolk_mrms_subset_rivanna.sst"
+assar_dirs[hpc_b_SST_in_subset]=${assar_dirs[sst]}"norfolk/norfolk_mrms_subset_rivanna.sst"
+assar_dirs[hpc_b_SST_in_hrly_subset]=${assar_dirs[sst]}"norfolk/norfolk_mrms_hourly_subset short_rivanna.sst"
+assar_dirs[hpc_b_SST_in_hrly_2001_to_2011]=${assar_dirs[sst]}"norfolk/norfolk_mrms_hourly_2001-2011_rivanna.sst"
 
