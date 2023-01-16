@@ -2,8 +2,11 @@
 from _inputs import def_work_c
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 f_daily_summaries, f_hourlyglobal_precip_all_stations, f_hourlyglobal_precip_subset_stations, f_hourlyprecip = def_work_c()
 min_record_length = 30 # years; for subsetting stations with sufficiently long record
+fldr_plt_out = "D:/Dropbox/_GradSchool/_norfolk/stormy/stochastic_storm_rescaling/outputs/work_c_NCEI_qaqc/"
+
 #%% load data
 df_daily = pd.read_csv(f_daily_summaries, parse_dates=['DATE'], low_memory=False)
 df_hrlyglbl_all = pd.read_csv(f_hourlyglobal_precip_all_stations, parse_dates=['DATE'], low_memory=False)
@@ -98,7 +101,8 @@ df_hrlyprcp = filter_stations_with_min_record(df_hrlyprcp)
 These look like garbage; none of the values in the precipitation column look like rainfall
 """
 # df = df_hrlyglbl_all[df_hrlyglbl_all["STATION"]==72307513769].copy()
-df = df_hrlyglbl_sbst[df_hrlyglbl_sbst["STATION"]==74598013702].copy()
+sta_id = 74598013702
+df = df_hrlyglbl_sbst[df_hrlyglbl_sbst["STATION"]==sta_id].copy()
 
 for col in ['AA1','AA2','AA3','AA4']:
     df_tmp = df[col].str.split(',', expand=True)
@@ -106,10 +110,25 @@ for col in ['AA1','AA2','AA3','AA4']:
         newname = col+"_"+str(i)
         df_tmp = df_tmp.rename(columns={i:newname})
     # df_tmp = df_tmp.rename(columns={0:new_names, 1:"val2", 2:'val3', 3:'val4'})
-df = pd.concat([df, df.PRCP.str.split(',', expand=True)], axis = 1)
-df = df.rename(columns={0:"val1", 1:"val2", 2:'val3', 3:'val4'})
-df = df[["DATE", 'val1', 'val2', 'val3', 'val4']]
+    df = df.drop(columns=col)
+    df = pd.concat([df, df_tmp], axis = 1)
+# df = df.rename(columns={0:"val1", 1:"val2", 2:'val3', 3:'val4'})
+# df = df[["DATE", 'val1', 'val2', 'val3', 'val4']]
+df = df.drop(columns="STATION")
 df = df.set_index("DATE")
+
+for colname, series in df.items():
+    sr = series.astype(float)
+    sr = sr.dropna()
+    if len(sr) == 0:
+        continue
+    fig, ax = plt.subplots(dpi=300)
+    sr.resample('1y').sum().plot(ax =ax)
+    ax.set_ylabel("Total Annual Rainfall (in)")
+    ax.set_xlabel("Year")
+    ax.set_title("Station: {} ({}hr timestep) \n Annual Precipitation Totals".format(sta_id, str(1)))
+    fig.savefig(fldr_plt_out + "ncei_qaqc_hourly global_station {}_series {}.png".format(sta_id, colname))
+
 valid_ids = []
 for row, col in df.items():
     try:
