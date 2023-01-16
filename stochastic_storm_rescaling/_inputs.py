@@ -9,6 +9,8 @@ mm_per_inch = 25.4
 # script a
 in_a_begin_year = 2001
 
+# minimum record length to use an NCEI dataset
+min_record_length = 30
 #%% Directories
 fldr_nrflk = str(Path(os.getcwd()).parents[1]) + "/"
 fldr_ssr = fldr_nrflk + "stormy/stochastic_storm_rescaling/"
@@ -44,6 +46,10 @@ f_out_b_csv_rainfall = fld_out_b + "b_mrms_rainfall.csv"
 f_out_b_csv_subs_w_mrms_grid = fld_out_b + "b_sub_ids_and_mrms_rain_col.csv"
 f_out_swmm_rainfall = fldr_swmm_tseries + "b_mrms_rainfall_in_per_hr_{}.dat"
 
+# unique to script c
+fld_out_c_plts = fldr_NCEI + "qaqc_plots/"
+fld_out_c_processed_data = fldr_NCEI + "processed_data/"
+
 def def_work():
     return f_out_a_all
 
@@ -58,3 +64,6 @@ def def_inputs_for_a():
 
 def def_inputs_for_b():
     return f_in_b_nc, f_shp_swmm_subs, f_out_b_csv_rainfall, f_out_b_csv_subs_w_mrms_grid, f_out_swmm_rainfall, mm_per_inch
+
+def def_inputs_for_c():
+    return f_daily_summaries, f_hourlyprecip, fld_out_c_plts, fld_out_c_processed_data, min_record_length
