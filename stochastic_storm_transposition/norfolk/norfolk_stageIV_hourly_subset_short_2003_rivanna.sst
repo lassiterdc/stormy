@@ -12,7 +12,7 @@ RAINPATH	/scratch/dcl3nd/StageIV/StageIV_rainfall/*/*.nc
 
 
 # SST PARAMETERS
-ISLASSITER		true											
+ISLASSITER		false											
 CATALOGNAME		norfolk_stageIV_sst_subset_short_2003_hourly_rivanna.nc							# THE STORM CATALOG IN NETCDF FORMAT TO BE READ OR CREATED
 CREATECATALOG	true										# IF FALSE, IT WILL LOOK FOR THE STORM CATALOG. IF TRUE, IT WILL CREATE THE STORM CATALOG
 DURATION		72													# STORM DURATION IN HOURS
