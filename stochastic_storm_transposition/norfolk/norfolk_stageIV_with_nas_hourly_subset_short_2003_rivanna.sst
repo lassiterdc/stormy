@@ -1,0 +1,62 @@
+#==============================================================================
+# WELCOME TO THE RAINY DAY MODEL!
+# USER DEFINED INFORMATION FOR STOCHASTIC STORM TRANSPOSITION
+#==============================================================================
+
+# BASIC INFO ON THE SCENARIO
+MAINPATH	/project/quinnlab/dcl3nd/norfolk/stormy/stochastic_storm_transposition/norfolk/	# THE MAGIC WILL HAPPEN HERE, IF NOT OTHERWISE DEFINED
+SCENARIONAME		norfolk_stageIV_with_nas_hourly_subset_short_2003						# THE DIRECTORY NAME IN MAINPATH WHERE THINGS WILL BE WRITTEN, ALSO PREFIX FOR FILES	
+
+# DEFINE THE RAINFALL INPUT DATASET (NOTE: NOT ALL DATASETS ARE CURRENTLY SUPPORTED, BUT SHOULD BE ABLE TO BE ADDED WITH MINIMAL WORK)
+RAINPATH	/scratch/dcl3nd/StageIV/2003_w_nas/*.nc
+
+
+# SST PARAMETERS
+ISLASSITER		false											
+CATALOGNAME		norfolk_stageIV_with_nas_sst_subset_short_2003_hourly_rivanna.nc							# THE STORM CATALOG IN NETCDF FORMAT TO BE READ OR CREATED
+CREATECATALOG	true										# IF FALSE, IT WILL LOOK FOR THE STORM CATALOG. IF TRUE, IT WILL CREATE THE STORM CATALOG
+DURATION		72													# STORM DURATION IN HOURS
+DURATIONCORRECTION false		
+NYEARS			10										# HOW MANY YEARS OF RAINFALL SHOULD BE GENERATED
+NSTORMS			50
+NREALIZATIONS	10														# HOW MANY REPLICATIONS/REALIZATIONS DO YOU WANT?
+TIMESEPARATION	12														# MINIMUM TIME SEPARATION BETWEEN STORMS IN CATALOG IN HOURS
+DOMAINTYPE		irregular												# "irregular" or "rectangular"
+DOMAINSHP		/project/quinnlab/dcl3nd/norfolk/stormy/stochastic_storm_transposition/norfolk/transposition_domain/norfolk_trans_dom_4326.shp
+#DOMAINFILE		/Users/daniel/Google_Drive/RainyDay2/RainyDayGit/Example/BigThompsonExample/PRISM_24hour_domain_BigThompson.nc
+#LATITUDE_MIN	35.0	
+#LATITUDE_MAX	44.0
+#LONGITUDE_MIN	-106.5
+#LONGITUDE_MAX	-104.5
+DIAGNOSTICPLOTS		true														# TO CREATE INFORMATIVE DIAGNOSTIC RAINFALL MAPS, WILL WRITE TO MAINPATH
+FREQANALYSIS	true													# TO DO RAINFALL FREQUENCY ANALYSIS
+SCENARIOS		true	
+SPINPERIOD		false
+#EXCLUDESTORMS	45,130,132,168,235,333,343
+EXCLUDEMONTHS	none								# "none"; OR NUMERIC MONTH (1-12) TO EXCLUDE FROM ANALYSIS-RECOMMENDED TO EXLCUDE WINTER TIME
+INCLUDEYEARS	2003
+TRANSPOSITION		nonuniform						# OPTIONS: "uniform", "nonuniform"
+RESAMPLING		poisson													# HOW WILL THE STORM COUNTS BE SYNTHESIZED FOR EACH YEAR? OPTIONS: "poisson" or "empirical"
+SPREADTYPE		ensemble
+RETURNLEVELS	1,2,5,10,25,50,100,200,500
+RETURNTHRESHOLD	1
+ROTATIONANGLE	false
+RESCALING		false    # false, deterministic, or stochastic
+#RAINDISTRIBUTIONFILE	/Users/daniel/Google_Drive/RainyDay2/PRISM_Top50storms_Daily_domain_basinscale.nc
+NPERYEAR	false
+
+
+# WHAT KIND OF SHAPE ARE WE SAMPLING FOR? OPTIONS ARE:
+# 		POINT (NOT RECOMMENDED FOR CONSTRUCTING STORM CATALOGS, BUT OK FOR SUBSEQUENT WORK), BOX, OR WATERSHED
+POINTAREA	basin																		# OPTIONS: “point”,“basin”,”box”
+WATERSHEDSHP	/project/quinnlab/dcl3nd/norfolk/stormy/stochastic_storm_transposition/norfolk/watershed/norfolk_wshed_4326.shp	# ONLY NEEDED IF A MASKFILE DOESN'T ALREADY EXIST
+#POINTLAT	40.35
+#POINTLON	-105.65
+#BOX_YMIN	43.
+#BOX_YMAX	43.25
+#BOX_XMIN	-105.8
+#BOX_XMAX	-105.45
+
+
+
+
