@@ -19,3 +19,7 @@ f_shp_trans_dom = fldr_rainyday_working_dir + "transposition_domain/norfolk_tran
 #%% defining functions for working scripts
 def work_a_inspctng_strm_cat():
     return f_nc_storm_cat, f_csv_freq_analysis, fldr_realizations, f_shp_wshed, f_shp_trans_dom
+
+
+def a_stormat_processing():
+    return fldr_rainyday_working_dir
