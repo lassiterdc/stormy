@@ -8,6 +8,7 @@ THe storm starts at 08:00.
 import xarray as xr
 import numpy as np
 fpath = "D:/Dropbox/_GradSchool/_norfolk/stormy/stochastic_storm_transposition/norfolk/_troubleshooting negatives/StageIV_FilledCorr.20031030.03degree_original.nc"
+fout = "D:/Dropbox/_GradSchool/_norfolk/stormy/stochastic_storm_transposition/norfolk/_troubleshooting negatives/StageIV_FilledCorr.20031030.03degree.nc"
 
 #%% load dataset
 ds = xr.load_dataset(fpath)
@@ -17,5 +18,9 @@ ts = ['2003-10-30T18:00:00.000000000','2003-10-30T19:00:00.000000000', '2003-10-
 
 ds.rainrate.loc[{"time":ts}] = np.nan
 
+#%% write netcdf
+ds.to_netcdf(fout)
 
-
+#%% test
+ds_tst = xr.load_dataset(fout)
+ds_tst.rainrate.loc[{"time":ts}]
