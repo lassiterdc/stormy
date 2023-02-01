@@ -19,6 +19,10 @@ assar_dirs[sst]=${assar_dirs[repo]}"stochastic_storm_transposition/"
 assar_dirs[hpc_b_py]=${assar_dirs[sst]}"RainyDay2/Source/RainyDay_Py3.py"
 
 # RainyDay Inputs
+## for actual runs
+assar_dirs[hpc_b_SST_stageVI]=${assar_dirs[sst]}"norfolk/norfolk_stageIV_rivanna.sst"
+assar_dirs[hpc_c_SST_mrms_hourly]=${assar_dirs[sst]}"norfolk/norfolk_mrms_hourly.sst"
+
 ## for testing
 assar_dirs[hpc_b_SST_in_subset]=${assar_dirs[sst]}"norfolk/norfolk_mrms_subset_rivanna.sst"
 assar_dirs[hpc_b_SST_in_hrly_subset]=${assar_dirs[sst]}"norfolk/norfolk_mrms_hourly_subset_short_rivanna.sst"
