@@ -36,8 +36,8 @@ else
 	year=20${SLURM_ARRAY_TASK_ID}
 fi
 
+# generate SST script for the year
 sst_in=$(python ${assar_dirs[hpc_c_py]} ${year})
 
-#%% running on Rivanna
-# using a subset of mrms data
+# running RainyDay
 python ${assar_dirs[hpc_rainyday_py]} ${sst_in}
