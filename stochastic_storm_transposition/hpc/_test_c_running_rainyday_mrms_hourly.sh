@@ -28,6 +28,8 @@ source activate rainyday
 
 source __directories.sh
 
+echo `python "_c_tbshooting.py"`
+
 # assign year variable
 if [ ${SLURM_ARRAY_TASK_ID} -lt 10 ]
 then
@@ -38,6 +40,7 @@ fi
 
 # generate SST script for the year
 sst_in=$(python ${assar_dirs[hpc_c_py]} ${year})
-
+echo `python "_c_tbshooting.py"`
 # running RainyDay
+echo `python "_c_tbshooting.py"`
 python ${assar_dirs[hpc_rainyday_py]} ${sst_in}
