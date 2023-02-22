@@ -2,7 +2,7 @@
 #SBATCH -o _script_outputs/%x/%A_%a_%N.out
 #SBATCH -e _script_errors/%x/%A_%a_%N.out
 #SBATCH --ntasks=1				# Number of tasks per serial job (must be 1)
-#SBATCH -p dev				# Queue name "standard" (serial)
+#SBATCH -p standard				# Queue name "standard" (serial)
 #SBATCH -A quinnlab_paid				# allocation name
 #SBATCH -t 1:00:00				# Run time per serial job (hh:mm:ss)
 #SBATCH --array=1-22	        # Array of jobs to loop through 22 years (2001-2022)
@@ -36,11 +36,11 @@ else
 	year=20${SLURM_ARRAY_TASK_ID}
 fi
 
-echo "Year $year"
+# echo "Year $year"
 
 sst_in=$(python ${assar_dirs[hpc_c_py]} ${year})
 
-echo "Running file $sst_in"
+# echo "Running file $sst_in"
 
 module purge
 module load anaconda
@@ -48,4 +48,4 @@ source activate rainyday
 
 #%% running on Rivanna
 # using a subset of mrms data
-python ${assar_dirs[hpc_b_py]} ${sst_in}
+python ${assar_dirs[hpc_rainyday_py]} ${sst_in}
