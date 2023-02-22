@@ -2,7 +2,7 @@
 #SBATCH -o _script_outputs/%x/%A_%a_%N.out
 #SBATCH -e _script_errors/%x/%A_%a_%N.out
 #SBATCH --ntasks=1				# Number of tasks per serial job (must be 1)
-#SBATCH -p standard				# Queue name "standard" (serial)
+#SBATCH -p dev				# Queue name "standard" (serial)
 #SBATCH -A quinnlab_paid				# allocation name
 #SBATCH -t 1:00:00				# Run time per serial job (hh:mm:ss)
 #SBATCH --array=1-11,15-22	        # Array of jobs to loop through 22 years (2001-2011, 15-22)
@@ -28,6 +28,7 @@ source activate rainyday
 
 source __directories.sh
 
+# test to confirm I can import the shapefiles library
 echo `python "_c_tbshooting.py"`
 
 # assign year variable
@@ -40,7 +41,6 @@ fi
 
 # generate SST script for the year
 sst_in=$(python ${assar_dirs[hpc_c_py]} ${year})
-echo `python "_c_tbshooting.py"`
+
 # running RainyDay
-echo `python "_c_tbshooting.py"`
 python ${assar_dirs[hpc_rainyday_py]} ${sst_in}
