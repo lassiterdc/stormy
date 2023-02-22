@@ -39,6 +39,7 @@ fi
 # here's where I'm stucks
 sst_in=$(python ${assar_dirs[hpc_b_py]} ${year})
 
+echo "Running file ${sst_in}"
 
 #%% running on Rivanna
 # using a subset of mrms data
