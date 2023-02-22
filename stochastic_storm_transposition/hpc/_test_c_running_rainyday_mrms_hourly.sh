@@ -6,7 +6,7 @@
 #SBATCH -A quinnlab_paid				# allocation name
 #SBATCH -t 1:00:00				# Run time per serial job (hh:mm:ss)
 #SBATCH --array=1-22	        # Array of jobs to loop through 22 years (2001-2022)
-#SBATCH --mem-per-cpu=100000
+#SBATCH --mem-per-cpu=36000
 #SBATCH --mail-user=dcl3nd@virginia.edu          # address for email notification
 #SBATCH --mail-type=ALL   
 # SBATCH --exclude=udc-ba26-18,udc-ba27-14,udc-ba26-16,udc-ba26-17
@@ -36,15 +36,7 @@ else
 	year=20${SLURM_ARRAY_TASK_ID}
 fi
 
-# echo "Year $year"
-
 sst_in=$(python ${assar_dirs[hpc_c_py]} ${year})
-
-# echo "Running file $sst_in"
-
-module purge
-module load anaconda
-source activate rainyday
 
 #%% running on Rivanna
 # using a subset of mrms data
