@@ -38,6 +38,8 @@ fi
 
 echo "Year $year"
 
+python ${assar_dirs[hpc_b_py]} ${year}
+
 # here's where I'm stucks
 sst_in=$(python ${assar_dirs[hpc_b_py]} ${year})
 
