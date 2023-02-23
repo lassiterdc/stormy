@@ -19,6 +19,7 @@ assar_dirs[hpc_scripts]=${assar_dirs[sst]}"hpc/"
 # scripts
 assar_dirs[hpc_rainyday_py]=${assar_dirs[sst]}"RainyDay2/Source/RainyDay_Py3.py"
 assar_dirs[hpc_c_py]=${assar_dirs[hpc_scripts]}"_c_running_rainyday_mrms_hourly.py"
+assar_dirs[hpc_d_py]=${assar_dirs[hpc_scripts]}"_d_running_rainyday_mrms.py"
 
 # RainyDay Inputs
 ## for actual runs

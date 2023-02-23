@@ -11,11 +11,19 @@ dir_mrms_hrly = dir_sst_nrflk + "sst_mrms_hourly/"
 f_sst_mrms_hrly = dir_mrms_hrly + "mrms_hourly_template.sst"
 dir_for_sst_files = dir_mrms_hrly + "_inputs/"
 
+## d
+dir_mrms = dir_sst_nrflk + "sst_mrms/"
+f_sst_mrms = dir_mrms + "mrms_template.sst"
+dir_for_sst_files = dir_mrms + "_inputs/"
+
 #%% hard coding
 
 #%% functions
 def c_rainyday_in():
     return dir_mrms_hrly, f_sst_mrms_hrly, dir_for_sst_files
+
+def d_rainyday_in():
+    return dir_mrms, f_sst_mrms, dir_for_sst_files
 
 
 
