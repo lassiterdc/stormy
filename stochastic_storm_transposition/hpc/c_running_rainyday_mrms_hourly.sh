@@ -42,7 +42,7 @@ fi
 # generate SST script for the year
 sst_in=$(python ${assar_dirs[hpc_c_py]} ${year})
 
-echo "Running sst for year $year using file $sst_in..."
+echo "Running sst for year $year using file $sst_in"
 
 # running RainyDay
 python ${assar_dirs[hpc_rainyday_py]} ${sst_in}
