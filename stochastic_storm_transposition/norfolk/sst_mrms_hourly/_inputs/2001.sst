@@ -4,7 +4,7 @@
 #==============================================================================
 
 # BASIC INFO ON THE SCENARIO
-MAINPATH	/project/quinnlab/dcl3nd/norfolk/stormy/stochastic_storm_transposition/norfolk/sst_mrms_hourly/	# THE MAGIC WILL HAPPEN HERE, IF NOT OTHERWISE DEFINED
+MAINPATH	/project/quinnlab/dcl3nd/norfolk/stormy/stochastic_storm_transposition/norfolk/	# THE MAGIC WILL HAPPEN HERE, IF NOT OTHERWISE DEFINED
 SCENARIONAME		mrms_hourly_2001						# THE DIRECTORY NAME IN MAINPATH WHERE THINGS WILL BE WRITTEN, ALSO PREFIX FOR FILES	
 
 # DEFINE THE RAINFALL INPUT DATASET (NOTE: NOT ALL DATASETS ARE CURRENTLY SUPPORTED, BUT SHOULD BE ABLE TO BE ADDED WITH MINIMAL WORK)
@@ -17,9 +17,9 @@ CATALOGNAME		strmcat_mrms_hourly.nc							# THE STORM CATALOG IN NETCDF FORMAT T
 CREATECATALOG	true										# IF FALSE, IT WILL LOOK FOR THE STORM CATALOG. IF TRUE, IT WILL CREATE THE STORM CATALOG
 DURATION		72													# STORM DURATION IN HOURS
 DURATIONCORRECTION false		
-NYEARS			100										# HOW MANY YEARS OF RAINFALL SHOULD BE GENERATED
-NSTORMS			570
-NREALIZATIONS	100														# HOW MANY REPLICATIONS/REALIZATIONS DO YOU WANT?
+NYEARS			10										# HOW MANY YEARS OF RAINFALL SHOULD BE GENERATED
+NSTORMS			20
+NREALIZATIONS	10														# HOW MANY REPLICATIONS/REALIZATIONS DO YOU WANT?
 TIMESEPARATION	12														# MINIMUM TIME SEPARATION BETWEEN STORMS IN CATALOG IN HOURS
 DOMAINTYPE		irregular												# "irregular" or "rectangular"
 DOMAINSHP		/project/quinnlab/dcl3nd/norfolk/stormy/stochastic_storm_transposition/norfolk/transposition_domain/norfolk_trans_dom_4326.shp
