@@ -4,10 +4,10 @@ Source: https://waterprogramming.wordpress.com/2016/06/03/pythons-template-class
 """
 
 #%% local testing
-dir_mrms = "D:/Dropbox/_GradSchool/_norfolk/stormy/stochastic_storm_transposition/norfolk/sst_mrms_subdivided/"
-f_sst_mrms = dir_mrms + "mrms_template_{}.sst"
-dir_for_sst_files = dir_mrms + "_inputs/"
-slurm_input = "20011" # this will ultimately be a user input file
+# dir_mrms = "D:/Dropbox/_GradSchool/_norfolk/stormy/stochastic_storm_transposition/norfolk/sst_mrms_subdivided/"
+# f_sst_mrms = dir_mrms + "mrms_template_{}.sst"
+# dir_for_sst_files = dir_mrms + "_inputs/"
+# slurm_input = "20011" # this will ultimately be a user input file
 #%% import libraries and load directories
 from __utils import d_rainyday_in, da_rainyday_in
 from string import Template
