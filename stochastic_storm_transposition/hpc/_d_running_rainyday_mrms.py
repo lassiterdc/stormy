@@ -9,14 +9,21 @@ Source: https://waterprogramming.wordpress.com/2016/06/03/pythons-template-class
 # dir_for_sst_files = dir_mrms_hrly + "_inputs/"
 # year = "2001" # this will ultimately be a user input file
 #%% import libraries and load directories
-from __utils import d_rainyday_in
+from __utils import d_rainyday_in, da_rainyday_in
 from string import Template
 import pathlib
 import sys
-dir_mrms_hrly, f_sst_mrms_hrly, dir_for_sst_files = d_rainyday_in()
-
 # inputs
-year = str(sys.argv[1]) #YYYY
+slurm_input = str(sys.argv[1]) #YYYY
+if len(slurm_input) == 4:
+    year = slurm_input
+    dir_mrms_hrly, f_sst_mrms_hrly, dir_for_sst_files = d_rainyday_in()
+else:
+    year = slurm_input[:4]
+    template_id = slurm_input[4:5]
+    
+    dir_mrms_hrly, f_sst_mrms_hrly, dir_for_sst_files = da_rainyday_in()
+    f_sst_mrms_hrly = f_sst_mrms_hrly.format(template_id)
 #%% creating a new sst for the year
 
 with open(f_sst_mrms_hrly, 'r') as T:
