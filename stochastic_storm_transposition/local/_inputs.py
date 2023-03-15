@@ -6,20 +6,23 @@ fldr_main = "D:/Dropbox/_GradSchool/_norfolk/stormy/stochastic_storm_transpositi
 fldr_rainyday_working_dir = fldr_main + "norfolk/"
 
 #%% script specific directories
-# work_a
-scen_name = "norfolk_mrms_subset"
-fldr_rainyday_outputs = fldr_rainyday_working_dir + "{}/".format(scen_name)
-f_csv_freq_analysis = fldr_rainyday_outputs + "{}_FreqAnalysis.csv".format(scen_name)
-fldr_realizations = fldr_rainyday_outputs + "Realizations/"
-f_nc_storm_cat = fldr_rainyday_working_dir + "norfolk_mrms_sst_subset_rivanna.nc"
-
+# non script specific filepaths and folders
 f_shp_wshed = fldr_rainyday_working_dir + "watershed/norfolk_wshed_4326.shp"
 f_shp_trans_dom = fldr_rainyday_working_dir + "transposition_domain/norfolk_trans_dom_4326.shp"
 
+# work_a
+scen_name = "sst_mrms_hourly"
+fldr_rainyday_outputs = fldr_rainyday_working_dir + "{}/".format(scen_name)
+# f_csv_freq_analysis = fldr_rainyday_outputs + "{}_FreqAnalysis.csv".format(scen_name)
+# fldr_realizations = fldr_rainyday_outputs + "Realizations/"
+# f_nc_storm_cat = fldr_rainyday_working_dir + "norfolk_mrms_sst_subset_rivanna.nc"
+
+
+
 #%% defining functions for working scripts
-def work_a_inspctng_strm_cat():
-    return f_nc_storm_cat, f_csv_freq_analysis, fldr_realizations, f_shp_wshed, f_shp_trans_dom
+# def work_a_inspctng_strm_cat():
+#     return f_nc_storm_cat, f_csv_freq_analysis, fldr_realizations, f_shp_wshed, f_shp_trans_dom
 
 
 def a_stormat_processing():
-    return fldr_rainyday_working_dir
+    return fldr_rainyday_outputs
