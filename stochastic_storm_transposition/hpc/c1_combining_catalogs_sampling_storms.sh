@@ -19,7 +19,8 @@ source __directories.sh
 
 cat ${assar_dirs[hpc_mrms_hourly]}*_20*.nc > ${assar_dirs[hpc_c1_cmbnd_cat]}
 
-echo "Resampling from hourly mrms storm catalog......."
+echo "Resampling from hourly mrms storm catalog ${assar_dirs[hpc_c1_cmbnd_cat]}"
+echo "Running SST file: ${assar_dirs[hpc_c1_sst]}"
 
 # running RainyDay
 python ${assar_dirs[hpc_rainyday_py]} ${assar_dirs[hpc_c1_sst]}
