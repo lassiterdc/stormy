@@ -19,10 +19,7 @@ source __directories.sh
 
 cat ${assar_dirs[hpc_mrms_hourly]}*_20*.nc > ${assar_dirs[hpc_c1_cmbnd_cat]}
 
-# generate SST script for the year
-sst_in=$(python ${assar_dirs[hpc_c_py]} ${year})
-
-echo "Running sst for year $year using file $sst_in"
+echo "Resampling from hourly mrms storm catalog......."
 
 # running RainyDay
-python ${assar_dirs[hpc_rainyday_py]} ${sst_in}
+python ${assar_dirs[hpc_rainyday_py]} ${assar_dirs[hpc_c1_sst]}
