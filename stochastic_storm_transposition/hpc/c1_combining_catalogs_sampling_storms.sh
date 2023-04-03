@@ -6,7 +6,7 @@
 #SBATCH -A quinnlab_paid				# allocation name
 #SBATCH -t 6:00:00				# Run time per serial job (hh:mm:ss)
 #SBATCH --array=1       # Array of jobs to loop through 22 years (2001-2011, 15-22)
-#SBATCH --mem-per-cpu=36000
+#SBATCH --mem-per-cpu=200000
 #SBATCH --mail-user=dcl3nd@virginia.edu          # address for email notification
 #SBATCH --mail-type=ALL   
 # SBATCH --exclude=udc-ba26-18,udc-ba27-14,udc-ba26-16,udc-ba26-17
@@ -17,9 +17,14 @@ source activate rainyday
 
 source __directories.sh
 
-cat ${assar_dirs[hpc_mrms_hourly]}*_20*.nc > ${assar_dirs[hpc_c1_cmbnd_cat]}
+# run script for combining storm catalogs
+echo "Combining storm catalogs...."
+# WORK
+# cat ${assar_dirs[hpc_mrms_hourly]}*_20*.nc > ${assar_dirs[hpc_c1_cmbnd_cat]} # doesn't work
+python ${assar_dirs[hpc_c1_py]}
+# END WORK
 
-echo "Resampling from hourly mrms storm catalog ${assar_dirs[hpc_c1_cmbnd_cat]}"
+echo "Finished creating ${assar_dirs[hpc_c1_cmbnd_cat]}"
 echo "Running SST file: ${assar_dirs[hpc_c1_sst]}"
 
 # running RainyDay

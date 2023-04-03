@@ -19,6 +19,7 @@ assar_dirs[hpc_scripts]=${assar_dirs[sst]}"hpc/"
 # scripts
 assar_dirs[hpc_rainyday_py]=${assar_dirs[sst]}"RainyDay2/Source/RainyDay_Py3.py"
 assar_dirs[hpc_c_py]=${assar_dirs[hpc_scripts]}"_c_running_rainyday_mrms_hourly.py"
+assar_dirs[hpc_c1_py]=${assar_dirs[hpc_scripts]}"_c1_combining_hrly_storm_catalogs.py"
 assar_dirs[hpc_d_py]=${assar_dirs[hpc_scripts]}"_d_running_rainyday_mrms.py"
 
 # RainyDay Inputs
@@ -29,7 +30,7 @@ assar_dirs[hpc_b_SST_stageVI]=${assar_dirs[sst]}"norfolk/norfolk_stageIV_rivanna
 # c1
 assar_dirs[hpc_mrms_hourly]=${assar_dirs[sst]}"norfolk/sst_mrms_hourly/"
 assar_dirs[hpc_c1_SST_mrms_hourly_inp]=${assar_dirs[hpc_mrms_hourly]}"_inputs/mrms_houlry_combined.sst"
-assar_dirs[hpc_c1_cmbnd_cat]=${assar_dirs[hpc_mrms_hourly]}"strmcat_mrms_hourly.nc"
+assar_dirs[hpc_c1_cmbnd_cat]=${assar_dirs[hpc_mrms_hourly]}"strmcat_mrms_hourly_combined.nc"
 assar_dirs[hpc_c1_sst]=${assar_dirs[hpc_mrms_hourly]}"mrms_hourly_combined.sst"
 
 ## for testing
