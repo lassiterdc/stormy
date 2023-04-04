@@ -5,13 +5,21 @@ dir_repo = "/project/quinnlab/dcl3nd/norfolk/stormy/"
 dir_sst = dir_repo + "stochastic_storm_transposition/"
 dir_sst_nrflk = dir_sst + "norfolk/"
 dir_sst_nrflk_hrly = dir_sst_nrflk + "sst_mrms_hourly/"
+f_sst_nrflk_hrly_parameterfile = dir_sst_nrflk_hrly + "mrms_hourly_combined.sst"
+f_sst_nrflk_hrly_combined_catalog = dir_sst_nrflk_hrly + "strmcat_mrms_hourly_combined.nc"
+f_sst_nrflk_hrly_combined_catalog_reformatted = dir_sst_nrflk_hrly + "strmcat_mrms_hourly_combined_reformatted_for_xarray.nc"
 #%% hard coding
 
 
 #%% functions
+def c3_reformat_hrly_cats():
+    f_in = f_sst_nrflk_hrly_combined_catalog
+    f_out = f_sst_nrflk_hrly_combined_catalog_reformatted
+    return f_in, f_out
+
 def c1_combine_hrly_cats():
-    parameterfile = dir_sst_nrflk_hrly + "mrms_hourly_combined.sst"
-    f_out = dir_sst_nrflk_hrly + "strmcat_mrms_hourly_combined.nc"
+    parameterfile = f_sst_nrflk_hrly_parameterfile
+    f_out = f_sst_nrflk_hrly_combined_catalog
     fs = glob(dir_sst_nrflk_hrly + "*_20*.nc")
     fs.sort() # sort alphabetically 
     return dir_sst_nrflk_hrly, parameterfile, f_out, fs
