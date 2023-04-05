@@ -28,6 +28,13 @@ layer6=Dividers
 layer7=Outfalls
 layer8=Junctions
 layer9=Storages
+[Graph]
+Plotting Position=Gringorten
+[Erosion]
+ErosionOn=False
+Use C TS=False
+Calculate LS=False
+Use TSS=False
 [Scenarios]
 "Scenarios0"="D:\Dropbox\_GradSchool\_norfolk\stormy\swmm\hague\swmm_model\hague_V1_using_norfolk_data.inp",False,False,hague_V1_using_norfolk_data
 "Scenarios1"="D:\Dropbox\_GradSchool\_norfolk\norfolk_ffa\swmm\hague\swmm_model\hague_V1_using_norfolk_data.inp",False,False,hague_V1_using_norfolk_data
@@ -38,10 +45,3 @@ layer9=Storages
 "Scenarios6"="C:\Users\Daniel\Dropbox\_GradSchool\_norfolk\norfolk_ffa\swmm\hague\V1_using_norfolk_data_directly\hague_V1_using_norfolk_data.inp",False,False,hague_V1_using_norfolk_data
 "Scenarios7"="C:\Users\Daniel\Dropbox\_GradSchool\Courses\SYS6582\assignments\final_project\swmm\hague_sub_model.inp",False,False,hague_sub_model
 "Scenarios8"="C:\Users\Daniel\Dropbox\_GradSchool\Courses\SYS6582\assignments\final_project_less_rain\rivanna_scripts\hague_sub_model.inp",False,False,hague_sub_model
-[Graph]
-Plotting Position=Gringorten
-[Erosion]
-ErosionOn=False
-Use C TS=False
-Calculate LS=False
-Use TSS=False
