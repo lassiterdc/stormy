@@ -64,6 +64,12 @@ def readrealization(rfile):
 
 #%% combining, reformatting, and exporting the combined storm catalog
 fs_rlz = glob(dir_sst_realizations + "*SST*.nc")
+# WORK
+print("##########################")
+print("fs_rlz")
+print(fs_rlz)
+# END WORK
+
 lst_ds = []
 count = 0
 for f in fs_rlz:
