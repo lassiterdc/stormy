@@ -79,15 +79,15 @@ for f in fs_rlz:
     d_nc_attributes["reformatted_realizations_directory"] = dir_sst_realizations
     d_nc_attributes["date_reformatted"] = str(datetime.now())
     # WORK
-    print("##########################")
-    print("d_time_attributes")
-    print(d_time_attributes)
-    print("##########################")
-    print("lst_time_dims")
-    print("##########################")
-    print(lst_time_dims)
-    print("lst_time_dimshape")
-    print(lst_time_dimshape)
+    # print("##########################")
+    # print("d_time_attributes")
+    # print(d_time_attributes)
+    # print("##########################")
+    # print("lst_time_dims")
+    # print("##########################")
+    # print(lst_time_dims)
+    # print("lst_time_dimshape")
+    # print(lst_time_dimshape)
     # END WORK
     # test create xarray dataset
     ds = xr.Dataset(data_vars=dict(

@@ -43,7 +43,7 @@ def c3_reformat_hrly_cats():
     f_in = f_sst_nrflk_hrly_combined_catalog
     f_out = f_sst_nrflk_hrly_combined_catalog_reformatted
     f_out_realizations = dir_swmm_sst_scenarios_hrly + name_out_realizations
-    return f_in, f_out, dir_swmm_sst_scenarios_hrly, f_out_realizations
+    return f_in, f_out, dir_sst_realizations_hrly, f_out_realizations
 
 def c1_combine_hrly_cats():
     parameterfile = f_sst_nrflk_hrly_parameterfile
