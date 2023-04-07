@@ -120,11 +120,11 @@ for f in fs_rlz:
         print("lst_time_dimshape")
         print(lst_time_dimshape)
         print("##########################")
-        print("outrain")
-        print(outrain)
-        print("##########################")
         print("outrain.shape")
         print(outrain.shape)
+        print("##########################")
+        print("outrain")
+        print(outrain)
         # END WORK
         sys.exit("script failed.")
 
