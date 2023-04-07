@@ -4,6 +4,7 @@ import numpy as np
 from datetime import datetime
 import xarray as xr
 from glob import glob
+import sys
 import pandas as pd
 from __utils import c3_reformat_hrly_cats
 
@@ -64,10 +65,20 @@ def readrealization(rfile):
 
 #%% combining, reformatting, and exporting the combined storm catalog
 fs_rlz = glob(dir_sst_realizations + "*SST*.nc")
+fs_rlz.sort()
 # WORK
 print("##########################")
 print("fs_rlz")
 print(fs_rlz)
+print("##########################")
+print("len(fs_rlz)")
+print(len(fs_rlz))
+print("##########################")
+print("fs_rlz[0]")
+print(fs_rlz[0])
+print("##########################")
+print("fs_rlz[-1]")
+print(fs_rlz[-1])
 # END WORK
 
 lst_ds = []
@@ -78,29 +89,44 @@ for f in fs_rlz:
     d_nc_attributes["note"] = "This dataset is a simple reformatting of the storm catalog output by RainyDay to allow it to be loaded into xarray."
     d_nc_attributes["reformatted_realizations_directory"] = dir_sst_realizations
     d_nc_attributes["date_reformatted"] = str(datetime.now())
-    # WORK
-    # print("##########################")
-    # print("d_time_attributes")
-    # print(d_time_attributes)
-    # print("##########################")
-    # print("lst_time_dims")
-    # print("##########################")
-    # print(lst_time_dims)
-    # print("lst_time_dimshape")
-    # print(lst_time_dimshape)
-    # END WORK
-    # test create xarray dataset
-    ds = xr.Dataset(data_vars=dict(
-            rainrate = (['year', 'storm_id', 'timestep_index', 'latitude', 'longitude'], outrain)),
-            coords=dict(
-                year = np.arange(1, lst_precrate_dimshape[0]+1),
-                storm_id = np.arange(1, lst_precrate_dimshape[1]+1),
-                timestep_index = np.arange(1, lst_precrate_dimshape[2]+1),
-                time = (["year", "storm_id", "datetime"], outtime), 
-                latitude = outlatitude, 
-                longitude = outlongitude),
-            attrs=d_nc_attributes
-            )
+
+    try:
+        ds = xr.Dataset(data_vars=dict(
+                rainrate = (['year', 'storm_id', 'timestep_index', 'latitude', 'longitude'], outrain)),
+                coords=dict(
+                    year = np.arange(1, lst_precrate_dimshape[0]+1),
+                    storm_id = np.arange(1, lst_precrate_dimshape[1]+1),
+                    timestep_index = np.arange(1, lst_precrate_dimshape[2]+1),
+                    time = (["year", "storm_id", "datetime"], outtime), 
+                    latitude = outlatitude, 
+                    longitude = outlongitude),
+                attrs=d_nc_attributes
+                )
+    except:
+        # WORK
+        print("##########################")
+        print("count")
+        print(count)
+        print("##########################")
+        print("f")
+        print(f)
+        print("##########################")
+        print("d_time_attributes")
+        print(d_time_attributes)
+        print("##########################")
+        print("lst_time_dims")
+        print(lst_time_dims)
+        print("##########################")
+        print("lst_time_dimshape")
+        print(lst_time_dimshape)
+        print("##########################")
+        print("outrain")
+        print(outrain)
+        print("##########################")
+        print("outrain.shape")
+        print(outrain.shape)
+        # END WORK
+        sys.exit("script failed.")
 
     ds.rainrate.attrs = d_precrate_attributes
     lst_ds.append(ds)
