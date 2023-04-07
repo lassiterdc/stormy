@@ -10,7 +10,7 @@ dir_sst_nrflk_hrly = dir_sst_nrflk + "sst_mrms_hourly/"
 f_sst_nrflk_hrly_parameterfile = dir_sst_nrflk_hrly + "mrms_hourly_combined_test.sst"
 # END WORK
 f_sst_nrflk_hrly_combined_catalog = dir_sst_nrflk_hrly + "strmcat_mrms_hourly_combined.nc"
-f_sst_nrflk_hrly_combined_catalog_reformatted = dir_sst_nrflk_hrly + "strmcat_mrms_hourly_combined_reformatted_for_xarray.nc"
+f_sst_nrflk_hrly_combined_catalog_reformatted = dir_sst_nrflk_hrly + "strmcat_mrms_hourly_combined_test_reformatted_for_xarray.nc"
 # swmm stuff
 dir_swmm_model = dir_repo + "swmm/hague/"
 f_shp_swmm_subs = dir_swmm_model + "swmm_model/exported_layers/subcatchments.shp"
@@ -18,8 +18,10 @@ lst_template_keys = ["rainfall_1", "rainfall_2", "rainfall_4", "rainfall_5", "ra
 work_f_water_level_path = dir_swmm_model + "swmm_timeseries/a_water_levels_ft.dat"
 
 # script c3
-# dir_sst_mrms_hourly = 
-dir_sst_realizations_hrly = dir_sst_nrflk_hrly + "mrms_hourly_combined/Realizations/"
+# WORK 
+# dir_sst_realizations_hrly = dir_sst_nrflk_hrly + "mrms_hourly_combined/Realizations/"
+dir_sst_realizations_hrly = dir_sst_nrflk_hrly + "mrms_hourly_combined_tst/Realizations/"
+# END WORK
 # c4
 dir_swmm_sst_scenarios_hrly = dir_swmm_model + "swmm_scenarios_sst_hourly/"
 dir_time_series_hrly = dir_swmm_sst_scenarios_hrly + "time_series/"
