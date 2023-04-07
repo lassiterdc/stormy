@@ -44,9 +44,9 @@ start_date = "2020-09-01" # start date for each of the time series
 # nyears = 1000 # should be 1,000 for the final experiment
 # nperyear = 20
 # nrealizations = 10
-nyears = 5
+nyears = 2
 nperyear = 20
-nrealizations = 5
+nrealizations = 2
 # END WORK
 
 #%% functions
