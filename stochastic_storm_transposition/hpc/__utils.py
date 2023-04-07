@@ -8,6 +8,12 @@ dir_sst_nrflk_hrly = dir_sst_nrflk + "sst_mrms_hourly/"
 f_sst_nrflk_hrly_parameterfile = dir_sst_nrflk_hrly + "mrms_hourly_combined.sst"
 f_sst_nrflk_hrly_combined_catalog = dir_sst_nrflk_hrly + "strmcat_mrms_hourly_combined.nc"
 f_sst_nrflk_hrly_combined_catalog_reformatted = dir_sst_nrflk_hrly + "strmcat_mrms_hourly_combined_reformatted_for_xarray.nc"
+
+name_out_realizations = "_combined_realizations.nc"
+# script c3
+# dir_sst_mrms_hourly = 
+dir_sst_realizations_hrly = dir_sst_nrflk_hrly + "mrms_hourly_combined/Realizations/"
+
 #%% hard coding
 
 
@@ -15,7 +21,9 @@ f_sst_nrflk_hrly_combined_catalog_reformatted = dir_sst_nrflk_hrly + "strmcat_mr
 def c3_reformat_hrly_cats():
     f_in = f_sst_nrflk_hrly_combined_catalog
     f_out = f_sst_nrflk_hrly_combined_catalog_reformatted
-    return f_in, f_out
+    dir_sst_realizations = dir_sst_realizations_hrly
+    f_out_realizations = dir_sst_realizations + name_out_realizations
+    return f_in, f_out, dir_sst_realizations, f_out_realizations
 
 def c1_combine_hrly_cats():
     parameterfile = f_sst_nrflk_hrly_parameterfile
