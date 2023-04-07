@@ -11,6 +11,8 @@ f_sst_nrflk_hrly_combined_catalog_reformatted = dir_sst_nrflk_hrly + "strmcat_mr
 # swmm stuff
 dir_swmm_model = dir_repo + "swmm/hague/"
 f_shp_swmm_subs = dir_swmm_model + "swmm_model/exported_layers/subcatchments.shp"
+lst_template_keys = ["rainfall_1", "rainfall_2", "rainfall_4", "rainfall_5", "rainfall_7", "water_level"]
+work_f_water_level_path = dir_swmm_model + "swmm_timeseries/a_water_levels_ft.dat"
 
 # script c3
 # dir_sst_mrms_hourly = 
@@ -20,6 +22,10 @@ dir_swmm_sst_scenarios_hrly = dir_swmm_model + "swmm_scenarios_sst_hourly/"
 dir_time_series_hrly = dir_swmm_sst_scenarios_hrly + "time_series/"
 f_key_subnames_gridind = dir_time_series_hrly + "_key_subnames_and_grid-indices.csv"
 seed_mrms_hourly = 22901
+# c5
+f_inp_base_hrly = dir_swmm_sst_scenarios_hrly + "hague_sst_model_template.inp"
+dir_time_series_hrly = dir_swmm_sst_scenarios_hrly + "time_series/"
+f_swmm_scenarios_catalog = dir_swmm_sst_scenarios_hrly + "_swmm_scenarios_catalog.csv"
 
 
 #%% hard coded variables
@@ -29,11 +35,15 @@ grid_spacing = 0.009999999776482582
 start_date = "2020-09-01" # start date for each of the time series
 
 # SST parameters
-nyears = 10 # should be 1,000 for the final experiment
+nyears = 1000 # should be 1,000 for the final experiment
 nperyear = 20
-nrealizations = 5
+nrealizations = 10
 
 #%% functions
+def c5_creating_inps():
+    f_out_realizations = dir_swmm_sst_scenarios_hrly + name_out_realizations
+    return nyears, nperyear, nrealizations, dir_swmm_sst_scenarios_hrly, f_inp_base_hrly, f_out_realizations, seed_mrms_hourly, dir_time_series_hrly, f_key_subnames_gridind, lst_template_keys, work_f_water_level_path, f_swmm_scenarios_catalog
+
 def c4_creating_rainfall_tseries():
     freq = "H"
     f_out_realizations = dir_swmm_sst_scenarios_hrly + name_out_realizations
