@@ -5,7 +5,10 @@ dir_repo = "/project/quinnlab/dcl3nd/norfolk/stormy/"
 dir_sst = dir_repo + "stochastic_storm_transposition/"
 dir_sst_nrflk = dir_sst + "norfolk/"
 dir_sst_nrflk_hrly = dir_sst_nrflk + "sst_mrms_hourly/"
-f_sst_nrflk_hrly_parameterfile = dir_sst_nrflk_hrly + "mrms_hourly_combined.sst"
+# WORK
+# f_sst_nrflk_hrly_parameterfile = dir_sst_nrflk_hrly + "mrms_hourly_combined.sst"
+f_sst_nrflk_hrly_parameterfile = dir_sst_nrflk_hrly + "mrms_hourly_combined_test.sst"
+# END WORK
 f_sst_nrflk_hrly_combined_catalog = dir_sst_nrflk_hrly + "strmcat_mrms_hourly_combined.nc"
 f_sst_nrflk_hrly_combined_catalog_reformatted = dir_sst_nrflk_hrly + "strmcat_mrms_hourly_combined_reformatted_for_xarray.nc"
 # swmm stuff
@@ -34,10 +37,15 @@ mm_per_inch = 25.4
 grid_spacing = 0.009999999776482582
 start_date = "2020-09-01" # start date for each of the time series
 
-# SST parameters
-nyears = 1000 # should be 1,000 for the final experiment
+# SST parameters (should line up with the SST input file)
+# WORK 
+# nyears = 1000 # should be 1,000 for the final experiment
+# nperyear = 20
+# nrealizations = 10
+nyears = 5
 nperyear = 20
-nrealizations = 10
+nrealizations = 5
+# END WORK
 
 #%% functions
 def c5_creating_inps():
