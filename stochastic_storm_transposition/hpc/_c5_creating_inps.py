@@ -11,7 +11,7 @@ import sys
 from tqdm import tqdm
 from __utils import c5_creating_inps
 
-nyears, nperyear, nrealizations, dir_swmm_sst_scenarios, f_inp_base, f_out_realizations, seed_mrms_hourly, dir_time_series, f_key_subnames_gridind, lst_template_keys, work_f_water_level_path, f_swmm_scenarios_catalog = c5_creating_inps()
+nyears, nperyear, nrealizations, dir_swmm_sst_models_hrly, f_inp_base, f_out_realizations, seed_mrms_hourly, dir_time_series, f_key_subnames_gridind, lst_template_keys, work_f_water_level_path, f_swmm_scenarios_catalog = c5_creating_inps()
 #%% define functions
 def get_rainfiles(rz, yr, storm_id, df_key):
     # format "realization{}_year{}_storm-id{}_grid-ind{}_.dat"
@@ -40,7 +40,7 @@ df_key = pd.read_csv(f_key_subnames_gridind)
 
 #%% clear folder of SWMM scenarios
 try:
-    shutil.rmtree(dir_swmm_sst_scenarios)
+    shutil.rmtree(dir_swmm_sst_models_hrly)
 except:
     pass
 
@@ -51,7 +51,7 @@ with open(f_inp_base, 'r') as T:
     count = -1
 
     for rz in tqdm(ds_rlztns.realization_id.values):
-        dir_r = dir_swmm_sst_scenarios + "weather_realization{}/".format(rz)
+        dir_r = dir_swmm_sst_models_hrly + "weather_realization{}/".format(rz)
         for yr in ds_rlztns.year.values:
             dir_y = dir_r + "year{}/".format(yr)
             for storm_id in ds_rlztns.storm_id.values:
