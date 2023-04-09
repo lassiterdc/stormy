@@ -28,11 +28,13 @@ dir_time_series_hrly = dir_swmm_sst_scenarios_hrly + "time_series/"
 f_key_subnames_gridind = dir_time_series_hrly + "_key_subnames_and_grid-indices.csv"
 seed_mrms_hourly = 22901
 # c5
+dir_swmm_sst_models_hrly = dir_swmm_sst_scenarios_hrly + "models/"
 f_inp_base_hrly = dir_swmm_sst_scenarios_hrly + "hague_sst_model_template.inp"
 dir_time_series_hrly = dir_swmm_sst_scenarios_hrly + "time_series/"
 f_swmm_scenarios_catalog = dir_swmm_sst_scenarios_hrly + "_swmm_scenarios_catalog.csv"
 
-
+# c6
+max_runtime_min_hrly = 15 # maximum minutes of runtime allowable for each SWMM simulation
 #%% hard coded variables
 name_out_realizations = "_combined_realizations.nc"
 mm_per_inch = 25.4
@@ -50,9 +52,12 @@ nrealizations = 2
 # END WORK
 
 #%% functions
+def c6_running_swmm():
+    return f_swmm_scenarios_catalog, dir_swmm_sst_models_hrly, max_runtime_min_hrly
+
 def c5_creating_inps():
     f_out_realizations = dir_swmm_sst_scenarios_hrly + name_out_realizations
-    return nyears, nperyear, nrealizations, dir_swmm_sst_scenarios_hrly, f_inp_base_hrly, f_out_realizations, seed_mrms_hourly, dir_time_series_hrly, f_key_subnames_gridind, lst_template_keys, work_f_water_level_path, f_swmm_scenarios_catalog
+    return nyears, nperyear, nrealizations, dir_swmm_sst_models_hrly, f_inp_base_hrly, f_out_realizations, seed_mrms_hourly, dir_time_series_hrly, f_key_subnames_gridind, lst_template_keys, work_f_water_level_path, f_swmm_scenarios_catalog
 
 def c4_creating_rainfall_tseries():
     freq = "H"
