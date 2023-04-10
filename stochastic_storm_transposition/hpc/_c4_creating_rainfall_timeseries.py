@@ -4,6 +4,7 @@ import os
 import xarray as xr
 os.environ['USE_PYGEOS'] = '0'
 import geopandas as gpd
+from geopandas import sjoin_nearest
 import numpy as np
 import pandas as pd
 import shutil
@@ -54,7 +55,7 @@ gdf_mrms = gpd.GeoDataFrame(geometry=gpd.points_from_xy(x=df_mrms_coords.x_lon, 
 gdf_mrms_state_plane = gdf_mrms.to_crs("EPSG:2284")
 
 #%% join subcatchment centroids with the closest MRMS point
-gdf_matching_subs_and_mrms = gpd.sjoin_nearest(gdf_sub_centroid, gdf_mrms_state_plane, how='left')
+gdf_matching_subs_and_mrms = sjoin_nearest(gdf_sub_centroid, gdf_mrms_state_plane, how='left')
 
 idx = gdf_matching_subs_and_mrms.index_right.values
 
