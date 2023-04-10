@@ -5,7 +5,7 @@
 #SBATCH -p standard				# Queue name "standard" (serial)
 #SBATCH -A quinnlab_paid				# allocation name
 #SBATCH -t 24:00:00				# Run time per serial job (hh:mm:ss)
-#SBATCH --array=1      
+#SBATCH --array=1-1000	        # Array of jobs, 1 for each of 1000 years   
 # SBATCH --mem-per-cpu=200000
 #SBATCH --mail-user=dcl3nd@virginia.edu          # address for email notification
 #SBATCH --mail-type=ALL   
@@ -17,5 +17,7 @@ source activate rainyday
 
 source __directories.sh
 
+echo "Creating SWMM models for year ${SLURM_ARRAY_TASK_ID}..."
+
 # running script
-python ${assar_dirs[hpc_c5_py]}
+python ${assar_dirs[hpc_c5_py]} ${SLURM_ARRAY_TASK_ID}
