@@ -31,7 +31,7 @@ seed_mrms_hourly = 22901
 dir_swmm_sst_models_hrly = dir_swmm_sst_scenarios_hrly + "models/"
 f_inp_base_hrly = dir_swmm_sst_scenarios_hrly + "hague_sst_model_template.inp"
 dir_time_series_hrly = dir_swmm_sst_scenarios_hrly + "time_series/"
-f_swmm_scenarios_catalog = dir_swmm_sst_scenarios_hrly + "_swmm_scenarios_catalog.csv"
+f_swmm_scenarios_catalog = dir_swmm_sst_scenarios_hrly + "swmm_scenario_catalogs/" + "_swmm_scenarios_catalog_yr{}.csv"
 
 # c6
 max_runtime_min_hrly = 15 # maximum minutes of runtime allowable for each SWMM simulation
