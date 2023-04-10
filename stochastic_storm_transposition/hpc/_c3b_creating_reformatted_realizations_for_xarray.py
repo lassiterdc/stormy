@@ -38,18 +38,18 @@ def readrealization(rfile):
 fs_rlz = glob(dir_sst_realizations + "*SST*.nc")
 fs_rlz.sort()
 # WORK
-print("##########################")
-print("fs_rlz")
-print(fs_rlz)
-print("##########################")
-print("len(fs_rlz)")
-print(len(fs_rlz))
-print("##########################")
-print("fs_rlz[0]")
-print(fs_rlz[0])
-print("##########################")
-print("fs_rlz[-1]")
-print(fs_rlz[-1])
+# print("##########################")
+# print("fs_rlz")
+# print(fs_rlz)
+# print("##########################")
+# print("len(fs_rlz)")
+# print(len(fs_rlz))
+# print("##########################")
+# print("fs_rlz[0]")
+# print(fs_rlz[0])
+# print("##########################")
+# print("fs_rlz[-1]")
+# print(fs_rlz[-1])
 # END WORK
 
 lst_ds = []
@@ -105,3 +105,5 @@ for f in fs_rlz:
 ds_all_realizations = xr.concat(lst_ds, pd.Index(np.arange(1, len(fs_rlz)+1),name = "realization_id"))
 
 ds_all_realizations.to_netcdf(f_out_realizations, encoding= {"rainrate":{"zlib":True}})
+
+print("Succesfully created file {}".format(f_out_realizations))
