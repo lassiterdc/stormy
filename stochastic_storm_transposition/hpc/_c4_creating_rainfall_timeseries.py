@@ -4,7 +4,6 @@ import os
 import xarray as xr
 os.environ['USE_PYGEOS'] = '0'
 import geopandas as gpd
-from geopandas import sjoin_nearest
 import numpy as np
 import pandas as pd
 import shutil
@@ -55,11 +54,15 @@ gdf_mrms = gpd.GeoDataFrame(geometry=gpd.points_from_xy(x=df_mrms_coords.x_lon, 
 gdf_mrms_state_plane = gdf_mrms.to_crs("EPSG:2284")
 
 #%% join subcatchment centroids with the closest MRMS point
-gdf_matching_subs_and_mrms = sjoin_nearest(gdf_sub_centroid, gdf_mrms_state_plane, how='left')
+try:
+    gdf_matching_subs_and_mrms = gpd.sjoin_nearest(gdf_sub_centroid, gdf_mrms_state_plane, how='left')
+    idx_mrms = gdf_matching_subs_and_mrms.index_right.values
+    idx_subs = gdf_matching_subs_and_mrms.index.values
+except:
+    idx_mrms = gdf_mrms_state_plane.sindex.nearest(gdf_sub_centroid.geometry)[1,:]
+    idx_subs = gdf_mrms_state_plane.sindex.nearest(gdf_sub_centroid.geometry)[0,:]
 
-idx = gdf_matching_subs_and_mrms.index_right.values
-
-df_mrms_at_subs = df_mrms_coords.iloc[idx, :]
+df_mrms_at_subs = df_mrms_coords.iloc[idx_mrms, :]
 
 # unique gridcells
 df_mrms_at_subs_unique = df_mrms_at_subs.drop_duplicates()
@@ -95,7 +98,7 @@ for rz in tqdm(ds_rlztns.realization_id.values):
 #%% generate a csv file for matching rain time series to subcatchments
 if yr == 1:
     df_subnames_and_gridind = pd.DataFrame(dict(sub_names = gdf_subs.NAME,
-                                                grid_index = gdf_matching_subs_and_mrms.index_right))
+                                                grid_index = idx_mrms))
 
     df_subnames_and_gridind.to_csv(f_key_subnames_gridind, index = False)
 
