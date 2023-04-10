@@ -12,7 +12,7 @@
 # SBATCH --exclude=udc-ba26-18,udc-ba27-14,udc-ba26-16,udc-ba26-17
 
 module purge
-module load anaconda
+module load gcc openmpi eccodes anaconda # the stuff other than anaconda was to ensure eccodes loaded correctly
 source activate rainyday
 
 source __directories.sh
