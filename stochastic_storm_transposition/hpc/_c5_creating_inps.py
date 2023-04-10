@@ -101,6 +101,9 @@ with open(f_inp_base, 'r') as T:
             with open (f_inp_scen, "w+") as f1:
                 f1.write(new_in)
 #%% export swmm catalog to csv file
+# create directory if it doesn't exist
+Path(f_swmm_scenarios_catalog.format(yr)).mkdir(parents=True, exist_ok=True)
+
 dtypes = dict(realization = int, year = int, storm_num = int)
 df_strms = df_strms.astype(dtypes)
 
