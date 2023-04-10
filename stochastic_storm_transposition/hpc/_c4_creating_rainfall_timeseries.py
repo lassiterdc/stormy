@@ -54,19 +54,26 @@ gdf_mrms = gpd.GeoDataFrame(geometry=gpd.points_from_xy(x=df_mrms_coords.x_lon, 
 gdf_mrms_state_plane = gdf_mrms.to_crs("EPSG:2284")
 
 #%% join subcatchment centroids with the closest MRMS point
+print("1")
 try:
     gdf_matching_subs_and_mrms = gpd.sjoin_nearest(gdf_sub_centroid, gdf_mrms_state_plane, how='left')
+    print("2")
     idx_mrms = gdf_matching_subs_and_mrms.index_right.values
     idx_subs = gdf_matching_subs_and_mrms.index.values
 except:
+    print("3")
     print("###########################")
     print("gdf_mrms_state_plane")
     print(gdf_mrms_state_plane)
     print("###########################")
     print("gdf_sub_centroid")
     print(gdf_sub_centroid)
-    idx_mrms = gdf_mrms_state_plane.sindex.nearest(gdf_sub_centroid.geometry)[1,:]
-    idx_subs = gdf_mrms_state_plane.sindex.nearest(gdf_sub_centroid.geometry)[0,:]
+    print("4")
+    indices = gdf_mrms_state_plane.sindex.nearest(gdf_sub_centroid.geometry)
+    idx_mrms = indices[1,:]
+    print("5")
+    idx_subs = indices[0,:]
+    print("6")
 
 df_mrms_at_subs = df_mrms_coords.iloc[idx_mrms, :]
 
