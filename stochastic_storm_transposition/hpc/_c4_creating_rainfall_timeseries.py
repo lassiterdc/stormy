@@ -116,4 +116,7 @@ if yr == 1:
 
     df_subnames_and_gridind.to_csv(f_key_subnames_gridind, index = False)
 
-    print("Created time series and exported time series key to the file {}".format(f_key_subnames_gridind))
+    print("Exported time series key to the file {}".format(f_key_subnames_gridind))
+
+num_files = len(ds_rlztns.realization_id.values)* len(ds_rlztns.realization_id.values) * len(df_mrms_at_subs_unique)
+print("Wrote {} time series files for each subcatchment-overlapping-grids, storms, and realizations for year {}".format(num_files, yr))
