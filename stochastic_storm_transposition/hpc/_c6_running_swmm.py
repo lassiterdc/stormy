@@ -16,7 +16,7 @@ f_out_runtimes = dir_swmm_sst_models + "_model_performance_year{}.csv".format(si
 
 script_start_time = datetime.now()
 #%% loading data
-df_strms = pd.read_csv(f_swmm_scenarios_catalog)
+df_strms = pd.read_csv(f_swmm_scenarios_catalog.format(sim_year))
 df_strms = df_strms.loc[df_strms.year==sim_year]
 
 s_tot_rz = df_strms.realization.max()
