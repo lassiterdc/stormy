@@ -59,6 +59,12 @@ try:
     idx_mrms = gdf_matching_subs_and_mrms.index_right.values
     idx_subs = gdf_matching_subs_and_mrms.index.values
 except:
+    print("###########################")
+    print("gdf_mrms_state_plane")
+    print(gdf_mrms_state_plane)
+    print("###########################")
+    print("gdf_sub_centroid")
+    print(gdf_sub_centroid)
     idx_mrms = gdf_mrms_state_plane.sindex.nearest(gdf_sub_centroid.geometry)[1,:]
     idx_subs = gdf_mrms_state_plane.sindex.nearest(gdf_sub_centroid.geometry)[0,:]
 
