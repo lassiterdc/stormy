@@ -8,8 +8,12 @@ import numpy as np
 import pandas as pd
 import shutil
 from glob import glob
+import sys
+from tqdm import tqdm
 
 from __utils import c4_creating_rainfall_tseries
+
+yr = int(sys.argv[1]) # a number between 1 and 1000
 
 f_out_realizations, f_shp_swmm_subs, dir_time_series, mm_per_inch, grid_spacing, start_date, freq, f_key_subnames_gridind, dir_sst_realizations = c4_creating_rainfall_tseries()
 #%% loading data
@@ -69,38 +73,37 @@ except:
     pass
 Path(dir_time_series).mkdir(parents=True, exist_ok=True)
 
-for rz in ds_rlztns.realization_id.values:
-    for yr in ds_rlztns.year.values:
-         for storm_id in ds_rlztns.storm_id.values:
-                for row in df_mrms_at_subs_unique.iterrows():
-                    mrms_index, coords = row
-                    # extract rainfall time series from the storm catalog
-                    idx = dict(realization_id = rz, year = yr, storm_id = storm_id, latitude = coords.y_lat, longitude = coords.x_lon)
-                    ds_rlztns_subset = ds_rlztns.sel(idx)
-                    dti = pd.date_range(start_date, periods = len(ds_rlztns_subset.timestep_index.values), freq = freq)
-                    rainrate_inperhr = ds_rlztns_subset.rainrate.values / mm_per_inch
-
-                    df = pd.DataFrame(dict(date=dti.strftime('%m/%d/%Y'),
-                                        time = dti.time,
-                                        rainrate_inperhr = rainrate_inperhr))
-                    # remove all but 1 leading and trailing zeros
-                    # df_cum_tsteps_with_rain = (df.rainrate_inperhr > 0).cumsum()
-                    # id_first_val = (df_cum_tsteps_with_rain == 0).idxmin()
-                    # id_last_val = df_cum_tsteps_with_rain.idxmax()
-                    # df = df.loc[id_first_val-1:id_last_val+1]
-                    # write .dat file with rainfall data
-                    f_out_swmm_rainfall = dir_time_series + "realization{}_year{}_storm-id{}_grid-ind{}.dat".format(rz, yr, storm_id, mrms_index)
-                    with open(f_out_swmm_rainfall, "w+") as file:
-                        file.write(";;sst_storm\n")
-                        file.write(";;Rainfall (in/hr)\n")
-                    # df_long_subset = df_long[df_long['station_id'] == g_id]
-                    # df_long_subset = df_long_subset.drop(["station_id"], axis=1)
-                    df.to_csv(f_out_swmm_rainfall, sep = '\t', index = False, header = False, mode="a")
+for rz in tqdm(ds_rlztns.realization_id.values):
+    for storm_id in ds_rlztns.storm_id.values:
+        for row in df_mrms_at_subs_unique.iterrows():
+            mrms_index, coords = row
+            # extract rainfall time series from the storm catalog
+            idx = dict(realization_id = rz, year = yr, storm_id = storm_id, latitude = coords.y_lat, longitude = coords.x_lon)
+            ds_rlztns_subset = ds_rlztns.sel(idx)
+            dti = pd.date_range(start_date, periods = len(ds_rlztns_subset.timestep_index.values), freq = freq)
+            rainrate_inperhr = ds_rlztns_subset.rainrate.values / mm_per_inch
+            df = pd.DataFrame(dict(date=dti.strftime('%m/%d/%Y'),
+                                time = dti.time,
+                                rainrate_inperhr = rainrate_inperhr))
+            # remove all but 1 leading and trailing zeros
+            # df_cum_tsteps_with_rain = (df.rainrate_inperhr > 0).cumsum()
+            # id_first_val = (df_cum_tsteps_with_rain == 0).idxmin()
+            # id_last_val = df_cum_tsteps_with_rain.idxmax()
+            # df = df.loc[id_first_val-1:id_last_val+1]
+            # write .dat file with rainfall data
+            f_out_swmm_rainfall = dir_time_series + "realization{}_year{}_storm-id{}_grid-ind{}.dat".format(rz, yr, storm_id, mrms_index)
+            with open(f_out_swmm_rainfall, "w+") as file:
+                file.write(";;sst_storm\n")
+                file.write(";;Rainfall (in/hr)\n")
+            # df_long_subset = df_long[df_long['station_id'] == g_id]
+            # df_long_subset = df_long_subset.drop(["station_id"], axis=1)
+            df.to_csv(f_out_swmm_rainfall, sep = '\t', index = False, header = False, mode="a")
 
 #%% generate a csv file for matching rain time series to subcatchments
-df_subnames_and_gridind = pd.DataFrame(dict(sub_names = gdf_subs.NAME,
-                                            grid_index = gdf_matching_subs_and_mrms.index_right))
+if yr == 1:
+    df_subnames_and_gridind = pd.DataFrame(dict(sub_names = gdf_subs.NAME,
+                                                grid_index = gdf_matching_subs_and_mrms.index_right))
 
-df_subnames_and_gridind.to_csv(f_key_subnames_gridind, index = False)
+    df_subnames_and_gridind.to_csv(f_key_subnames_gridind, index = False)
 
-print("Created time series and exported time series key to the file {}".format(f_key_subnames_gridind))
+    print("Created time series and exported time series key to the file {}".format(f_key_subnames_gridind))
