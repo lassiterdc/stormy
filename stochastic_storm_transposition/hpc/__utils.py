@@ -6,11 +6,11 @@ dir_sst = dir_repo + "stochastic_storm_transposition/"
 dir_sst_nrflk = dir_sst + "norfolk/"
 dir_sst_nrflk_hrly = dir_sst_nrflk + "sst_mrms_hourly/"
 # WORK
-# f_sst_nrflk_hrly_parameterfile = dir_sst_nrflk_hrly + "mrms_hourly_combined.sst"
-f_sst_nrflk_hrly_parameterfile = dir_sst_nrflk_hrly + "mrms_hourly_combined_test.sst"
+f_sst_nrflk_hrly_parameterfile = dir_sst_nrflk_hrly + "mrms_hourly_combined.sst"
+# f_sst_nrflk_hrly_parameterfile = dir_sst_nrflk_hrly + "mrms_hourly_combined_test.sst"
 # END WORK
 f_sst_nrflk_hrly_combined_catalog = dir_sst_nrflk_hrly + "strmcat_mrms_hourly_combined.nc"
-f_sst_nrflk_hrly_combined_catalog_reformatted = dir_sst_nrflk_hrly + "strmcat_mrms_hourly_combined_test_reformatted_for_xarray.nc"
+f_sst_nrflk_hrly_combined_catalog_reformatted = dir_sst_nrflk_hrly + "strmcat_mrms_hourly_combined_reformatted_for_xarray.nc"
 # swmm stuff
 dir_swmm_model = dir_repo + "swmm/hague/"
 f_shp_swmm_subs = dir_swmm_model + "swmm_model/exported_layers/subcatchments.shp"
@@ -19,8 +19,8 @@ work_f_water_level_path = dir_swmm_model + "swmm_timeseries/a_water_levels_ft.da
 
 # script c3
 # WORK 
-# dir_sst_realizations_hrly = dir_sst_nrflk_hrly + "mrms_hourly_combined/Realizations/"
-dir_sst_realizations_hrly = dir_sst_nrflk_hrly + "mrms_hourly_combined_tst/Realizations/"
+dir_sst_realizations_hrly = dir_sst_nrflk_hrly + "mrms_hourly_combined/Realizations/"
+# dir_sst_realizations_hrly = dir_sst_nrflk_hrly + "mrms_hourly_combined_tst/Realizations/"
 # END WORK
 # c4
 dir_swmm_sst_scenarios_hrly = dir_swmm_model + "swmm_scenarios_sst_hourly/"
@@ -43,12 +43,12 @@ start_date = "2020-09-01" # start date for each of the time series
 
 # SST parameters (should line up with the SST input file)
 # WORK 
-# nyears = 1000 # should be 1,000 for the final experiment
-# nperyear = 20
-# nrealizations = 10
-nyears = 2
+nyears = 1000 # should be 1,000 for the final experiment
 nperyear = 20
-nrealizations = 2
+nrealizations = 10
+# nyears = 2
+# nperyear = 20
+# nrealizations = 2
 # END WORK
 
 #%% functions
