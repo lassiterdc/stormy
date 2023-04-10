@@ -54,26 +54,27 @@ gdf_mrms = gpd.GeoDataFrame(geometry=gpd.points_from_xy(x=df_mrms_coords.x_lon, 
 gdf_mrms_state_plane = gdf_mrms.to_crs("EPSG:2284")
 
 #%% join subcatchment centroids with the closest MRMS point
-print("1")
 try:
     gdf_matching_subs_and_mrms = gpd.sjoin_nearest(gdf_sub_centroid, gdf_mrms_state_plane, how='left')
-    print("2")
     idx_mrms = gdf_matching_subs_and_mrms.index_right.values
-    idx_subs = gdf_matching_subs_and_mrms.index.values
+    # idx_subs = gdf_matching_subs_and_mrms.index.values
 except:
-    print("3")
-    print("###########################")
-    print("gdf_mrms_state_plane")
-    print(gdf_mrms_state_plane)
-    print("###########################")
-    print("gdf_sub_centroid")
-    print(gdf_sub_centroid)
-    print("4")
-    indices = gdf_mrms_state_plane.sindex.nearest(gdf_sub_centroid.geometry)
-    idx_mrms = indices[1,:]
-    print("5")
-    idx_subs = indices[0,:]
-    print("6")
+    try:
+        print(gdf_mrms_state_plane)
+        print(gdf_sub_centroid)
+        indices = gdf_mrms_state_plane.sindex.nearest(gdf_sub_centroid.geometry)
+        idx_mrms = indices[1,:]
+        # idx_subs = indices[0,:]
+    except:
+        from shapely.ops import nearest_points
+        lst_mrms_indices = []
+        for pt in gdf_sub_centroid.geometry:
+            distances = pt.distance(gdf_mrms_state_plane.geometry)
+            mrms_idx_min_dist = distances.idxmin()
+            lst_mrms_indices.append(mrms_idx_min_dist)
+
+        idx_mrms = np.array(lst_mrms_indices)
+        # idx_subs = np.arange(len(gdf_sub_centroid.geometry))
 
 df_mrms_at_subs = df_mrms_coords.iloc[idx_mrms, :]
 
