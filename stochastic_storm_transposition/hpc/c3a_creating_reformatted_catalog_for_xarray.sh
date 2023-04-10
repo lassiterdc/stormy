@@ -18,4 +18,4 @@ source activate rainyday
 source __directories.sh
 
 # running script
-python ${assar_dirs[hpc_c3_py]}
+python ${assar_dirs[hpc_c3a_py]}
