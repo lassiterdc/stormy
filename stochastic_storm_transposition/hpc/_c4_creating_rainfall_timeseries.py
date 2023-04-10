@@ -67,10 +67,10 @@ df_mrms_at_subs_unique = df_mrms_at_subs.drop_duplicates()
 
 # create the time series directory if it does not exist
 # clear everything in the directory
-try:
-    shutil.rmtree(dir_time_series)
-except:
-    pass
+# try:
+#     shutil.rmtree(dir_time_series)
+# except:
+#     pass
 Path(dir_time_series).mkdir(parents=True, exist_ok=True)
 
 for rz in tqdm(ds_rlztns.realization_id.values):
@@ -85,18 +85,10 @@ for rz in tqdm(ds_rlztns.realization_id.values):
             df = pd.DataFrame(dict(date=dti.strftime('%m/%d/%Y'),
                                 time = dti.time,
                                 rainrate_inperhr = rainrate_inperhr))
-            # remove all but 1 leading and trailing zeros
-            # df_cum_tsteps_with_rain = (df.rainrate_inperhr > 0).cumsum()
-            # id_first_val = (df_cum_tsteps_with_rain == 0).idxmin()
-            # id_last_val = df_cum_tsteps_with_rain.idxmax()
-            # df = df.loc[id_first_val-1:id_last_val+1]
-            # write .dat file with rainfall data
             f_out_swmm_rainfall = dir_time_series + "realization{}_year{}_storm-id{}_grid-ind{}.dat".format(rz, yr, storm_id, mrms_index)
             with open(f_out_swmm_rainfall, "w+") as file:
                 file.write(";;sst_storm\n")
                 file.write(";;Rainfall (in/hr)\n")
-            # df_long_subset = df_long[df_long['station_id'] == g_id]
-            # df_long_subset = df_long_subset.drop(["station_id"], axis=1)
             df.to_csv(f_out_swmm_rainfall, sep = '\t', index = False, header = False, mode="a")
 
 #%% generate a csv file for matching rain time series to subcatchments
