@@ -13,7 +13,7 @@
 
 module purge
 module load gcc openmpi eccodes anaconda # the stuff other than anaconda was to ensure eccodes loaded correctly
-source activate rainyday
+source activate geopandas # created an environment for this script specifically
 
 source __directories.sh
 
