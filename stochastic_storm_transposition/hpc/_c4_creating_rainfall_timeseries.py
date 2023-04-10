@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import shutil
 from glob import glob
-from tqdm import tqdm
+
 from __utils import c4_creating_rainfall_tseries
 
 f_out_realizations, f_shp_swmm_subs, dir_time_series, mm_per_inch, grid_spacing, start_date, freq, f_key_subnames_gridind, dir_sst_realizations = c4_creating_rainfall_tseries()
@@ -69,7 +69,7 @@ except:
     pass
 Path(dir_time_series).mkdir(parents=True, exist_ok=True)
 
-for rz in tqdm(ds_rlztns.realization_id.values):
+for rz in ds_rlztns.realization_id.values:
     for yr in ds_rlztns.year.values:
          for storm_id in ds_rlztns.storm_id.values:
                 for row in df_mrms_at_subs_unique.iterrows():
@@ -102,3 +102,5 @@ df_subnames_and_gridind = pd.DataFrame(dict(sub_names = gdf_subs.NAME,
                                             grid_index = gdf_matching_subs_and_mrms.index_right))
 
 df_subnames_and_gridind.to_csv(f_key_subnames_gridind, index = False)
+
+print("Created time series and exported time series key to the file {}".format(f_key_subnames_gridind))
