@@ -33,6 +33,10 @@ lat_shifted = ds_rlztns.latitude - shift
 
 ds_rlztns = ds_rlztns.assign_coords({"longitude":lon_shifted, "latitude":lat_shifted})
 
+# BEGIN WORK
+time_script_min = round((script_start_time - datetime.now()).seconds / 60, 1)
+sys.exit("loaded subcatchment shapefile  and realizations in {} minutes".format(time_script_min))
+# END WORK
 #%% loading storm realizations
 # fs_rlz = glob(dir_sst_realizations+"*.nc")
 
@@ -44,7 +48,7 @@ ds_rlztns = ds_rlztns.assign_coords({"longitude":lon_shifted, "latitude":lat_shi
 gdf_sub_centroid = gpd.GeoDataFrame(geometry=gdf_subs.centroid)
 # BEGIN WORK
 time_script_min = round((script_start_time - datetime.now()).seconds / 60, 1)
-sys.exit("loaded subcatchment shapefile in {} minutes".format(time_script_min))
+sys.exit("Converted sub gdf to centroids in {} minutes".format(time_script_min))
 # END WORK
 
 x,y = np.meshgrid(ds_rlztns.longitude.values, ds_rlztns.latitude.values, indexing="ij")
