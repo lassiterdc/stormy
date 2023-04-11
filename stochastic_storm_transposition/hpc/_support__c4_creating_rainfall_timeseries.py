@@ -178,7 +178,7 @@ for rz in ds_rlztns.realization_id.values:
             times_fwright_min.append(time_fwright_min)
             mean_times = round(np.mean(times_fwright_min), 1)
             # BEGIN WORK
-            print("Wrote file {} out of {}. File write time (min): {}   Average write time (min): {}".format(count, num_files, time_fwright_min, mean_times))
+            # print("Wrote file {} out of {}. File write time (min): {}   Average write time (min): {}".format(count, num_files, time_fwright_min, mean_times))
             # if count == 5:
             #     sys.exit("STOPPED SCRIPT EARLY TO SEE SOME PRELIMINARY RESULTS.")
             # END WORK
