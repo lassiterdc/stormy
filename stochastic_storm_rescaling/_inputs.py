@@ -15,7 +15,7 @@ min_record_length = 30
 fldr_nrflk = str(Path(os.getcwd()).parents[1]) + "/"
 fldr_ssr = fldr_nrflk + "stormy/stochastic_storm_rescaling/"
 fldr_mrms_processing = fldr_nrflk + "/highres-radar-rainfall-processing/data/"
-fld_out = fldr_ssr + "outputs"
+dir_ssr_outputs = fldr_ssr + "outputs/"
 
 # SWMM stuff
 fldr_swmm = fldr_nrflk + "stormy/swmm/"
@@ -31,18 +31,24 @@ f_hourlyglobal_precip_all_stations = fldr_NCEI + "2023-1-4_NCEI_Hourly Global_pr
 f_hourlyglobal_precip_subset_stations = fldr_NCEI + "2023-1-4_NCEI_Hourly Global_station_subset_precip.csv"
 f_hourlyprecip = fldr_NCEI + "2023-1-4_NCEI_Hourly Precip_precip.csv"
 
-# unique to script a
-fld_out_a = fld_out + "/a_NOAA_water_levels/"
-f_out_a_meta = fld_out_a + 'sewells_pt_water_level_metadatap.json'
-f_out_a_all = fld_out_a + "a_water-lev_tide_surge.csv"
-f_out_a_shp = fld_out_a + "sewells_pt.shp"
+
+dir_noaa_water_levels = dir_ssr_outputs + "a_NOAA_water_levels/"
+f_out_a_meta = dir_noaa_water_levels + 'sewells_pt_water_level_metadatap.json'
+f_water_level_storm_surge = dir_noaa_water_levels + "a_water-lev_tide_surge.csv"
+f_out_a_shp = dir_noaa_water_levels + "sewells_pt.shp"
 f_out_swmm_waterlevel = fldr_swmm_tseries + "a_water_levels_ft.dat"
 
+# event selection
+min_interevent_time = 12 # hour
+max_event_length = 72 # hours
+min_event_threshold = 0.5 # inches of total rainfall
+dir_mrms_events = dir_ssr_outputs + "c_mrms_events/"
+f_mrms_event_summaries = dir_mrms_events + "mrms_event_summaries.csv"
+f_mrms_event_timeseries = dir_mrms_events + "mrms_event_timeseries.csv"
 
-# unique to script b
-fld_out_b = fld_out + "/b_precip_time_series_at_gages/"
+fld_out_b = dir_ssr_outputs + "b_precip_time_series_at_gages/"
 f_in_b_nc = fldr_mrms_processing+"mrms_nc_preciprate_fullres_atgages.nc"
-f_out_b_csv_rainfall = fld_out_b + "b_mrms_rainfall.csv"
+f_mrms_rainfall = fld_out_b + "mrms_rainfall.csv"
 f_out_b_csv_subs_w_mrms_grid = fld_out_b + "b_sub_ids_and_mrms_rain_col.csv"
 f_out_swmm_rainfall = fldr_swmm_tseries + "b_mrms_rainfall_in_per_hr_{}.dat"
 
@@ -51,19 +57,25 @@ fld_out_c_plts = fldr_NCEI + "qaqc_plots/"
 fld_out_c_processed_data = fldr_NCEI + "processed_data/"
 
 def def_work():
-    return f_out_a_all
+    return f_water_level_storm_surge
 
 def def_work_b():
-    return f_swmm_model, f_out_b_csv_rainfall, f_out_b_csv_subs_w_mrms_grid
+    return f_swmm_model, f_mrms_rainfall, f_out_b_csv_subs_w_mrms_grid
 
 def def_work_c():
     return f_daily_summaries, f_hourlyglobal_precip_all_stations, f_hourlyglobal_precip_subset_stations, f_hourlyprecip
 
 def def_inputs_for_a():
-    return in_a_begin_year, f_out_a_meta, f_out_a_all, f_out_a_shp, f_out_swmm_waterlevel
+    return in_a_begin_year, f_out_a_meta, f_water_level_storm_surge, f_out_a_shp, f_out_swmm_waterlevel
 
 def def_inputs_for_b():
-    return f_in_b_nc, f_shp_swmm_subs, f_out_b_csv_rainfall, f_out_b_csv_subs_w_mrms_grid, f_out_swmm_rainfall, mm_per_inch
+    return f_in_b_nc, f_shp_swmm_subs, f_mrms_rainfall, f_out_b_csv_subs_w_mrms_grid, f_out_swmm_rainfall, mm_per_inch
+
+def def_inputs_for_b2():
+    return f_mrms_rainfall, f_water_level_storm_surge, min_interevent_time, max_event_length, min_event_threshold, mm_per_inch, f_mrms_event_summaries, f_mrms_event_timeseries
 
 def def_inputs_for_c():
     return f_daily_summaries, f_hourlyprecip, fld_out_c_plts, fld_out_c_processed_data, min_record_length
+
+def def_inputs_for_d():
+    return f_mrms_event_summaries, f_mrms_event_timeseries, f_water_level_storm_surge
