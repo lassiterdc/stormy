@@ -117,7 +117,7 @@ except:
 time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
 prnt_statement = "Joined grid coords to subs in {} minutes".format(time_script_min)
 print(prnt_statement)
-sys.exit(prnt_statement)
+# sys.exit(prnt_statement)
 
 # END WORK
 
