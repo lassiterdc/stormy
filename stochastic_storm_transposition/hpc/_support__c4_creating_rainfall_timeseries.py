@@ -34,7 +34,7 @@ lat_shifted = ds_rlztns.latitude - shift
 ds_rlztns = ds_rlztns.assign_coords({"longitude":lon_shifted, "latitude":lat_shifted})
 
 # BEGIN WORK
-# time_script_min = round((datetime.now()).seconds - script_start_time / 60, 1)
+# time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
 # sys.exit("loaded subcatchment shapefile and realizations in {} minutes".format(time_script_min))
 # END WORK
 #%% loading storm realizations
@@ -47,7 +47,7 @@ ds_rlztns = ds_rlztns.assign_coords({"longitude":lon_shifted, "latitude":lat_shi
 #%% associate each sub with the closest grid coord
 gdf_sub_centroid = gpd.GeoDataFrame(geometry=gdf_subs.centroid)
 # BEGIN WORK
-# time_script_min = round((datetime.now()).seconds - script_start_time / 60, 1)
+# time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
 # print((datetime.now() - script_start_time).seconds / 60)
 # sys.exit("Converted sub gdf to centroids in {} minutes".format(time_script_min))
 # END WORK
@@ -63,8 +63,8 @@ df_mrms_coords = pd.DataFrame({"x_lon":x, "y_lat":y})
 gdf_mrms = gpd.GeoDataFrame(geometry=gpd.points_from_xy(x=df_mrms_coords.x_lon, y=df_mrms_coords.y_lat), crs="EPSG:4326")
 
 # BEGIN WORK
-time_script_min = round((datetime.now()).seconds - script_start_time / 60, 1)
-sys.exit("Created gdf from grid coordinates {} minutes".format(time_script_min))
+# time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
+# sys.exit("Created gdf from grid coordinates {} minutes".format(time_script_min))
 # END WORK
 
 gdf_mrms_state_plane = gdf_mrms.to_crs("EPSG:2284")
@@ -80,7 +80,7 @@ try:
     # idx_subs = gdf_matching_subs_and_mrms.index.values
 except:
     # BEGIN WORK
-    time_script_min = round((datetime.now()).seconds - script_start_time / 60, 1)
+    time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
     sys.exit("Made it to first except statement in {} minutes".format(time_script_min))
     # END WORK
     try:
@@ -91,7 +91,7 @@ except:
         # idx_subs = indices[0,:]
     except:
         # BEGIN WORK
-        time_script_min = round((datetime.now()).seconds - script_start_time / 60, 1)
+        time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
         sys.exit("Made it to second except statement in {} minutes".format(time_script_min))
         # END WORK
         from shapely.ops import nearest_points
@@ -105,7 +105,7 @@ except:
         # idx_subs = np.arange(len(gdf_sub_centroid.geometry))
 
 # BEGIN WORK
-time_script_min = round((datetime.now()).seconds - script_start_time / 60, 1)
+time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
 sys.exit("Joined grid coords to subs in {} minutes".format(time_script_min))
 # END WORK
 
@@ -115,13 +115,13 @@ df_mrms_at_subs = df_mrms_coords.iloc[idx_mrms, :]
 df_mrms_at_subs_unique = df_mrms_at_subs.drop_duplicates()
 
 # BEGIN WORK
-time_script_min = round((datetime.now()).seconds - script_start_time / 60, 1)
+time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
 if time_script_min > 1:
     sys.exit("SCRIPT TAKING UNEXPECTEDLY LONG 1")
 # END WORK
 
 # BEGIN WORK
-time_script_min = round((datetime.now()).seconds - script_start_time / 60, 1)
+time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
 sys.exit("Part 2 joined subs to grid coordinates in {} minutes".format(time_script_min))
 # END WORK
 
@@ -179,6 +179,6 @@ if yr == 1:
 
     print("Exported time series key to the file {}".format(f_key_subnames_gridind))
 
-time_script_min = round((datetime.now()).seconds - script_start_time / 60, 1)
+time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
 
 print("Wrote {} time series files for each subcatchment-overlapping-grids, storms, and realizations for year {}. Script runtime: {} (min)".format(num_files, yr, time_script_min))
