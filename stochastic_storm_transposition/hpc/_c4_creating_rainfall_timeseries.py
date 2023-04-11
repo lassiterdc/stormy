@@ -33,10 +33,6 @@ lat_shifted = ds_rlztns.latitude - shift
 
 ds_rlztns = ds_rlztns.assign_coords({"longitude":lon_shifted, "latitude":lat_shifted})
 
-# BEGIN WORK
-time_script_min = round((script_start_time - datetime.now()).seconds / 60, 1)
-sys.exit("loaded data in {} minutes".format(time_script_min)))
-# END WORK
 #%% loading storm realizations
 # fs_rlz = glob(dir_sst_realizations+"*.nc")
 
@@ -65,6 +61,11 @@ gdf_mrms = gpd.GeoDataFrame(geometry=gpd.points_from_xy(x=df_mrms_coords.x_lon, 
 
 
 gdf_mrms_state_plane = gdf_mrms.to_crs("EPSG:2284")
+
+# BEGIN WORK
+time_script_min = round((script_start_time - datetime.now()).seconds / 60, 1)
+sys.exit("Joined subs to grid coordinates in {} minutes".format(time_script_min))
+# END WORK
 
 #%% join subcatchment centroids with the closest MRMS point
 # BEGIN WORK
