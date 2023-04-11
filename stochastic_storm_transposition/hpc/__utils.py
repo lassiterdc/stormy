@@ -5,6 +5,9 @@ dir_repo = "/project/quinnlab/dcl3nd/norfolk/stormy/"
 dir_sst = dir_repo + "stochastic_storm_transposition/"
 dir_sst_nrflk = dir_sst + "norfolk/"
 dir_sst_nrflk_hrly = dir_sst_nrflk + "sst_mrms_hourly/"
+dir_home = "/home/dcl3nd/stormy/"
+dir_home_sst = dir_home + "sst/"
+
 # WORK
 f_sst_nrflk_hrly_parameterfile = dir_sst_nrflk_hrly + "mrms_hourly_combined.sst"
 # f_sst_nrflk_hrly_parameterfile = dir_sst_nrflk_hrly + "mrms_hourly_combined_test.sst"
@@ -23,14 +26,17 @@ dir_sst_realizations_hrly = dir_sst_nrflk_hrly + "mrms_hourly_combined/Realizati
 # dir_sst_realizations_hrly = dir_sst_nrflk_hrly + "mrms_hourly_combined_tst/Realizations/"
 # END WORK
 # c4
-dir_swmm_sst_scenarios_hrly = dir_swmm_model + "swmm_scenarios_sst_hourly/"
+# BEGIN WORK
+# dir_swmm_sst_scenarios_hrly = dir_swmm_model + "swmm_scenarios_sst_hourly/"
+dir_swmm_sst_scenarios_hrly = dir_home_sst + "swmm_sst_hourly/"
 dir_time_series_hrly = dir_swmm_sst_scenarios_hrly + "time_series/"
 f_key_subnames_gridind = dir_time_series_hrly + "_key_subnames_and_grid-indices.csv"
 seed_mrms_hourly = 22901
+# END WORK
 # c5
 dir_swmm_sst_models_hrly = dir_swmm_sst_scenarios_hrly + "models/"
 f_inp_base_hrly = dir_swmm_sst_scenarios_hrly + "hague_sst_model_template.inp"
-dir_time_series_hrly = dir_swmm_sst_scenarios_hrly + "time_series/"
+# dir_time_series_hrly = dir_swmm_sst_scenarios_hrly + "time_series/"
 f_swmm_scenarios_catalog = dir_swmm_sst_scenarios_hrly + "swmm_scenario_catalogs/" + "_swmm_scenarios_catalog_yr{}.csv"
 
 # c6
