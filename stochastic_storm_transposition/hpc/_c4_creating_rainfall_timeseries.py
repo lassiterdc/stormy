@@ -33,23 +33,11 @@ lat_shifted = ds_rlztns.latitude - shift
 
 ds_rlztns = ds_rlztns.assign_coords({"longitude":lon_shifted, "latitude":lat_shifted})
 
-# BEGIN WORK
-time_script_min = round((script_start_time - datetime.now()).seconds / 60, 1)
-sys.exit("loaded subcatchment shapefile  and realizations in {} minutes".format(time_script_min))
-# END WORK
 #%% loading storm realizations
 # fs_rlz = glob(dir_sst_realizations+"*.nc")
 
-# # WORK
-# ds_tst = xr.open_dataset(fs_rlz[0])
-# # END WORK
-
 #%% associate each sub with the closest grid coord
 gdf_sub_centroid = gpd.GeoDataFrame(geometry=gdf_subs.centroid)
-# BEGIN WORK
-time_script_min = round((script_start_time - datetime.now()).seconds / 60, 1)
-sys.exit("Converted sub gdf to centroids in {} minutes".format(time_script_min))
-# END WORK
 
 x,y = np.meshgrid(ds_rlztns.longitude.values, ds_rlztns.latitude.values, indexing="ij")
 grid_length = x.shape[0] * x.shape[1]
@@ -61,27 +49,15 @@ df_mrms_coords = pd.DataFrame({"x_lon":x, "y_lat":y})
 # create geopandas dataframe for mrms grid
 gdf_mrms = gpd.GeoDataFrame(geometry=gpd.points_from_xy(x=df_mrms_coords.x_lon, y=df_mrms_coords.y_lat), crs="EPSG:4326")
 
-# BEGIN WORK
-time_script_min = round((script_start_time - datetime.now()).seconds / 60, 1)
-sys.exit("Created gdf from grid coordinates {} minutes".format(time_script_min))
-# END WORK
-
 gdf_mrms_state_plane = gdf_mrms.to_crs("EPSG:2284")
 
 #%% join subcatchment centroids with the closest MRMS point
-# BEGIN WORK
-print("Joining geodataframes to storm cat indices...")
-# END WORK
 
 try:
     gdf_matching_subs_and_mrms = gpd.sjoin_nearest(gdf_sub_centroid, gdf_mrms_state_plane, how='left')
     idx_mrms = gdf_matching_subs_and_mrms.index_right.values
     # idx_subs = gdf_matching_subs_and_mrms.index.values
 except:
-    # BEGIN WORK
-    time_script_min = round((script_start_time - datetime.now()).seconds / 60, 1)
-    sys.exit("Made it to first except statement in {} minutes".format(time_script_min))
-    # END WORK
     try:
         # print(gdf_mrms_state_plane)
         # print(gdf_sub_centroid)
@@ -89,10 +65,6 @@ except:
         idx_mrms = indices[1,:]
         # idx_subs = indices[0,:]
     except:
-        # BEGIN WORK
-        time_script_min = round((script_start_time - datetime.now()).seconds / 60, 1)
-        sys.exit("Made it to second except statement in {} minutes".format(time_script_min))
-        # END WORK
         from shapely.ops import nearest_points
         lst_mrms_indices = []
         for pt in gdf_sub_centroid.geometry:
@@ -103,26 +75,11 @@ except:
         idx_mrms = np.array(lst_mrms_indices)
         # idx_subs = np.arange(len(gdf_sub_centroid.geometry))
 
-# BEGIN WORK
-time_script_min = round((script_start_time - datetime.now()).seconds / 60, 1)
-sys.exit("Joined grid coords to subs in {} minutes".format(time_script_min))
-# END WORK
 
 df_mrms_at_subs = df_mrms_coords.iloc[idx_mrms, :]
 
 # unique gridcells
 df_mrms_at_subs_unique = df_mrms_at_subs.drop_duplicates()
-
-# BEGIN WORK
-time_script_min = round((script_start_time - datetime.now()).seconds / 60, 1)
-if time_script_min > 1:
-    sys.exit("SCRIPT TAKING UNEXPECTEDLY LONG 1")
-# END WORK
-
-# BEGIN WORK
-time_script_min = round((script_start_time - datetime.now()).seconds / 60, 1)
-sys.exit("Part 2 joined subs to grid coordinates in {} minutes".format(time_script_min))
-# END WORK
 
 #%% create a swmm .date file for each of the events
 
@@ -162,12 +119,6 @@ for rz in ds_rlztns.realization_id.values:
             time_fwright_min = round((time_end_fwrite - time_start_fwrite).seconds / 60, 1)
             times_fwright_min.append(time_fwright_min)
             mean_times = round(np.mean(times_fwright_min), 1)
-            # BEGIN WORK
-            print("Wrote file {} out of {}. File write time (min): {}   Average write time (min): {}".format(count, num_files, time_fwright_min, mean_times))
-            if count == 5:
-                sys.exit("STOPPED SCRIPT EARLY TO SEE SOME PRELIMINARY RESULTS.")
-            # END WORK
-
 
 #%% generate a csv file for matching rain time series to subcatchments
 if yr == 1:
