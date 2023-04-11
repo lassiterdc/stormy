@@ -42,7 +42,8 @@ f_swmm_scenarios_catalog = dir_swmm_sst_scenarios_hrly + "swmm_scenario_catalogs
 # c6
 max_runtime_min_hrly = 15 # maximum minutes of runtime allowable for each SWMM simulation
 #%% hard coded variables
-name_out_realizations = "_combined_realizations.nc"
+# name_out_realizations = "_combined_realizations.nc"
+f_realizations_hourly = dir_swmm_model + "swmm_scenarios_sst_hourly/_combined_realizations.nc"
 mm_per_inch = 25.4
 grid_spacing = 0.009999999776482582
 start_date = "2020-09-01" # start date for each of the time series
@@ -62,18 +63,18 @@ def c6_running_swmm():
     return f_swmm_scenarios_catalog, dir_swmm_sst_models_hrly, max_runtime_min_hrly
 
 def c5_creating_inps():
-    f_out_realizations = dir_swmm_sst_scenarios_hrly + name_out_realizations
+    f_out_realizations = f_realizations_hourly
     return nyears, nperyear, nrealizations, dir_swmm_sst_models_hrly, f_inp_base_hrly, f_out_realizations, seed_mrms_hourly, dir_time_series_hrly, f_key_subnames_gridind, lst_template_keys, work_f_water_level_path, f_swmm_scenarios_catalog
 
 def c4_creating_rainfall_tseries():
     freq = "H"
-    f_out_realizations = dir_swmm_sst_scenarios_hrly + name_out_realizations
+    f_out_realizations = f_realizations_hourly
     return f_out_realizations, f_shp_swmm_subs, dir_time_series_hrly, mm_per_inch, grid_spacing, start_date, freq, f_key_subnames_gridind, dir_sst_realizations_hrly
 
 def c3_reformat_hrly_cats():
     f_in = f_sst_nrflk_hrly_combined_catalog
     f_out = f_sst_nrflk_hrly_combined_catalog_reformatted
-    f_out_realizations = dir_swmm_sst_scenarios_hrly + name_out_realizations
+    f_out_realizations = f_realizations_hourly
     return f_in, f_out, dir_sst_realizations_hrly, f_out_realizations
 
 def c1_combine_hrly_cats():
