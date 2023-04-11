@@ -34,8 +34,10 @@ lat_shifted = ds_rlztns.latitude - shift
 ds_rlztns = ds_rlztns.assign_coords({"longitude":lon_shifted, "latitude":lat_shifted})
 
 # BEGIN WORK
-# time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
-# sys.exit("loaded subcatchment shapefile and realizations in {} minutes".format(time_script_min))
+time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
+prnt_statement = "loaded subcatchment shapefile and realizations in {} minutes".format(time_script_min)
+print(prnt_statement)
+# sys.exit(prnt_statement)
 # END WORK
 #%% loading storm realizations
 # fs_rlz = glob(dir_sst_realizations+"*.nc")
@@ -47,9 +49,10 @@ ds_rlztns = ds_rlztns.assign_coords({"longitude":lon_shifted, "latitude":lat_shi
 #%% associate each sub with the closest grid coord
 gdf_sub_centroid = gpd.GeoDataFrame(geometry=gdf_subs.centroid)
 # BEGIN WORK
-# time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
-# print((datetime.now() - script_start_time).seconds / 60)
-# sys.exit("Converted sub gdf to centroids in {} minutes".format(time_script_min))
+time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
+prnt_statement = "Converted sub gdf to centroids in {} minutes".format(time_script_min)
+print(prnt_statement)
+#sys.exit(prnt_statement)
 # END WORK
 
 x,y = np.meshgrid(ds_rlztns.longitude.values, ds_rlztns.latitude.values, indexing="ij")
@@ -63,8 +66,10 @@ df_mrms_coords = pd.DataFrame({"x_lon":x, "y_lat":y})
 gdf_mrms = gpd.GeoDataFrame(geometry=gpd.points_from_xy(x=df_mrms_coords.x_lon, y=df_mrms_coords.y_lat), crs="EPSG:4326")
 
 # BEGIN WORK
-# time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
-# sys.exit("Created gdf from grid coordinates {} minutes".format(time_script_min))
+time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
+prnt_statement = "Created gdf from grid coordinates {} minutes".format(time_script_min)
+print(prnt_statement)
+# sys.exit(prnt_statement)
 # END WORK
 
 gdf_mrms_state_plane = gdf_mrms.to_crs("EPSG:2284")
@@ -81,7 +86,9 @@ try:
 except:
     # BEGIN WORK
     time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
-    sys.exit("Made it to first except statement in {} minutes".format(time_script_min))
+    prnt_statement = "Made it to first except statement in {} minutes".format(time_script_min)
+    print(prnt_statement)
+    sys.exit(prnt_statement)
     # END WORK
     try:
         # print(gdf_mrms_state_plane)
@@ -92,7 +99,9 @@ except:
     except:
         # BEGIN WORK
         time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
-        sys.exit("Made it to second except statement in {} minutes".format(time_script_min))
+        prnt_statement = "Made it to second except statement in {} minutes".format(time_script_min)
+        print(prnt_statement)
+        sys.exit(prnt_statement)
         # END WORK
         from shapely.ops import nearest_points
         lst_mrms_indices = []
@@ -106,7 +115,10 @@ except:
 
 # BEGIN WORK
 time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
-sys.exit("Joined grid coords to subs in {} minutes".format(time_script_min))
+prnt_statement = "Joined grid coords to subs in {} minutes".format(time_script_min)
+print(prnt_statement)
+sys.exit(prnt_statement)
+
 # END WORK
 
 df_mrms_at_subs = df_mrms_coords.iloc[idx_mrms, :]
@@ -115,14 +127,16 @@ df_mrms_at_subs = df_mrms_coords.iloc[idx_mrms, :]
 df_mrms_at_subs_unique = df_mrms_at_subs.drop_duplicates()
 
 # BEGIN WORK
-time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
-if time_script_min > 1:
-    sys.exit("SCRIPT TAKING UNEXPECTEDLY LONG 1")
+# time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
+# if time_script_min > 1:
+#     sys.exit("SCRIPT TAKING UNEXPECTEDLY LONG 1")
 # END WORK
 
 # BEGIN WORK
 time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
-sys.exit("Part 2 joined subs to grid coordinates in {} minutes".format(time_script_min))
+prnt_statement = "Part 2 joined subs to grid coordinates in {} minutes".format(time_script_min)
+print(prnt_statement)
+sys.exit(prnt_statement)
 # END WORK
 
 #%% create a swmm .date file for each of the events
