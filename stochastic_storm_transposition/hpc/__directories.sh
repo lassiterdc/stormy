@@ -49,6 +49,6 @@ assar_dirs[hpc_b_SST_in_hrly_2001_to_2011]=${assar_dirs[sst]}"norfolk/norfolk_mr
 assar_dirs[hpc_c1_sst_test]=${assar_dirs[hpc_mrms_hourly]}"mrms_hourly_combined_test.sst"
 
 # reprex for Rivanna Support
-assar_dirs[hpc_sup_c4_py]=${assar_dirs[hpc_scripts]}"_support_c4_creating_rainfall_timeseries.py"
+assar_dirs[hpc_sup_c4_py]=${assar_dirs[hpc_scripts]}"__support_c4_creating_rainfall_timeseries.py"
 
 
