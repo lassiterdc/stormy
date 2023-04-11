@@ -21,4 +21,4 @@ echo "Creating rainfall time series for year ${SLURM_ARRAY_TASK_ID}..."
 
 # running script
 python ${assar_dirs[hpc_sup_c4_py]} ${SLURM_ARRAY_TASK_ID}
-# the python script is "/project/quinnlab/dcl3nd/norfolk/stormy/stochastic_storm_transposition/hpc/__support_c4_creating_rainfall_timeseries.py"
+# the python script is "/project/quinnlab/dcl3nd/norfolk/stormy/stochastic_storm_transposition/hpc/_support__c4_creating_rainfall_timeseries.py"
