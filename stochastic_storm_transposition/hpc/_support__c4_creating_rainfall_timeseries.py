@@ -136,7 +136,7 @@ df_mrms_at_subs_unique = df_mrms_at_subs.drop_duplicates()
 time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
 prnt_statement = "Part 2 joined subs to grid coordinates in {} minutes".format(time_script_min)
 print(prnt_statement)
-sys.exit(prnt_statement)
+# sys.exit(prnt_statement)
 # END WORK
 
 #%% create a swmm .date file for each of the events
