@@ -76,7 +76,7 @@ gdf_mrms_state_plane = gdf_mrms.to_crs("EPSG:2284")
 
 #%% join subcatchment centroids with the closest MRMS point
 # BEGIN WORK
-print("Joining geodataframes to storm cat indices...")
+# print("Joining geodataframes to storm cat indices...")
 # END WORK
 
 try:
