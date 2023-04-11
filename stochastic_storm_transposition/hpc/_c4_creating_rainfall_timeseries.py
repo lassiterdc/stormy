@@ -9,13 +9,16 @@ import pandas as pd
 import shutil
 from glob import glob
 import sys
-from tqdm import tqdm
+from datetime import datetime
+# from tqdm import tqdm
 
 from __utils import c4_creating_rainfall_tseries
 
 yr = int(sys.argv[1]) # a number between 1 and 1000
 
 f_out_realizations, f_shp_swmm_subs, dir_time_series, mm_per_inch, grid_spacing, start_date, freq, f_key_subnames_gridind, dir_sst_realizations = c4_creating_rainfall_tseries()
+
+script_start_time = datetime.now()
 #%% loading data
 ds_rlztns = xr.open_dataset(f_out_realizations)
 gdf_subs = gpd.read_file(f_shp_swmm_subs)
@@ -91,9 +94,16 @@ df_mrms_at_subs_unique = df_mrms_at_subs.drop_duplicates()
 #     pass
 Path(dir_time_series).mkdir(parents=True, exist_ok=True)
 
-for rz in tqdm(ds_rlztns.realization_id.values):
+num_files = len(ds_rlztns.realization_id.values) * len(ds_rlztns.storm_id.values) * len(df_mrms_at_subs_unique)
+
+times_fwright_min = []
+
+count = 0
+for rz in ds_rlztns.realization_id.values:
     for storm_id in ds_rlztns.storm_id.values:
         for row in df_mrms_at_subs_unique.iterrows():
+            count += 1
+            time_start_fwrite = datetime.now()
             mrms_index, coords = row
             # extract rainfall time series from the storm catalog
             idx = dict(realization_id = rz, year = yr, storm_id = storm_id, latitude = coords.y_lat, longitude = coords.x_lon)
@@ -108,6 +118,16 @@ for rz in tqdm(ds_rlztns.realization_id.values):
                 file.write(";;sst_storm\n")
                 file.write(";;Rainfall (in/hr)\n")
             df.to_csv(f_out_swmm_rainfall, sep = '\t', index = False, header = False, mode="a")
+            time_end_fwrite = datetime.now()
+            time_fwright_min = round((time_end_fwrite - time_start_fwrite).seconds / 60, 1)
+            times_fwright_min.append(time_fwright_min)
+            mean_times = round(np.mean(times_fwright_min), 1)
+            # BEGIN WORK
+            print("Wrote file {} out of {}. File write time (min): {}   Average write time (min): {}".format(count, num_files, time_fwright_min, mean_times))
+            if count == 5:
+                sys.exit("STOPPED SCRIPT EARLY TO SEE SOME PRELIMINARY RESULTS.")
+            # END WORK
+
 
 #%% generate a csv file for matching rain time series to subcatchments
 if yr == 1:
@@ -118,5 +138,6 @@ if yr == 1:
 
     print("Exported time series key to the file {}".format(f_key_subnames_gridind))
 
-num_files = len(ds_rlztns.realization_id.values)* len(ds_rlztns.realization_id.values) * len(df_mrms_at_subs_unique)
-print("Wrote {} time series files for each subcatchment-overlapping-grids, storms, and realizations for year {}".format(num_files, yr))
+time_script_min = round((script_start_time - datetime.now()).seconds / 60, 1)
+
+print("Wrote {} time series files for each subcatchment-overlapping-grids, storms, and realizations for year {}. Script runtime: {} (min)".format(num_files, yr, time_script_min))
