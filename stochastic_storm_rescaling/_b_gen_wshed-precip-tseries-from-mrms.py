@@ -8,7 +8,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 
-f_in_b_nc, f_shp_swmm_subs, f_out_b_csv_rainfall, f_out_b_csv_subs_w_mrms_grid, f_out_swmm_rainfall, mm_per_inch = def_inputs_for_b()
+f_in_b_nc, f_shp_swmm_subs, f_mrms_rainfall, f_out_b_csv_subs_w_mrms_grid, f_out_swmm_rainfall, mm_per_inch = def_inputs_for_b()
 
 #%% load data
 ds_rain = xr.open_dataset(f_in_b_nc)
@@ -80,7 +80,7 @@ sub_name = gdf_subs.NAME.values
 df_subs_raingages = pd.DataFrame({"subcatchment_id":sub_name, "raingage_id":raingage_id})
 
 #%% export csv files
-df_rain_tseries.to_csv(f_out_b_csv_rainfall)
+df_rain_tseries.to_csv(f_mrms_rainfall)
 df_subs_raingages.to_csv(f_out_b_csv_subs_w_mrms_grid)
 
 print("finished creating .csv files")

@@ -20,7 +20,7 @@ import noaa_coops as nc
 import numpy as np
 from datetime import date
 
-begin_year, f_out_a_meta, f_out_a_all, f_out_a_shp, f_out_swmm_waterlevel= def_inputs_for_a()
+begin_year, f_out_a_meta, f_water_level_storm_surge, f_out_a_shp, f_out_swmm_waterlevel= def_inputs_for_a()
 
 # parameters for downloading data
 b_md = "0101" # start date of each year downloaded
@@ -133,9 +133,9 @@ with open(f_out_a_meta, 'w', encoding='utf-8') as outfile:
 
 # yrs = "_{}_to_{}".format(str(min(years-1)), str(max(years)))
 
-# df_wl.to_csv(fld_out_a+"a_water_level{}.csv".format(yrs))
-# df_tide_pred.to_csv(fld_out_a+"a_tide_preds{}.csv".format(yrs))
-df_comb.to_csv(f_out_a_all)
+# df_wl.to_csv(dir_noaa_water_levels+"a_water_level{}.csv".format(yrs))
+# df_tide_pred.to_csv(dir_noaa_water_levels+"a_tide_preds{}.csv".format(yrs))
+df_comb.to_csv(f_water_level_storm_surge)
 
 keys=['name', 'lat', 'lng']
 geo_data={key:metadata[key] for key in keys}
@@ -147,7 +147,7 @@ gdf = gp.GeoDataFrame(df, geometry=gp.points_from_xy(df.lat, df.lng))
 gdf.to_file(f_out_a_shp)
 
 #%% exporting to SWMM .dat file
-df_wlevel = pd.read_csv(f_out_a_all, parse_dates=["date_time"])
+df_wlevel = pd.read_csv(f_water_level_storm_surge, parse_dates=["date_time"])
 df_wlevel = df_wlevel.loc[:, ['date_time', 'water_level']]
 # df_wlevel.rename(columns = {"water_level":";water_level"}, inplace=True)
 # df_wlevel[";;year"] = df_wlevel.date_time.dt.year
