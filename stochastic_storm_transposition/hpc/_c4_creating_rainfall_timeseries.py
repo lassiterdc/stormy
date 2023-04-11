@@ -41,6 +41,12 @@ ds_rlztns = ds_rlztns.assign_coords({"longitude":lon_shifted, "latitude":lat_shi
 # # END WORK
 
 #%% associate each sub with the closest grid coord
+# BEGIN WORK
+time_script_min = round((script_start_time - datetime.now()).seconds / 60, 1)
+if time_script_min > 1:
+    sys.exit("SCRIPT TAKING UNEXPECTEDLY LONG 1")
+# END WORK
+
 gdf_sub_centroid = gpd.GeoDataFrame(geometry=gdf_subs.centroid)
 
 x,y = np.meshgrid(ds_rlztns.longitude.values, ds_rlztns.latitude.values, indexing="ij")
@@ -57,6 +63,10 @@ gdf_mrms = gpd.GeoDataFrame(geometry=gpd.points_from_xy(x=df_mrms_coords.x_lon, 
 gdf_mrms_state_plane = gdf_mrms.to_crs("EPSG:2284")
 
 #%% join subcatchment centroids with the closest MRMS point
+# BEGIN WORK
+print("Joining geodataframes to storm cat indices...")
+# END WORK
+
 try:
     gdf_matching_subs_and_mrms = gpd.sjoin_nearest(gdf_sub_centroid, gdf_mrms_state_plane, how='left')
     idx_mrms = gdf_matching_subs_and_mrms.index_right.values
@@ -83,6 +93,17 @@ df_mrms_at_subs = df_mrms_coords.iloc[idx_mrms, :]
 
 # unique gridcells
 df_mrms_at_subs_unique = df_mrms_at_subs.drop_duplicates()
+
+# BEGIN WORK
+time_script_min = round((script_start_time - datetime.now()).seconds / 60, 1)
+if time_script_min > 1:
+    sys.exit("SCRIPT TAKING UNEXPECTEDLY LONG 1")
+# END WORK
+
+# BEGIN WORK
+print("Finished joining geodataframes to storm cat indices...")
+sys.exit("stopping script just to see wtf is going on")
+# END WORK
 
 #%% create a swmm .date file for each of the events
 
