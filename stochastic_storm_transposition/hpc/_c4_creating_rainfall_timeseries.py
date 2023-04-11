@@ -33,6 +33,10 @@ lat_shifted = ds_rlztns.latitude - shift
 
 ds_rlztns = ds_rlztns.assign_coords({"longitude":lon_shifted, "latitude":lat_shifted})
 
+# BEGIN WORK
+time_script_min = round((script_start_time - datetime.now()).seconds / 60, 1)
+sys.exit("loaded data in {} minutes".format(time_script_min)))
+# END WORK
 #%% loading storm realizations
 # fs_rlz = glob(dir_sst_realizations+"*.nc")
 
@@ -73,8 +77,8 @@ try:
     # idx_subs = gdf_matching_subs_and_mrms.index.values
 except:
     try:
-        print(gdf_mrms_state_plane)
-        print(gdf_sub_centroid)
+        # print(gdf_mrms_state_plane)
+        # print(gdf_sub_centroid)
         indices = gdf_mrms_state_plane.sindex.nearest(gdf_sub_centroid.geometry)
         idx_mrms = indices[1,:]
         # idx_subs = indices[0,:]
