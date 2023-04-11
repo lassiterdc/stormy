@@ -88,7 +88,7 @@ except:
     time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
     prnt_statement = "Made it to first except statement in {} minutes".format(time_script_min)
     print(prnt_statement)
-    sys.exit(prnt_statement)
+    # sys.exit(prnt_statement)
     # END WORK
     try:
         # print(gdf_mrms_state_plane)
