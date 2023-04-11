@@ -3,8 +3,8 @@
 #SBATCH -e _script_errors/%x/%A_%a_%N.out
 #SBATCH --ntasks=1				# Number of tasks per serial job (must be 1)
 #SBATCH -p standard				# Queue name "standard" (serial)
-#SBATCH -A quinnlab_paid				# allocation name
-#SBATCH -t 24:00:00				# Run time per serial job (hh:mm:ss)
+#SBATCH -A dev				# allocation name [quinnlab_paid]
+#SBATCH -t 01:00:00				# Run time per serial job (hh:mm:ss) [24:00:00]
 #SBATCH --array=1-1000	        # Array of jobs, 1 for each of 1000 years    
 # SBATCH --mem-per-cpu=200000
 #SBATCH --mail-user=dcl3nd@virginia.edu          # address for email notification
