@@ -111,13 +111,14 @@ with open(f_inp_base, 'r') as T:
 # create directory if it doesn't exist
 # pth = Path(f_swmm_scenarios_catalog.format(yr)).mkdir(parents=True, exist_ok=True)
 pth_parent = Path(f_swmm_scenarios_catalog.format(yr)).parent
-pth_parent.mkdir(parents=True, exist_ok=True)
+
 # erase whatever is in the directory now
 try:
     shutil.rmtree(pth_parent)
 except:
     pass
 
+pth_parent.mkdir(parents=True, exist_ok=True)
 # dtypes = dict(realization = int, year = int, storm_num = int)
 # df_strms = df_strms.astype(dtypes)
 
