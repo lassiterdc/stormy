@@ -155,7 +155,6 @@ print(prnt_statement)
 #     shutil.rmtree(dir_time_series)
 # except:
 #     pass
-Path(dir_time_series).mkdir(parents=True, exist_ok=True)
 
 num_files = len(realization_ids) * len(ds_rlztns.storm_id.values) * len(df_mrms_at_subs_unique)
 
@@ -163,6 +162,8 @@ times_fwright_min = []
 
 count = 0
 for rz in realization_ids:
+    dir_yr = dir_time_series + "weather_realization{}/year{}/".format(rz, yr)
+    Path(dir_yr).mkdir(parents=True, exist_ok=True)
     for storm_id in ds_rlztns.storm_id.values:
         for row in df_mrms_at_subs_unique.iterrows():
             count += 1
@@ -176,7 +177,7 @@ for rz in realization_ids:
             df = pd.DataFrame(dict(date=dti.strftime('%m/%d/%Y'),
                                 time = dti.time,
                                 rainrate_inperhr = rainrate_inperhr))
-            f_out_swmm_rainfall = dir_time_series + "realization{}_year{}_storm-id{}_grid-ind{}.dat".format(rz, yr, storm_id, mrms_index)
+            f_out_swmm_rainfall = dir_yr + "rz{}yr{}_strm{}_grid-ind{}.dat".format(rz, yr, storm_id, mrms_index)
             with open(f_out_swmm_rainfall, "w+") as file:
                 file.write(";;sst_storm\n")
                 file.write(";;Rainfall (in/hr)\n")
