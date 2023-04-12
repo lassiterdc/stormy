@@ -19,8 +19,8 @@ yr = int(sys.argv[1]) # a number between 1 and 1000
 script_start_time = datetime.now()
 #%% define functions
 def get_rainfiles(rz, yr, storm_id, df_key):
-    # format "realization{}_year{}_storm-id{}_grid-ind{}_.dat"
-    lst_f_rain_dats = glob(dir_time_series  + "realization{}_year{}_storm-id{}_*.dat".format(rz, yr, storm_id))
+    # format: dir_time_series + "weather_realization{}/year{}/".format(rz, yr) + "rz{}yr{}_strm{}_grid-ind{}.dat".format(rz, yr, storm_id, mrms_index)
+    lst_f_rain_dats = glob(dir_time_series  + "weather_realization{}/year{}/".format(rz, yr) + "rz{}yr{}_strm{}_*.dat".format(rz, yr, storm_id))
     lst_rain_dats = []
     lst_grid_ind = []
     for f in lst_f_rain_dats:
