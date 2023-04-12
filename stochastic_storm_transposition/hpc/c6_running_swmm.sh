@@ -17,7 +17,7 @@ source activate running_swmm
 
 source __directories.sh
 
-echo "Running SWMM for year ${SLURM_ARRAY_TASK_ID}..."
+# echo "Running SWMM for year ${SLURM_ARRAY_TASK_ID}..."
 
 # running swmm
 python ${assar_dirs[hpc_c6_py]} ${SLURM_ARRAY_TASK_ID}

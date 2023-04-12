@@ -17,7 +17,7 @@ source activate geopandas # created an environment for this script specifically
 
 source __directories.sh
 
-echo "Creating rainfall time series for year ${SLURM_ARRAY_TASK_ID}..."
+# echo "Creating rainfall time series for year ${SLURM_ARRAY_TASK_ID}..."
 
 # running script
 python ${assar_dirs[hpc_c4_py]} ${SLURM_ARRAY_TASK_ID}
