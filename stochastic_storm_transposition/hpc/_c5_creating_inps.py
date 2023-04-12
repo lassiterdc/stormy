@@ -113,10 +113,10 @@ with open(f_inp_base, 'r') as T:
 pth_parent = Path(f_swmm_scenarios_catalog.format(yr)).parent
 
 # erase whatever is in the directory now
-try:
-    shutil.rmtree(pth_parent)
-except:
-    pass
+# try:
+#     shutil.rmtree(pth_parent)
+# except:
+#     pass
 
 pth_parent.mkdir(parents=True, exist_ok=True)
 # dtypes = dict(realization = int, year = int, storm_num = int)
