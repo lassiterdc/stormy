@@ -24,10 +24,11 @@ s_tot_storms = df_strms.storm_num.max()
 s_tot_sims = s_tot_rz * s_tot_storms
 #%% define functions
 def parse_inp(f_inp):
+    # format "rz{}_yr{}_strm{}.inp"
     lst_name_comp = f_inp.split("/")[-1].split("_")
-    rz = lst_name_comp[0].split("r")[-1]
-    yr = lst_name_comp[1].split("y")[-1]
-    storm_id = lst_name_comp[2].split(".")[0].split('s')[-1]
+    rz = lst_name_comp[0].split("rz")[-1]
+    yr = lst_name_comp[1].split("yr")[-1]
+    storm_id = lst_name_comp[2].split(".")[0].split('strm')[-1]
     return rz, yr, storm_id
 
 #%% run simulations
