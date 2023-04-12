@@ -62,12 +62,13 @@ with open(f_inp_base, 'r') as T:
     count = -1
     for rz in realization_ids:
         dir_r = dir_swmm_sst_models_hrly + "weather_realization{}/".format(rz)
-        dir_y = dir_r + "year{}/".format(yr)
-        # clear folder of any other swmm files from previous runs
-        # try:
-        #     shutil.rmtree(dir_y)
-        # except:
-        #     pass
+        dir_yr = dir_r + "year{}/".format(yr)
+        # clear folder of any other swmm files from previous runs in case I update the naming convention
+        try:
+            shutil.rmtree(dir_yr)
+        except:
+            pass
+        Path(dir_yr).mkdir(parents=True, exist_ok=True)
         for storm_id in ds_rlztns.storm_id.values:
             count += 1
             df_strms.loc[count, "realization"] = rz
@@ -76,8 +77,8 @@ with open(f_inp_base, 'r') as T:
             # append new row to pandas dataframe
             # dic_scen = dict(realization = rz, year = yr, storm = storm_id)
             # create copy of input file
-            # dir_strm = dir_y + "rz{}_yr{}_strm{}/".format(rz, yr, storm_id)
-            f_inp_scen = dir_y + "rz{}_yr{}_strm{}.inp".format(rz, yr, storm_id)
+            # dir_strm = dir_yr + "rz{}_yr{}_strm{}/".format(rz, yr, storm_id)
+            f_inp_scen = dir_yr + "rz{}_yr{}_strm{}.inp".format(rz, yr, storm_id)
             df_strms.loc[count, "swmm_inp"] = f_inp_scen
             ## shutil.copy(f_inp_base, f_inp_scen)
             df_rain_paths = get_rainfiles(rz, yr, storm_id, df_key)

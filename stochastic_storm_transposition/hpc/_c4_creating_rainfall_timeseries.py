@@ -164,6 +164,10 @@ times_fwright_min = []
 count = 0
 for rz in realization_ids:
     dir_yr = dir_time_series + "weather_realization{}/year{}/".format(rz, yr)
+    try:
+        shutil.rmtree(dir_yr)
+    except:
+        pass
     Path(dir_yr).mkdir(parents=True, exist_ok=True)
     for storm_id in ds_rlztns.storm_id.values:
         for row in df_mrms_at_subs_unique.iterrows():
