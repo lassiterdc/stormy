@@ -19,8 +19,8 @@ script_start_time = datetime.now()
 df_strms = pd.read_csv(f_swmm_scenarios_catalog.format(sim_year))
 df_strms = df_strms.loc[df_strms.year==sim_year]
 
-s_tot_rz = df_strms.realization.max()
-s_tot_storms = df_strms.storm_num.max()
+s_tot_rz = int(df_strms.realization.max())
+s_tot_storms = int(df_strms.storm_num.max())
 s_tot_sims = s_tot_rz * s_tot_storms
 #%% define functions
 def parse_inp(f_inp):
@@ -29,7 +29,7 @@ def parse_inp(f_inp):
     rz = lst_name_comp[0].split("rz")[-1]
     yr = lst_name_comp[1].split("yr")[-1]
     storm_id = lst_name_comp[2].split(".")[0].split('strm')[-1]
-    return rz, yr, storm_id
+    return int(rz), int(yr), int(storm_id)
 
 #%% run simulations
 runtimes = []
