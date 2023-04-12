@@ -178,7 +178,7 @@ for rz in realization_ids:
             df = pd.DataFrame(dict(date=dti.strftime('%m/%d/%Y'),
                                 time = dti.time,
                                 rainrate_inperhr = rainrate_inperhr))
-            f_out_swmm_rainfall = dir_yr + "rz{}yr{}_strm{}_grid-ind{}.dat".format(rz, yr, storm_id, mrms_index)
+            f_out_swmm_rainfall = dir_yr + "rz{}_yr{}_strm{}_grid-ind{}.dat".format(rz, yr, storm_id, mrms_index)
             with open(f_out_swmm_rainfall, "w+") as file:
                 file.write(";;sst_storm\n")
                 file.write(";;Rainfall (in/hr)\n")
