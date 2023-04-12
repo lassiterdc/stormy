@@ -112,8 +112,8 @@ with open(f_inp_base, 'r') as T:
 # create directory if it doesn't exist
 Path(f_swmm_scenarios_catalog.format(yr)).mkdir(parents=True, exist_ok=True)
 
-dtypes = dict(realization = int, year = int, storm_num = int)
-df_strms = df_strms.astype(dtypes)
+# dtypes = dict(realization = int, year = int, storm_num = int)
+# df_strms = df_strms.astype(dtypes)
 
 df_strms.to_csv(f_swmm_scenarios_catalog.format(yr), index = False)
 
