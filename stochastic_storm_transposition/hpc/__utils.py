@@ -27,17 +27,17 @@ dir_sst_realizations_hrly = dir_sst_nrflk_hrly + "mrms_hourly_combined/Realizati
 # END WORK
 # c4
 # BEGIN WORK
-# dir_swmm_sst_scenarios_hrly = dir_swmm_model + "swmm_scenarios_sst_hourly/"
-dir_swmm_sst_scenarios_hrly = dir_home_sst + "swmm_sst_hourly/"
-dir_time_series_hrly = dir_swmm_sst_scenarios_hrly + "time_series/"
+dir_swmm_sst_scenarios_hrly_proj = dir_swmm_model + "swmm_scenarios_sst_hourly/"
+dir_swmm_sst_scenarios_hrly_home = dir_home_sst + "swmm_sst_hourly/"
+dir_time_series_hrly = dir_swmm_sst_scenarios_hrly_home + "time_series/"
 f_key_subnames_gridind = dir_time_series_hrly + "_key_subnames_and_grid-indices.csv"
 seed_mrms_hourly = 22901
 # END WORK
 # c5
-dir_swmm_sst_models_hrly = dir_swmm_sst_scenarios_hrly + "models/"
-f_inp_base_hrly = dir_swmm_sst_scenarios_hrly + "hague_sst_model_template.inp"
+dir_swmm_sst_models_hrly = dir_swmm_sst_scenarios_hrly_proj + "models/"
+f_inp_base_hrly = dir_swmm_sst_scenarios_hrly_proj + "hague_sst_model_template.inp"
 # dir_time_series_hrly = dir_swmm_sst_scenarios_hrly + "time_series/"
-f_swmm_scenarios_catalog = dir_swmm_sst_scenarios_hrly + "swmm_scenario_catalogs/" + "_swmm_scenarios_catalog_yr{}.csv"
+f_swmm_scenarios_catalog = dir_swmm_sst_scenarios_hrly_proj + "swmm_scenario_catalogs/" + "_swmm_scenarios_catalog_yr{}.csv"
 
 # c6
 max_runtime_min_hrly = 15 # maximum minutes of runtime allowable for each SWMM simulation
