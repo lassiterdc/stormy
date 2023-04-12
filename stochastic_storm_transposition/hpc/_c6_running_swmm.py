@@ -10,7 +10,7 @@ from __utils import c6_running_swmm
 
 f_swmm_scenarios_catalog, dir_swmm_sst_models, max_runtime_min = c6_running_swmm()
 
-sim_year = str(sys.argv[1]) # a number between 1 and 1000
+sim_year = int(sys.argv[1]) # a number between 1 and 1000
 
 f_out_runtimes = dir_swmm_sst_models + "_model_performance_year{}.csv".format(sim_year)
 
@@ -19,7 +19,14 @@ script_start_time = datetime.now()
 df_strms = pd.read_csv(f_swmm_scenarios_catalog.format(sim_year))
 df_strms = df_strms.loc[df_strms.year==sim_year]
 
-s_tot_rz = int(df_strms.realization.max())
+try:
+    s_tot_rz = int(df_strms.realization.max())
+except:
+    print(df_strms.realization.max())
+    print(df_strms.realization)
+    print(df_strms)
+    sys.exit("mierda")
+    
 s_tot_storms = int(df_strms.storm_num.max())
 s_tot_sims = s_tot_rz * s_tot_storms
 #%% define functions
