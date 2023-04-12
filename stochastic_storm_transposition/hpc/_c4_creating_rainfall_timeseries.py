@@ -111,13 +111,14 @@ except:
         print(prnt_statement)
         # sys.exit(prnt_statement)
         # END WORK
-        from shapely.ops import nearest_points
         lst_mrms_indices = []
         for pt in gdf_sub_centroid.geometry:
-            distances = pt.distance(gdf_mrms_state_plane.geometry)
+            distances = []
+            for mrms_grid_center in gdf_mrms_state_plane.geometry:
+                distances.append(pt.distance(mrms_grid_center))
+            distances = pd.Series(distances)
             mrms_idx_min_dist = distances.idxmin()
             lst_mrms_indices.append(mrms_idx_min_dist)
-
         idx_mrms = np.array(lst_mrms_indices)
         # idx_subs = np.arange(len(gdf_sub_centroid.geometry))
 
