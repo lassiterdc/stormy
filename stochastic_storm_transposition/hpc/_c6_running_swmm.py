@@ -19,7 +19,6 @@ script_start_time = datetime.now()
 df_strms = pd.read_csv(f_swmm_scenarios_catalog.format(sim_year))
 df_strms = df_strms.loc[df_strms.year==sim_year]
 
-
 s_tot_rz = int(df_strms.realization.max())
 s_tot_storms = int(df_strms.storm_num.max())
 s_tot_sims = s_tot_rz * s_tot_storms
@@ -52,18 +51,17 @@ for f_inp in df_strms.swmm_inp:
                 break
             pass
     successes.append(success)
-    
     tot_elapsed_time_hr = round((sim_time - script_start_time).seconds / 60 / 60, 1)
     runtimes.append(sim_runtime_min)
     mean_sim_time = round(np.mean(runtimes), 1)
     expected_tot_runtime_hr = round(mean_sim_time*s_tot_sims/60, 1)
     expected_remaining_time_hr = round((expected_tot_runtime_hr - tot_elapsed_time_hr), 1)
-
     # MONTIROING
     if success == True:
         print("Simulation runtime (min): {}, Mean simulation runtime (min): {}, Total elapsed time (hr): {}, Expected total time (hr): {}, Estimated time remaining (hr): {}".format(sim_runtime_min, tot_elapsed_time_hr, mean_sim_time, expected_tot_runtime_hr, expected_remaining_time_hr)) 
     else: 
         print("Simulation cancelled after {} minutes due to user-defined runtime limits, Mean simulation runtime (min): {}, Total elapsed time (hr): {}, Expected total time (hr): {}, Estimated time remaining (hr): {}".format(max_runtime_min, tot_elapsed_time_hr, mean_sim_time, expected_tot_runtime_hr, expected_remaining_time_hr)) 
+
 #%% export model runtimes to a file
 df_strms['runtime_min'] = runtimes
 df_strms['run_completed'] = successes
