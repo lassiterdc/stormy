@@ -16,11 +16,19 @@ from __utils import c4_creating_rainfall_tseries
 
 yr = int(sys.argv[1]) # a number between 1 and 1000
 
-f_out_realizations, f_shp_swmm_subs, dir_time_series, mm_per_inch, grid_spacing, start_date, freq, f_key_subnames_gridind, dir_sst_realizations = c4_creating_rainfall_tseries()
+nrealizations, f_out_realizations, f_shp_swmm_subs, dir_time_series, mm_per_inch, grid_spacing, start_date, freq, f_key_subnames_gridind, dir_sst_realizations = c4_creating_rainfall_tseries()
 
 script_start_time = datetime.now()
 #%% loading data
 ds_rlztns = xr.open_dataset(f_out_realizations)
+
+# if the number of realizations defined in __utils is less than in the combined catalog, us the smaller of the two
+if nrealizations < len(ds_rlztns.realization_id.values):
+    realization_ids = np.arange(1, nrealizations+1)
+    print("Using just {} out of {} available realizations based on user inputs in __utils.py.".format(nrealizations, len(ds_rlztns.realization_id.values)))
+else:
+    realization_ids = ds_rlztns.realization_id.values
+
 gdf_subs = gpd.read_file(f_shp_swmm_subs)
 
 # shift gridcell to center (the coordinates represent the upper left of each gridcell)
@@ -149,12 +157,12 @@ print(prnt_statement)
 #     pass
 Path(dir_time_series).mkdir(parents=True, exist_ok=True)
 
-num_files = len(ds_rlztns.realization_id.values) * len(ds_rlztns.storm_id.values) * len(df_mrms_at_subs_unique)
+num_files = len(realization_ids) * len(ds_rlztns.storm_id.values) * len(df_mrms_at_subs_unique)
 
 times_fwright_min = []
 
 count = 0
-for rz in ds_rlztns.realization_id.values:
+for rz in realization_ids:
     for storm_id in ds_rlztns.storm_id.values:
         for row in df_mrms_at_subs_unique.iterrows():
             count += 1

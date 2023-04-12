@@ -69,7 +69,7 @@ def c5_creating_inps():
 def c4_creating_rainfall_tseries():
     freq = "H"
     f_out_realizations = f_realizations_hourly
-    return f_out_realizations, f_shp_swmm_subs, dir_time_series_hrly, mm_per_inch, grid_spacing, start_date, freq, f_key_subnames_gridind, dir_sst_realizations_hrly
+    return nrealizations, f_out_realizations, f_shp_swmm_subs, dir_time_series_hrly, mm_per_inch, grid_spacing, start_date, freq, f_key_subnames_gridind, dir_sst_realizations_hrly
 
 def c3_reformat_hrly_cats():
     f_in = f_sst_nrflk_hrly_combined_catalog
