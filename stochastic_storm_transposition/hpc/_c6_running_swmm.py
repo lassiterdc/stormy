@@ -19,14 +19,8 @@ script_start_time = datetime.now()
 df_strms = pd.read_csv(f_swmm_scenarios_catalog.format(sim_year))
 df_strms = df_strms.loc[df_strms.year==sim_year]
 
-try:
-    s_tot_rz = int(df_strms.realization.max())
-except:
-    print(df_strms.realization.max())
-    print(df_strms.realization)
-    print(df_strms)
-    sys.exit("mierda")
-    
+
+s_tot_rz = int(df_strms.realization.max())
 s_tot_storms = int(df_strms.storm_num.max())
 s_tot_sims = s_tot_rz * s_tot_storms
 #%% define functions
