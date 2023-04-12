@@ -8,12 +8,15 @@ from glob import glob
 import pandas as pd
 from string import Template
 import sys
-from tqdm import tqdm
+from datetime import datetime
+# from tqdm import tqdm
 from __utils import c5_creating_inps
 
 nyears, nperyear, nrealizations, dir_swmm_sst_models_hrly, f_inp_base, f_out_realizations, seed_mrms_hourly, dir_time_series, f_key_subnames_gridind, lst_template_keys, work_f_water_level_path, f_swmm_scenarios_catalog = c5_creating_inps()
 
 yr = int(sys.argv[1]) # a number between 1 and 1000
+
+script_start_time = datetime.now()
 #%% define functions
 def get_rainfiles(rz, yr, storm_id, df_key):
     # format "realization{}_year{}_storm-id{}_grid-ind{}_.dat"
@@ -41,6 +44,11 @@ df_strms = pd.DataFrame(dict(storm_number = np.arange(1, num_storms+1)))
 df_key = pd.read_csv(f_key_subnames_gridind)
 
 #%% clear folder of SWMM scenarios
+
+num_files = len(ds_rlztns.realization_id.values) * len(ds_rlztns.storm_id.values)
+
+print("begin writing {} .inp files...".format(num_files))
+
 try:
     shutil.rmtree(dir_swmm_sst_models_hrly)
 except:
@@ -52,7 +60,7 @@ with open(f_inp_base, 'r') as T:
     template = Template(T.read())
     count = -1
 
-    for rz in tqdm(ds_rlztns.realization_id.values):
+    for rz in ds_rlztns.realization_id.values:
         dir_r = dir_swmm_sst_models_hrly + "weather_realization{}/".format(rz)
         dir_y = dir_r + "year{}/".format(yr)
         for storm_id in ds_rlztns.storm_id.values:
@@ -85,7 +93,7 @@ with open(f_inp_base, 'r') as T:
                 if fpath is not None: # meaning, if a filepath associated with the grid index was found
                     d_fields[key] = fpath
                 else:
-                    sys.exit("Filepath to fill out SWMM tepmlate not found.")
+                    sys.exit("Filepath to fill out SWMM template not found.")
 
                 # format the filepath
                 fpath = fpath.replace("/", "\\")
@@ -108,3 +116,7 @@ dtypes = dict(realization = int, year = int, storm_num = int)
 df_strms = df_strms.astype(dtypes)
 
 df_strms.to_csv(f_swmm_scenarios_catalog.format(yr), index = False)
+
+time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
+
+print("Wrote {} .inp files for each realization and storm in year {}. Script runtime: {} (min)".format(num_files, yr, time_script_min))
