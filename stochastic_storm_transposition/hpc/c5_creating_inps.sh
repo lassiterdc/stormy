@@ -5,7 +5,7 @@
 #SBATCH -p standard				# Queue name "standard" (serial)
 #SBATCH -A quinnlab_paid				# allocation name
 #SBATCH -t 24:00:00				# Run time per serial job (hh:mm:ss)
-#SBATCH --array=1-1000	        # Array of jobs, 1 for each of 1000 years   
+#SBATCH --array=1-1000%10	        # Array of jobs, 1 for each of 1000 years   
 # SBATCH --mem-per-cpu=200000
 #SBATCH --mail-user=dcl3nd@virginia.edu          # address for email notification
 #SBATCH --mail-type=ALL   
