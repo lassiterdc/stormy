@@ -18,7 +18,7 @@ f_sst_nrflk_hrly_combined_catalog_reformatted = dir_sst_nrflk_hrly + "strmcat_mr
 dir_swmm_model = dir_repo + "swmm/hague/"
 f_shp_swmm_subs = dir_swmm_model + "swmm_model/exported_layers/subcatchments.shp"
 lst_template_keys = ["rainfall_1", "rainfall_2", "rainfall_4", "rainfall_5", "rainfall_7", "water_level"]
-work_f_water_level_path = dir_swmm_model + "swmm_timeseries/a_water_levels_ft.dat"
+# work_f_water_level_path = dir_swmm_model + "swmm_timeseries/a_water_levels_ft.dat"
 
 # script c3
 # WORK 
@@ -76,7 +76,7 @@ def c6_running_swmm():
 
 def c5_creating_inps():
     f_out_realizations = f_realizations_hourly
-    return nyears, nperyear, nrealizations, dir_swmm_sst_models_hrly, f_inp_base_hrly, f_out_realizations, seed_mrms_hourly, dir_time_series_hrly, f_key_subnames_gridind, lst_template_keys, work_f_water_level_path, f_swmm_scenarios_catalog
+    return nyears, nperyear, nrealizations, dir_swmm_sst_models_hrly, f_inp_base_hrly, f_out_realizations, seed_mrms_hourly, dir_time_series_hrly, f_key_subnames_gridind, lst_template_keys, f_swmm_scenarios_catalog
 
 def c4b_creating_wlevel_tseries():
     return f_mrms_event_summaries, f_mrms_event_timeseries, f_water_level_storm_surge, f_realizations_hourly, f_key_subnames_gridind, nrealizations, sst_hrly_tstep_min, start_date, time_buffer, dir_time_series_hrly
