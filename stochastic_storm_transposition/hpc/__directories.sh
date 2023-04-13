@@ -23,6 +23,7 @@ assar_dirs[hpc_c1_py]=${assar_dirs[hpc_scripts]}"_c1_combining_hrly_storm_catalo
 assar_dirs[hpc_c3a_py]=${assar_dirs[hpc_scripts]}"_c3a_creating_reformatted_catalog_for_xarray.py"
 assar_dirs[hpc_c3b_py]=${assar_dirs[hpc_scripts]}"_c3b_creating_reformatted_realizations_for_xarray.py"
 assar_dirs[hpc_c4_py]=${assar_dirs[hpc_scripts]}"_c4_creating_rainfall_timeseries.py"
+assar_dirs[hpc_c4b_py]=${assar_dirs[hpc_scripts]}"_c4b_creating_waterlevel_timeseries .py"
 assar_dirs[hpc_c5_py]=${assar_dirs[hpc_scripts]}"_c5_creating_inps.py"
 assar_dirs[hpc_c6_py]=${assar_dirs[hpc_scripts]}"_c6_running_swmm.py"
 assar_dirs[hpc_d_py]=${assar_dirs[hpc_scripts]}"_d_running_rainyday_mrms.py"

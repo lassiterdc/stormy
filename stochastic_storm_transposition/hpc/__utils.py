@@ -33,6 +33,18 @@ dir_time_series_hrly = dir_swmm_sst_scenarios_hrly_home + "time_series/"
 f_key_subnames_gridind = dir_time_series_hrly + "_key_subnames_and_grid-indices.csv"
 seed_mrms_hourly = 22901
 # END WORK
+
+# c4b 
+dir_ssr = dir_repo + "stochastic_storm_rescaling/"
+dir_ssr_outputs = dir_ssr + "outputs/"
+dir_mrms_events = dir_ssr_outputs + "c_mrms_events/"
+f_mrms_event_summaries = dir_mrms_events + "mrms_event_summaries.csv"
+f_mrms_event_timeseries = dir_mrms_events + "mrms_event_timeseries.csv"
+dir_noaa_water_levels = dir_ssr_outputs + "a_NOAA_water_levels/"
+f_water_level_storm_surge = dir_noaa_water_levels + "a_water-lev_tide_surge.csv"
+sst_hrly_tstep_min = 60
+time_buffer = 6 # hours before and after start date; should correspond to the SWMM model
+
 # c5
 dir_swmm_sst_models_hrly = dir_swmm_sst_scenarios_hrly_proj + "models/"
 f_inp_base_hrly = dir_swmm_sst_scenarios_hrly_proj + "hague_sst_model_template.inp"
@@ -65,6 +77,9 @@ def c6_running_swmm():
 def c5_creating_inps():
     f_out_realizations = f_realizations_hourly
     return nyears, nperyear, nrealizations, dir_swmm_sst_models_hrly, f_inp_base_hrly, f_out_realizations, seed_mrms_hourly, dir_time_series_hrly, f_key_subnames_gridind, lst_template_keys, work_f_water_level_path, f_swmm_scenarios_catalog
+
+def c4b_creating_wlevel_tseries():
+    return f_mrms_event_summaries, f_mrms_event_timeseries, f_water_level_storm_surge, f_realizations_hourly, f_key_subnames_gridind, nrealizations, sst_hrly_tstep_min, start_date, time_buffer, dir_time_series_hrly
 
 def c4_creating_rainfall_tseries():
     freq = "H"
