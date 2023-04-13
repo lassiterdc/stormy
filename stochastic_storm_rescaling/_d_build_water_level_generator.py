@@ -2,16 +2,14 @@
 import pandas as pd
 import sys
 import numpy as np
-from _inputs import def_inputs_for_d
 from copulas.multivariate import GaussianMultivariate
 from copulas.visualization import compare_3d
 import itertools
 import matplotlib.pyplot as plt 
 import xarray as xr
 import geopandas as gpd
-from tqdm import tqdm
-import shutil
 from pathlib import Path
+from _inputs import def_inputs_for_d
 
 yr = 1
 
@@ -414,10 +412,6 @@ for obs_event_id in obs_event_ids:
     rz, yr, strm = df_sst_storm_summaries.rz_yr_strm.loc[i].split("_")
 
     f_out = dir_time_series + "weather_realization{}/year{}/_waterlevel_rz{}_yr{}_strm{}.dat".format(rz, yr, rz, yr, strm)
-    try:
-        shutil.rmtree(f_out)
-    except:
-        pass
 
     Path(f_out).parent.mkdir(parents=True, exist_ok=True)
 
