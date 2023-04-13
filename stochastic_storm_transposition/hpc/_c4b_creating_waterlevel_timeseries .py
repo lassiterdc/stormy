@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import xarray as xr
 import geopandas as gpd
 from pathlib import Path
+from datetime import datetime
 
 from __utils import c4b_creating_wlevel_tseries
 
@@ -16,6 +17,7 @@ yr = int(sys.argv[1]) # a number between 1 and 1000
 
 f_mrms_event_summaries, f_mrms_event_timeseries, f_water_level_storm_surge, f_realizations, f_key_subnames_gridind, nrealizations, sst_tstep_min, start_date, time_buffer, dir_time_series = c4b_creating_wlevel_tseries()
 
+script_start_time = datetime.now()
 #%% load data
 ds_rlztns = xr.open_dataset(f_realizations)
 
@@ -351,6 +353,7 @@ i = -1
 lst_s_wlevel_tseries = []
 lst_keys = []
 source_event_id = []
+count = 0
 for obs_event_id in obs_event_ids:
     source_event_id.append(obs_event_id)
     i += 1
@@ -419,3 +422,8 @@ for obs_event_id in obs_event_ids:
         file.write(";;synthetic water level\n")
         file.write(";;Water Level (ft)\n")
     s_sim_wlevel.reset_index().to_csv(f_out, sep = '\t', index = False, header = False, mode="a")
+
+    count += 1
+
+time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
+print("Wrote {} time series files for each subcatchment-overlapping-grids, storms, and realizations for year {}. Script runtime: {} (min)".format(count, yr, time_script_min))
