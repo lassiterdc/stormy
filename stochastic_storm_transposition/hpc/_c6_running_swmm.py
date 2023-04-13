@@ -58,9 +58,9 @@ for f_inp in df_strms.swmm_inp:
     expected_remaining_time_hr = round((expected_tot_runtime_hr - tot_elapsed_time_hr), 1)
     # MONTIROING
     if success == True:
-        print("Simulation runtime (min): {}, Mean simulation runtime (min): {}, Total elapsed time (hr): {}, Expected total time (hr): {}, Estimated time remaining (hr): {}".format(sim_runtime_min, tot_elapsed_time_hr, mean_sim_time, expected_tot_runtime_hr, expected_remaining_time_hr)) 
+        print("Simulation runtime (min): {}, Mean simulation runtime (min): {}, Total elapsed time (hr): {}, Expected total time (hr): {}, Estimated time remaining (hr): {}".format(sim_runtime_min, mean_sim_time, tot_elapsed_time_hr, expected_tot_runtime_hr, expected_remaining_time_hr)) 
     else: 
-        print("Simulation cancelled after {} minutes due to user-defined runtime limits, Mean simulation runtime (min): {}, Total elapsed time (hr): {}, Expected total time (hr): {}, Estimated time remaining (hr): {}".format(max_runtime_min, tot_elapsed_time_hr, mean_sim_time, expected_tot_runtime_hr, expected_remaining_time_hr)) 
+        print("Simulation cancelled after {} minutes due to user-defined runtime limits, Mean simulation runtime (min): {}, Total elapsed time (hr): {}, Expected total time (hr): {}, Estimated time remaining (hr): {}".format(sim_runtime_min, mean_sim_time, tot_elapsed_time_hr, expected_tot_runtime_hr, expected_remaining_time_hr)) 
 
 #%% export model runtimes to a file
 df_strms['runtime_min'] = runtimes
