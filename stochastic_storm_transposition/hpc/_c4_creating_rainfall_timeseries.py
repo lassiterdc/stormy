@@ -181,9 +181,20 @@ for rz in realization_ids:
             # remove preceding and trailing zeros
             ### BE AWARE THAT THE THE START DATE CORRESOPNDS TO THE FIRST TIMESTEP OF PRECIPITATION
             df_rr = pd.DataFrame(dict(rainrate = rainrate_inperhr))
-            non_zero_indices = df_rr[df_rr.rainrate != 0].index
-            first_tstep_with_rain = non_zero_indices[0]
-            last_tstep_with_rain = non_zero_indices[-1]
+            try:
+                non_zero_indices = df_rr[df_rr.rainrate != 0].index
+                first_tstep_with_rain = non_zero_indices[0]
+                last_tstep_with_rain = non_zero_indices[-1]
+            except:
+                print("###################")
+                print("rz{}_storm{}_mrms_ind{}".format(rz, storm_id, mrms_ind))
+                print("###################")
+                print("rainrate_inperhr")
+                print(rainrate_inperhr)
+                print("###################")
+                print("non_zero_indices")
+                print(non_zero_indices)
+                sys.exit()
             rainrate_inperhr = rainrate_inperhr[first_tstep_with_rain:last_tstep_with_rain]
             dti = pd.date_range(start_date, periods = len(rainrate_inperhr), freq = freq)
             # create dataframe to write to .dat file
