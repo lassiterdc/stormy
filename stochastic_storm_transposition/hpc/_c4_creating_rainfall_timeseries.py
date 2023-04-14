@@ -178,25 +178,16 @@ for rz in realization_ids:
             idx = dict(realization_id = rz, year = yr, storm_id = storm_id, latitude = coords.y_lat, longitude = coords.x_lon)
             ds_rlztns_subset = ds_rlztns.sel(idx)
             rainrate_inperhr = ds_rlztns_subset.rainrate.values / mm_per_inch
-            # remove preceding and trailing zeros
-            ### BE AWARE THAT THE THE START DATE CORRESOPNDS TO THE FIRST TIMESTEP OF PRECIPITATION
-            df_rr = pd.DataFrame(dict(rainrate = rainrate_inperhr))
-            try:
+            # remove preceding and trailing zeros (this means that the first precipitation plug will happen exactly on start_date)
+            if rainrate_inperhr.sum() > 0:
+                df_rr = pd.DataFrame(dict(rainrate = rainrate_inperhr))
                 non_zero_indices = df_rr[df_rr.rainrate != 0].index
                 first_tstep_with_rain = non_zero_indices[0]
                 last_tstep_with_rain = non_zero_indices[-1]
-            except:
-                print("###################")
-                print("rz{}_storm{}_mrms_ind{}".format(rz, storm_id, mrms_index))
-                print("###################")
-                print("rainrate_inperhr")
-                print(rainrate_inperhr)
-                print("###################")
-                print("non_zero_indices")
-                print(non_zero_indices)
-                sys.exit()
-            rainrate_inperhr = rainrate_inperhr[first_tstep_with_rain:last_tstep_with_rain]
-            dti = pd.date_range(start_date, periods = len(rainrate_inperhr), freq = freq)
+                rainrate_inperhr = rainrate_inperhr[first_tstep_with_rain:last_tstep_with_rain]
+                dti = pd.date_range(start_date, periods = len(rainrate_inperhr), freq = freq)
+            else: 
+                dti = pd.date_range(start_date, periods = len(rainrate_inperhr), freq = freq)
             # create dataframe to write to .dat file
             df = pd.DataFrame(dict(date=dti.strftime('%m/%d/%Y'),
                                 time = dti.time,
