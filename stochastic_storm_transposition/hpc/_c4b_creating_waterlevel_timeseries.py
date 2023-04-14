@@ -458,7 +458,7 @@ for ind, s_sim_event_summary in df_synth_hydro_cond.iterrows():
                 absurd_simulation = False
                 success = True
             else:
-                print("Absurd simulation encountered. Max simulated water level = {}; Min simulated water level = {}. Resampling from observed events...".format(max_sim_wlevel, min_sim_wlevel))
+                print("Absurd simulation encountered. Observed event id = {}; Max simulated water level = {}; Min simulated water level = {}. Resampling from observed events...".format(obs_event_id, max_sim_wlevel, min_sim_wlevel))
         except:
             print("An error was encountered on attempt {}. Re-sampling from historical timeseries...".format(attempts))
             if attempts >= 20:
