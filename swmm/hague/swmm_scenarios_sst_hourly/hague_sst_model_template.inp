@@ -6236,7 +6236,6 @@ tide_08_16_18               23         -0.584
 
 7                FILE "${rainfall_7}"
 
-;;;Water Level (ft)
 water_level      FILE "${water_level}"
 
 [REPORT]
