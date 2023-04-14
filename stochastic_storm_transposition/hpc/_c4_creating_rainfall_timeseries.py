@@ -187,7 +187,7 @@ for rz in realization_ids:
                 last_tstep_with_rain = non_zero_indices[-1]
             except:
                 print("###################")
-                print("rz{}_storm{}_mrms_ind{}".format(rz, storm_id, mrms_ind))
+                print("rz{}_storm{}_mrms_ind{}".format(rz, storm_id, mrms_index))
                 print("###################")
                 print("rainrate_inperhr")
                 print(rainrate_inperhr)
