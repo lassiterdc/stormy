@@ -49,6 +49,7 @@ wlevel_threshold = 0.5 # i don't want simulated time series that are 50% above o
 
 n_attempts = 50
 n_clusters = 5
+lag_limit_hr = 24
 
 # c5
 dir_swmm_sst_models_hrly = dir_swmm_sst_scenarios_hrly_proj + "models/"
@@ -84,7 +85,7 @@ def c5_creating_inps():
     return nyears, nperyear, nrealizations, dir_swmm_sst_models_hrly, f_inp_base_hrly, f_out_realizations, seed_mrms_hourly, dir_time_series_hrly, f_key_subnames_gridind, lst_template_keys, f_swmm_scenarios_catalog
 
 def c4b_creating_wlevel_tseries():
-    return f_mrms_event_summaries, f_mrms_event_timeseries, f_water_level_storm_surge, f_realizations_hourly, f_key_subnames_gridind, nrealizations, sst_hrly_tstep_min, start_date, time_buffer, dir_time_series_hrly, c4b_gen_plots, wlevel_threshold, n_attempts, n_clusters
+    return f_mrms_event_summaries, f_mrms_event_timeseries, f_water_level_storm_surge, f_realizations_hourly, f_key_subnames_gridind, nrealizations, sst_hrly_tstep_min, start_date, time_buffer, dir_time_series_hrly, c4b_gen_plots, wlevel_threshold, n_attempts, n_clusters, lag_limit_hr
 
 def c4_creating_rainfall_tseries():
     freq = "H"

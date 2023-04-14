@@ -16,7 +16,7 @@ from __utils import c4b_creating_wlevel_tseries
 
 yr = int(sys.argv[1]) # a number between 1 and 1000
 
-f_mrms_event_summaries, f_mrms_event_timeseries, f_water_level_storm_surge, f_realizations, f_key_subnames_gridind, nrealizations, sst_tstep_min, start_date, time_buffer, dir_time_series, gen_plots, wlevel_threshold, n_attempts, n_clusters = c4b_creating_wlevel_tseries()
+f_mrms_event_summaries, f_mrms_event_timeseries, f_water_level_storm_surge, f_realizations, f_key_subnames_gridind, nrealizations, sst_tstep_min, start_date, time_buffer, dir_time_series, gen_plots, wlevel_threshold, n_attempts, n_clusters, lag_limit_hr = c4b_creating_wlevel_tseries()
 
 script_start_time = datetime.now()
 #%% load data
@@ -280,7 +280,13 @@ except:
     print("##########################")
     sys.exit("Failed to generate synthetic data. There are {} storms in the storm catalog.".format(len(df_cond)))
 
+# if the lag is excessively high or low, shift it to be within the accepted range
+idx_of_excessive_high_lag = df_synth_hydro_cond.surge_peak_after_rain_peak_min > lag_limit_hr * 60
+idx_of_excessive_low_lag = df_synth_hydro_cond.surge_peak_after_rain_peak_min < lag_limit_hr * 60 * -1
 
+for ind in np.arange(len(df_synth_hydro_cond)):
+    if idx_of_excessive_high_lag[ind] or idx_of_excessive_low_lag[ind]:
+        df_synth_hydro_cond.loc[ind, "surge_peak_after_rain_peak_min"] = np.random.uniform(0,lag_limit_hr*60)
 #%% plot synthetically generated data
 # define columns names
 if gen_plots:

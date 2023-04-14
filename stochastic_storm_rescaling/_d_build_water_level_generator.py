@@ -11,7 +11,7 @@ import geopandas as gpd
 from pathlib import Path
 from _inputs import def_inputs_for_d
 
-yr = 14
+yr = 94
 
 f_mrms_event_summaries, f_mrms_event_timeseries, f_water_level_storm_surge, f_realizations, f_key_subnames_gridind, nrealizations, sst_tstep_min, start_date, time_buffer, dir_time_series, wlevel_threshold = def_inputs_for_d()
 
@@ -342,6 +342,14 @@ df_cond = df_sst_storm_summaries.loc[:, vars_cond].dropna()
 n_samples = len(df_cond)
 df_synth_hydro_cond = gen_conditioned_samples(cop_hydro, df_cond, n_samples)
 
+# if the lag is excessively high or low, shift it to be within the accepted range
+idx_of_excessive_high_lag = df_synth_hydro_cond.surge_peak_after_rain_peak_min > 24 * 60
+idx_of_excessive_low_lag = df_synth_hydro_cond.surge_peak_after_rain_peak_min < 24 * 60 * -1
+
+for ind in np.arange(len(df_synth_hydro_cond)):
+    if idx_of_excessive_high_lag[ind] or idx_of_excessive_low_lag[ind]:
+        df_synth_hydro_cond.loc[ind, "surge_peak_after_rain_peak_min"] = np.random.uniform(0,24*60)
+
 #%% plot synthetically generated data
 # define columns names
 col_names_for3d = []
@@ -457,6 +465,10 @@ lst_event_starts = []
 lst_event_ends = []
 lst_event_durations = []
 lst_peak_surge_tsteps = []
+
+
+        
+
 for ind, s_sim_event_summary in df_synth_hydro_cond.iterrows():
     absurd_simulation = True
     i += 1
