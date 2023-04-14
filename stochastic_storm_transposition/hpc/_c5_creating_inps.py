@@ -54,9 +54,9 @@ df_strms = pd.DataFrame(dict(storm_number = np.arange(1, num_storms+1)))
 df_key = pd.read_csv(f_key_subnames_gridind)
 
 #%% create the folders and duplicate the model
-num_files = len(realization_ids) * len(ds_rlztns.storm_id.values)
+num_files = len(realization_ids) * len(df_event_summaries.storm_id.values)
 
-print("begin writing {} .inp files...".format(num_files))
+# print("begin writing {} .inp files...".format(num_files))
 
 with open(f_inp_base, 'r') as T:
     # loading template
