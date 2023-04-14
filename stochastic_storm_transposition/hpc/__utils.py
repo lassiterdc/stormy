@@ -45,6 +45,7 @@ f_water_level_storm_surge = dir_noaa_water_levels + "a_water-lev_tide_surge.csv"
 sst_hrly_tstep_min = 60
 time_buffer = 6 # hours before and after start date; should correspond to the SWMM model
 c4b_gen_plots = False
+wlevel_threshold = 0.5 # i don't want simulated time series that are 50% above or below the min and max observed waterlevel since 2000
 
 # c5
 dir_swmm_sst_models_hrly = dir_swmm_sst_scenarios_hrly_proj + "models/"
@@ -80,7 +81,7 @@ def c5_creating_inps():
     return nyears, nperyear, nrealizations, dir_swmm_sst_models_hrly, f_inp_base_hrly, f_out_realizations, seed_mrms_hourly, dir_time_series_hrly, f_key_subnames_gridind, lst_template_keys, f_swmm_scenarios_catalog
 
 def c4b_creating_wlevel_tseries():
-    return f_mrms_event_summaries, f_mrms_event_timeseries, f_water_level_storm_surge, f_realizations_hourly, f_key_subnames_gridind, nrealizations, sst_hrly_tstep_min, start_date, time_buffer, dir_time_series_hrly, c4b_gen_plots
+    return f_mrms_event_summaries, f_mrms_event_timeseries, f_water_level_storm_surge, f_realizations_hourly, f_key_subnames_gridind, nrealizations, sst_hrly_tstep_min, start_date, time_buffer, dir_time_series_hrly, c4b_gen_plots, wlevel_threshold
 
 def c4_creating_rainfall_tseries():
     freq = "H"
