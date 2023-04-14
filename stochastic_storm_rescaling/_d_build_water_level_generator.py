@@ -565,12 +565,17 @@ for ind, s_sim_event_summary in df_synth_hydro_cond.iterrows():
 
     f_out = dir_time_series + "weather_realization{}/year{}/_waterlevel_rz{}_yr{}_strm{}.dat".format(rz, yr, rz, yr, strm)
 
+    # create data frame with proper formatting to be read in SWMM
+    df = pd.DataFrame(dict(date = s_sim_wlevel.index.strftime('%m/%d/%Y'),
+                 time = s_sim_wlevel.index.time,
+                 water_level = s_sim_wlevel.values))
+
     Path(f_out).parent.mkdir(parents=True, exist_ok=True)
 
     with open(f_out, "w+") as file:
         file.write(";;synthetic water level\n")
         file.write(";;Water Level (ft)\n")
-    s_sim_wlevel.reset_index().to_csv(f_out, sep = '\t', index = False, header = False, mode="a")
+    df.to_csv(f_out, sep = '\t', index = False, header = False, mode="a")
 
 
 #%% export event summaries
