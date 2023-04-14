@@ -17,9 +17,10 @@ nyears, nperyear, nrealizations, dir_swmm_sst_models_hrly, f_inp_base, f_out_rea
 yr = int(sys.argv[1]) # a number between 1 and 1000
 
 script_start_time = datetime.now()
-#%% load event summary table
+#%% data
 f_summary = dir_time_series + "_event_summary_year{}.csv".format(yr) # must match formatting in script _c4b
 df_event_summaries = pd.read_csv(f_summary, parse_dates=["event_start", "event_end", "tstep_peak_surge","tstep_max_rain_intensity"])
+ds_rlztns = xr.open_dataset(f_out_realizations)
 #%% define functions
 def get_rainfiles(rz, yr, storm_id, df_key):
     # format: dir_time_series + "weather_realization{}/year{}/".format(rz, yr) + "rz{}yr{}_strm{}_grid-ind{}.dat".format(rz, yr, storm_id, mrms_index)
@@ -27,7 +28,7 @@ def get_rainfiles(rz, yr, storm_id, df_key):
     lst_rain_dats = []
     lst_grid_ind = []
     for f in lst_f_rain_dats:
-        rain_dat = f.split("\\")[-1]
+        rain_dat = f.split("/")[-1]
         grid_ind = rain_dat.split("grid-ind")[-1].split(".")[0]
         lst_rain_dats.append(rain_dat)
         lst_grid_ind.append(grid_ind)
@@ -39,9 +40,6 @@ def get_rainfiles(rz, yr, storm_id, df_key):
 def get_water_level_series(rz, yr, strm):
         fpath_waterlevel = dir_time_series + "weather_realization{}/year{}/_waterlevel_rz{}_yr{}_strm{}.dat".format(rz, yr, rz, yr, strm)
         return fpath_waterlevel
-
-#%% load data
-ds_rlztns = xr.open_dataset(f_out_realizations)
 
 # if the number of realizations defined in __utils is less than in the combined catalog, us the smaller of the two
 if nrealizations < len(ds_rlztns.realization_id.values):
@@ -88,34 +86,38 @@ with open(f_inp_base, 'r') as T:
             df_rain_paths = get_rainfiles(rz, yr, storm_id, df_key)
             # fill in template stuff
             df_single_event = df_event_summaries[df_event_summaries.realization_id==rz][df_event_summaries.storm_id==storm_id]
+            df_single_event.reset_index(drop=True, inplace = True)
             d_fields = {}
             for key in lst_template_keys:
-                fpath = None
-                if key == "water_level":
-                    fpath = get_water_level_series(rz, yr, storm_id)
+                # check if the key is for one of the rainfall time series
                 key_grid = key.split("_")[-1]
-                if key == "START_DATE":
-                    d_fields[key] = df_single_event.event_start.dt.strftime('%m/%d/%Y')[0]
-                if key == "START_TIME":
-                    d_fields[key] = df_single_event.event_start.dt.strftime("%H:%M:%S")[0]
-                if key == "REPORT_START_DATE":
-                    d_fields[key] = df_single_event.event_start.dt.strftime('%m/%d/%Y')[0]
-                if key == "REPORT_START_TIME":
-                    d_fields[key] = df_single_event.event_start.dt.strftime("%H:%M:%S")[0]
-                if key == "END_DATE":
-                    d_fields[key] = df_single_event.event_end.dt.strftime('%m/%d/%Y')[0]
-                if key == "END_TIME":
-                    d_fields[key] = df_single_event.event_start.dt.strftime('%m/%d/%Y')[0]
+                fpath = None
                 for grid_ind in df_rain_paths.grid_ind:
                     if grid_ind == key_grid:
                         fpath = df_rain_paths.rain_dats_fullpath[df_rain_paths.grid_ind == grid_ind].values[0]
+                        # format the filepath
+                        fpath = fpath.replace("/", "\\")
+                        df_strms.loc[count, key] = fpath
                 if fpath is not None: # meaning, if a filepath associated with the grid index was found
                     d_fields[key] = fpath
+                elif key == "water_level":
+                    fpath = get_water_level_series(rz, yr, storm_id)
+                    fpath = fpath.replace("/", "\\")
+                    d_fields[key] = fpath
+                elif key == "START_DATE":
+                    d_fields[key] = df_single_event.event_start.dt.strftime('%m/%d/%Y')[0]
+                elif key == "START_TIME":
+                    d_fields[key] = df_single_event.event_start.dt.strftime("%H:%M:%S")[0]
+                elif key == "REPORT_START_DATE":
+                    d_fields[key] = df_single_event.event_start.dt.strftime('%m/%d/%Y')[0]
+                elif key == "REPORT_START_TIME":
+                    d_fields[key] = df_single_event.event_start.dt.strftime("%H:%M:%S")[0]
+                elif key == "END_DATE":
+                    d_fields[key] = df_single_event.event_end.dt.strftime('%m/%d/%Y')[0]
+                elif key == "END_TIME":
+                    d_fields[key] = df_single_event.event_start.dt.strftime('%m/%d/%Y')[0]
                 else:
-                    sys.exit("Filepath to fill out SWMM template not found.")
-                # format the filepath
-                fpath = fpath.replace("/", "\\")
-                df_strms.loc[count, key] = fpath
+                    sys.exit("SCRIPT FAILED: {} was not found for filling out the SWMM template.".format(key))
             new_in = template.safe_substitute(d_fields)
             new_in = template.substitute(d_fields)
             # new_file = f_inp_scen
