@@ -268,12 +268,15 @@ df_sst_storm_summaries[df_sst_storm_summaries.max_mm_per_hour < 0] = np.nan
 
 df_sst_storm_summaries = df_sst_storm_summaries.dropna()
 
+df_sst_storm_summaries.reset_index(drop=True, inplace=True)
+
 if len(df_sst_storm_summaries.dropna()) == 0:
        sys.exit("NO RAINFALL WAS REGISTERED IN THE STORM CATALOG FOR YEAR {}".format(yr))
 
 #%% generating synthetic data with conditions
 df_cond = df_sst_storm_summaries.loc[:, vars_cond]
 n_samples = len(df_cond)
+# df_synth_hydro_cond = gen_conditioned_samples(cop_hydro, df_cond, n_samples)
 try:
     df_synth_hydro_cond = gen_conditioned_samples(cop_hydro, df_cond, n_samples)
 except:
