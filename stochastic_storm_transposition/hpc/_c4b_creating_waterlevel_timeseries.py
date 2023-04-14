@@ -469,10 +469,10 @@ for ind, s_sim_event_summary in df_synth_hydro_cond.iterrows():
             if (max_sim_wlevel < (1+wlevel_threshold)*max_obs_wlevel) and (min_sim_wlevel > (1+wlevel_threshold)*min_obs_wlevel):
                 absurd_simulation = False
                 success = True
-            else:
-                print("Absurd simulation encountered. Observed event id = {}; Max simulated water level = {}; Min simulated water level = {}. Resampling from observed events...".format(obs_event_id, max_sim_wlevel, min_sim_wlevel))
+            # else:
+            #     print("Absurd simulation encountered. Observed event id = {}; Max simulated water level = {}; Min simulated water level = {}. Resampling from observed events...".format(obs_event_id, max_sim_wlevel, min_sim_wlevel))
         except:
-            print("An error was encountered on attempt {}. Re-sampling from historical timeseries...".format(attempts))
+            print("An error was encountered on attempt {}. Re-sampling from observed events...".format(attempts))
             if attempts >= 20:
                 new_lag = np.random.uniform(0,lag_limit_hr*60)
                 print("After {} unsuccesful attempts, the time lag was reset from {} to {}".format(attempts, s_sim_event_summary["surge_peak_after_rain_peak_min"], new_lag))
@@ -525,7 +525,7 @@ df_sim_summary.to_csv(f_summary, index=False,)
 
 #%% report run times
 
-time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
-print("Wrote {} time series files for each storm realizations for year {}. Script runtime: {} (min)".format(count, yr, time_script_min))
+# time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
+# print("Wrote {} time series files for each storm realizations for year {}. Script runtime: {} (min)".format(count, yr, time_script_min))
 
-sys.exit("THE SCRIPT RAN THROUGH TO COMPLETION")
+# sys.exit("THE SCRIPT RAN THROUGH TO COMPLETION")
