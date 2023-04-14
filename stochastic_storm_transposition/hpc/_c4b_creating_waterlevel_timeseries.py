@@ -17,7 +17,7 @@ from __utils import c4b_creating_wlevel_tseries
 
 yr = int(sys.argv[1]) # a number between 1 and 1000
 
-f_mrms_event_summaries, f_mrms_event_timeseries, f_water_level_storm_surge, f_realizations, f_key_subnames_gridind, nrealizations, sst_tstep_min, start_date, time_buffer, dir_time_series, gen_plots, wlevel_threshold, n_attempts, n_clusters, lag_limit_hr = c4b_creating_wlevel_tseries()
+f_mrms_event_summaries, f_mrms_event_timeseries, f_water_level_storm_surge, f_realizations, f_key_subnames_gridind, nrealizations, sst_tstep_min, start_date, time_buffer, dir_time_series, gen_plots, wlevel_threshold, n_attempts, n_clusters, lag_limit_hr, attempts_before_resetting_lab = c4b_creating_wlevel_tseries()
 
 script_start_time = datetime.now()
 #%% load data
@@ -288,12 +288,12 @@ except:
     sys.exit("SCRIPT FAILED FOR YEAR {}: to generate synthetic data. There are {} storms in the storm catalog.".format(yr, len(df_cond)))
 
 # if the lag is excessively high or low, shift it to be within the accepted range
-idx_of_excessive_high_lag = df_synth_hydro_cond.surge_peak_after_rain_peak_min > lag_limit_hr * 60
-idx_of_excessive_low_lag = df_synth_hydro_cond.surge_peak_after_rain_peak_min < lag_limit_hr * 60 * -1
+# idx_of_excessive_high_lag = df_synth_hydro_cond.surge_peak_after_rain_peak_min > lag_limit_hr * 60
+# idx_of_excessive_low_lag = df_synth_hydro_cond.surge_peak_after_rain_peak_min < lag_limit_hr * 60 * -1
 
-for ind in np.arange(len(df_synth_hydro_cond)):
-    if idx_of_excessive_high_lag[ind] or idx_of_excessive_low_lag[ind]:
-        df_synth_hydro_cond.loc[ind, "surge_peak_after_rain_peak_min"] = np.random.uniform(0,lag_limit_hr*60)
+# for ind in np.arange(len(df_synth_hydro_cond)):
+#     if idx_of_excessive_high_lag[ind] or idx_of_excessive_low_lag[ind]:
+#         df_synth_hydro_cond.loc[ind, "surge_peak_after_rain_peak_min"] = np.random.uniform(0,lag_limit_hr*60)
 #%% plot synthetically generated data
 # define columns names
 if gen_plots:
@@ -379,8 +379,7 @@ pred_ks = kmeans.predict(df_synth_hydro_cond_scaled)
 obs_ks = kmeans.labels_
 
 # define function to randomly select an event from the same category
-def get_storm_to_rescale(storm_index):
-    pred_k = pred_ks[storm_index]
+def get_storm_to_rescale(pred_k):
     ind_obs_same_class = np.where(obs_ks==pred_k)[0]
     obs_event_id = np.random.choice(ind_obs_same_class)
     return obs_event_id
@@ -406,17 +405,23 @@ lst_event_ends = []
 lst_event_durations = []
 lst_peak_surge_tsteps = []
 count = 0
+lag_reset = False
 for ind, s_sim_event_summary in df_synth_hydro_cond.iterrows():
     count += 1
     i += 1
     absurd_simulation = True
     attempts = 0
+    if lag_reset:
+        print("After {} failed attempts to generate a reasonable time series, the lag was reset from an original value of {} to {} after re-generating it {} times.".format(attempts_before_resetting_lab))
+    lag_reset = False
     while absurd_simulation == True:
         if attempts >= n_attempts:
             sys.exit("SCRIPT FAILED FOR YEAR {}: FAILED AFTER {} ATTEMPTS TO GENERATE A SYNTHETIC WATER LEVEL TIME SERIES FOR {}".format(yr, attempts, s_sim_event_summary))
         attempts += 1
         try:
-            obs_event_id = get_storm_to_rescale(i)
+            s_sim_event_summary_scaled = df_vars_stormclass_scaler.transform(pd.DataFrame(s_sim_event_summary.loc[vars_k]).T)
+            pred_k = kmeans.predict(s_sim_event_summary_scaled)
+            obs_event_id = get_storm_to_rescale(pred_k)
             source_event_id.append(obs_event_id)
             df_obs_event_tseries = df_water_rain_tseries[df_water_rain_tseries.event_id == obs_event_id]
             df_obs_event_summary = df_compound_summary.loc[df_compound_summary.event_id == obs_event_id, vars_all]
@@ -472,14 +477,15 @@ for ind, s_sim_event_summary in df_synth_hydro_cond.iterrows():
             # else:
             #     print("Absurd simulation encountered. Observed event id = {}; Max simulated water level = {}; Min simulated water level = {}. Resampling from observed events...".format(obs_event_id, max_sim_wlevel, min_sim_wlevel))
         except:
-            print("An error was encountered on attempt {}. Re-sampling from observed events...".format(attempts))
-            if attempts >= 20:
-                new_lag = np.random.uniform(0,lag_limit_hr*60)
-                print("After {} unsuccesful attempts, the time lag was reset from {} to {}".format(attempts, s_sim_event_summary["surge_peak_after_rain_peak_min"], new_lag))
-                s_sim_event_summary["surge_peak_after_rain_peak_min"] = new_lag
-                print("#####################")
-                print("s_sim_event_summary[\"surge_peak_after_rain_peak_min\"]")
-                print(s_sim_event_summary["surge_peak_after_rain_peak_min"])
+            # print("An error was encountered on attempt {}. Re-sampling from observed events...".format(attempts))
+            if ((attempts % 10) == 0) and (attempts > 1):
+                # new_lag = np.random.uniform(0,lag_limit_hr*60)
+                
+                # s_sim_event_summary["surge_peak_after_rain_peak_min"] = new_lag
+                # write code to resample from the copula conditioned on this stuff
+                df_new_sim = gen_conditioned_samples(cop_hydro, s_sim_event_summary.loc[vars_cond].to_frame().T.reset_index(drop=True), n_samples=1)
+                print("After {} unsuccesful attempts to generate a water level time series without errors, the peak surge and time lag were resampled using the copula. Former values: {}, New values: {}".format(attempts,s_sim_event_summary,df_new_sim.loc[0,:]))
+                s_sim_event_summary = df_new_sim.loc[0,:]
             continue
 
     min_sim_wlevels.append(min_sim_wlevel)

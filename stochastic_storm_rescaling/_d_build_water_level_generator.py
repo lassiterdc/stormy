@@ -445,8 +445,7 @@ obs_ks = kmeans.labels_
 np.unique(obs_ks, return_counts = True)
 
 # randomly select another event with the same category
-def get_storm_to_rescale(storm_index):
-    pred_k = pred_ks[storm_index]
+def get_storm_to_rescale(pred_k):
     ind_obs_same_class = np.where(obs_ks==pred_k)[0]
     obs_event_id = np.random.choice(ind_obs_same_class)
     return obs_event_id
@@ -480,7 +479,10 @@ for ind, s_sim_event_summary in df_synth_hydro_cond.iterrows():
     absurd_simulation = True
     i += 1
     while absurd_simulation == True:
-        obs_event_id = get_storm_to_rescale(i)
+        # compute predicted
+        s_sim_event_summary_scaled = df_vars_stormclass_scaler.transform(pd.DataFrame(s_sim_event_summary.loc[vars_k]).T)
+        pred_k = kmeans.predict(s_sim_event_summary_scaled)
+        obs_event_id = get_storm_to_rescale(pred_k)
         source_event_id.append(obs_event_id)
         df_obs_event_tseries = df_water_rain_tseries[df_water_rain_tseries.event_id == obs_event_id]
         df_obs_event_summary = df_compound_summary.loc[df_compound_summary.event_id == obs_event_id, vars_all]
