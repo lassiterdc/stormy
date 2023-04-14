@@ -69,6 +69,10 @@ f_key_subnames_gridind = dir_swmm_sst_scenarios_hrly + "_key_subnames_and_grid-i
 sst_hrly_tstep_min = 60 # number of minutes per tstep
 
 time_buffer = 6 # hours; this is the amount that must be included before and after peak storm surge while generating the water level time series
+
+wlevel_threshold = 0.5 # i don't want simulated time series that are 50% above or below the min and max observed waterlevel since 2000
+
+
 # unique to script c
 fld_out_c_plts = fldr_NCEI + "qaqc_plots/"
 fld_out_c_processed_data = fldr_NCEI + "processed_data/"
@@ -95,4 +99,4 @@ def def_inputs_for_c():
     return f_daily_summaries, f_hourlyprecip, fld_out_c_plts, fld_out_c_processed_data, min_record_length
 
 def def_inputs_for_d():
-    return f_mrms_event_summaries, f_mrms_event_timeseries, f_water_level_storm_surge, f_realizations_hrly, f_key_subnames_gridind, nrealizations, sst_hrly_tstep_min, start_date, time_buffer, dir_time_series_hrly
+    return f_mrms_event_summaries, f_mrms_event_timeseries, f_water_level_storm_surge, f_realizations_hrly, f_key_subnames_gridind, nrealizations, sst_hrly_tstep_min, start_date, time_buffer, dir_time_series_hrly, wlevel_threshold
