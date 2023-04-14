@@ -438,20 +438,18 @@ for ind, s_sim_event_summary in df_synth_hydro_cond.iterrows():
             sim_tstep_max_surge = sim_tstep_max_int + pd.Timedelta(s_sim_event_summary["surge_peak_after_rain_peak_min"], "minutes")
             # round to the closest timestep
             sim_tstep_max_surge = sim_tstep_max_surge.round(wlevel_freq)
-            # calculate the start of the event
-            event_starttime = min(pd.to_datetime(start_date), sim_tstep_max_surge-pd.Timedelta(time_buffer, "hours"))
-            # event_endtime =max(pd.to_datetime(start_date) + pd.Timedelta(s_sim_event_summary["duration_hr"], "hr"), sim_tstep_max_surge+pd.Timedelta(time_buffer, "hours"))
-            # end time is either the time of the last tstep or the time of peak surge
+            # start time is the minimum of the start date or the timestep of max surge minus the time buffer
+            event_starttime = min(pd.to_datetime(start_date), sim_tstep_max_surge)-pd.Timedelta(time_buffer, "hours")
+            # end time is the max of the last rainfall or the peak surge tstep plus the time buffer
             sim_tstep_lastrain = df_sst_storm_summaries.last_timestep_w_rainfall[i]
-            event_endtime = max(sim_tstep_lastrain, sim_tstep_max_surge+pd.Timedelta(time_buffer, "hours"))
+            event_endtime = max(sim_tstep_lastrain, sim_tstep_max_surge)+pd.Timedelta(time_buffer, "hours")
 
             # duration is start minus end
             duration = event_endtime - event_starttime
 
-            sim_wlevel_times = pd.date_range(event_starttime, event_endtime+pd.Timedelta(time_buffer, "hours"), freq=wlevel_freq)
+            sim_wlevel_times = pd.date_range(event_starttime, event_endtime, freq=wlevel_freq)
 
             time_to_peak_surge = sim_tstep_max_surge - min(sim_wlevel_times)
-            tstep_peak = event_starttime + time_to_peak_surge
 
             # extract observed surge data
             obs_tstep_max_surge = df_obs_event_tseries.surge_ft.idxmax()
@@ -459,14 +457,15 @@ for ind, s_sim_event_summary in df_synth_hydro_cond.iterrows():
             obs_end_time = obs_start_time + duration
             obs_surge_times = pd.date_range(obs_start_time, obs_end_time, freq=wlevel_freq)
             obs_surges = df_water_levels.surge_ft.loc[obs_surge_times]
-            obs_peak_tstep = obs_surges.index[0]+time_to_peak_surge
-            obs_peak = obs_surges[obs_peak_tstep]
+            # obs_peak_tstep = obs_surges.index[0]+time_to_peak_surge
+            obs_peak = obs_surges[obs_tstep_max_surge]
 
 
             # add predicted water level with a random shift of plus or minus 12 hours
             tide_shift = pd.Timedelta(np.random.choice(np.arange(-12, 12+1)), "hr")
             s_tides_times = pd.date_range(obs_start_time+tide_shift, obs_end_time+tide_shift, freq=wlevel_freq)
             s_tides = df_water_levels.predicted_wl.loc[s_tides_times]
+            # set index to align with timesteps of sim_wlevel_times to add later
             s_tides.index = sim_wlevel_times
 
             # rescaling
