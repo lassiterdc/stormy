@@ -60,6 +60,8 @@ for rz in realization_ids:
             ds_subset_1loc = ds_subset.sel(loc_idx)
             strm_tseries["grid_ind{}".format(mrms_index)] = ds_subset_1loc.rainrate.values
         df_strm_tseries = pd.DataFrame(strm_tseries)
+        # convert negative rainrates to 0
+        df_strm_tseries[df_strm_tseries<0] = 0
         s_strm_avg = df_strm_tseries.mean(axis=1)
         s_strm_avg.name = "precip_mm_per_hour"
         lst_storm_mean_tseries.append(s_strm_avg)
@@ -298,7 +300,6 @@ for rz_yr_strm in df_sst_storms.rz_yr_strm.unique():
     event_id += 1
     rain = True
     df_subset = df_sst_storms[df_sst_storms.rz_yr_strm == rz_yr_strm]
-
     # check if there is rain
     if df_subset.precip_mm_per_hour.sum() == 0:
         rain = False
@@ -334,7 +335,7 @@ df_sst_storm_summaries = pd.DataFrame(dict(rz_yr_strm = df_sst_storms.rz_yr_strm
                               mean_mm_per_hr = mean_int, max_mm_per_hour = max_int, rain_in_sst_tseries = lst_no_rain,
                               tstep_of_max_intensity = lst_tstep_max))
 
-df_sst_storm_summaries[df_sst_storm_summaries.max_mm_per_hour < 0] = np.nan
+# df_sst_storm_summaries[df_sst_storm_summaries.max_mm_per_hour < 0] = np.nan
 
 #%% generating synthetic data with conditions
 df_cond = df_sst_storm_summaries.loc[:, vars_cond].dropna()

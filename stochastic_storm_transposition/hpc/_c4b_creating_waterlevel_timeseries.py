@@ -64,6 +64,8 @@ for rz in realization_ids:
             ds_subset_1loc = ds_subset.sel(loc_idx)
             strm_tseries["grid_ind{}".format(mrms_index)] = ds_subset_1loc.rainrate.values
         df_strm_tseries = pd.DataFrame(strm_tseries)
+        # convert negative rain rates to 0
+        df_strm_tseries[df_strm_tseries<0] = 0
         s_strm_avg = df_strm_tseries.mean(axis=1)
         s_strm_avg.name = "precip_mm_per_hour"
         lst_storm_mean_tseries.append(s_strm_avg)
