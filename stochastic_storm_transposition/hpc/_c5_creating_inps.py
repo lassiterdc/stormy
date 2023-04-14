@@ -96,13 +96,13 @@ with open(f_inp_base, 'r') as T:
                     if grid_ind == key_grid:
                         fpath = df_rain_paths.rain_dats_fullpath[df_rain_paths.grid_ind == grid_ind].values[0]
                         # format the filepath
-                        fpath = fpath.replace("/", "\\")
+                        # fpath = fpath.replace("/", "\\")
                         df_strms.loc[count, key] = fpath
                 if fpath is not None: # meaning, if a filepath associated with the grid index was found
                     d_fields[key] = fpath
                 elif key == "water_level":
                     fpath = get_water_level_series(rz, yr, storm_id)
-                    fpath = fpath.replace("/", "\\")
+                    # fpath = fpath.replace("/", "\\")
                     d_fields[key] = fpath
                 elif key == "START_DATE":
                     d_fields[key] = df_single_event.event_start.dt.strftime('%m/%d/%Y')[0]
