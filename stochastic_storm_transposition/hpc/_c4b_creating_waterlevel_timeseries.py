@@ -493,3 +493,5 @@ df_sim_summary.to_csv(f_summary, index=False,)
 
 time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
 print("Wrote {} time series files for each storm realizations for year {}. Script runtime: {} (min)".format(count, yr, time_script_min))
+
+sys.exit("THE SCRIPT RAN THROUGH TO COMPLETION")

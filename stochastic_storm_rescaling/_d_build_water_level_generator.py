@@ -400,7 +400,7 @@ plt.xlabel('Number of clusters')
 plt.ylabel('Inertia')
 plt.show()
 
-n_clusters = 5
+n_clusters = 4
 
 kmeans = KMeans(n_clusters=n_clusters)
 kmeans.fit(df_vars_stormclass_scaled)
@@ -427,6 +427,7 @@ df_synth_hydro_cond_scaled = df_vars_stormclass_scaler.transform(df_synth_hydro_
 
 pred_ks = kmeans.predict(df_synth_hydro_cond_scaled)
 obs_ks = kmeans.labels_
+np.unique(obs_ks, return_counts = True)
 
 # randomly select another event with the same category
 def get_storm_to_rescale(storm_index):
