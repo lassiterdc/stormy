@@ -132,8 +132,8 @@ df_vars_all = df_compound_summary.loc[:, vars_all]
 # except:
 #     sys.exit("SCRIPT FAILED FOR YEAR {}: FAILED TO FIT GAUSSIAN MULTIVARIATE COPULA...".format(yr))
 
-def fxn():
-    warnings.warn("RuntimeWarning", RuntimeWarning)
+# def fxn():
+#     warnings.warn("RuntimeWarning", RuntimeWarning)
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -345,11 +345,16 @@ if gen_plots:
     plt.ylabel('Inertia')
     plt.show()
 
-try:
+# try:
+#     kmeans = KMeans(n_clusters=n_clusters)
+#     kmeans.fit(df_vars_stormclass_scaled)
+# except:
+#     sys.exit("SCRIPT FAILED FOR YEAR {}:  TO FIT THE K-MEANS MODEL.".format(yr))
+
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
     kmeans = KMeans(n_clusters=n_clusters)
     kmeans.fit(df_vars_stormclass_scaled)
-except:
-    sys.exit("SCRIPT FAILED FOR YEAR {}:  TO FIT THE K-MEANS MODEL.".format(yr))
 #%%
 # plt.scatter(x = df_vars_all.max_surge_ft, y= df_vars_all.duration_hr, c=kmeans.labels_)
 # plt.show()

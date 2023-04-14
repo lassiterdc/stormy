@@ -10,6 +10,7 @@ import xarray as xr
 import geopandas as gpd
 from pathlib import Path
 from _inputs import def_inputs_for_d
+import warnings
 
 yr = 94
 
@@ -125,8 +126,13 @@ vars_sim = ["max_surge_ft", "surge_peak_after_rain_peak_min"]
 
 df_vars_all = df_compound_summary.loc[:, vars_all]
 
-cop_hydro = GaussianMultivariate()
-cop_hydro.fit(df_vars_all)
+def fxn():
+    warnings.warn("RuntimeWarning", RuntimeWarning)
+
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    cop_hydro = GaussianMultivariate()
+    cop_hydro.fit(df_vars_all)
 
 #%% compare correlation structure
 obs_corr = df_vars_all.corr()
