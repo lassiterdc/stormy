@@ -61,7 +61,6 @@ f_out_swmm_rainfall = fldr_swmm_tseries + "b_mrms_rainfall_in_per_hr_{}.dat"
 
 f_realizations_hrly = fldr_swmm + "hague/swmm_scenarios_sst_hourly/_combined_realizations.nc"
 
-
 dir_swmm_sst_scenarios_hrly = fldr_swmm + "hague/swmm_scenarios_sst_hourly/"
 dir_time_series_hrly = dir_swmm_sst_scenarios_hrly + "time_series/"
 f_key_subnames_gridind = dir_swmm_sst_scenarios_hrly + "_key_subnames_and_grid-indices.csv"
