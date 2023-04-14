@@ -47,7 +47,7 @@ time_buffer = 6 # hours before and after start date; should correspond to the SW
 c4b_gen_plots = False
 wlevel_threshold = 0.5 # i don't want simulated time series that are 50% above or below the min and max observed waterlevel since 2000
 
-n_attempts = 50
+n_attempts = 100
 n_clusters = 5
 lag_limit_hr = 24
 
