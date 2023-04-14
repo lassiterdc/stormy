@@ -463,8 +463,11 @@ for ind, s_sim_event_summary in df_synth_hydro_cond.iterrows():
             print("An error was encountered on attempt {}. Re-sampling from historical timeseries...".format(attempts))
             if attempts >= 20:
                 new_lag = np.random.uniform(0,lag_limit_hr*60)
-                print("After {} failed attempts, the time lag was reset from {} to {}".format(s_sim_event_summary["surge_peak_after_rain_peak_min"], new_lag))
+                print("After {} failed attempts, the time lag was reset from {} to {}".format(attempts, s_sim_event_summary["surge_peak_after_rain_peak_min"], new_lag))
                 s_sim_event_summary["surge_peak_after_rain_peak_min"] = new_lag
+                print("#####################")
+                print("s_sim_event_summary[\"surge_peak_after_rain_peak_min\"]")
+                print(s_sim_event_summary["surge_peak_after_rain_peak_min"])
             continue
 
     min_sim_wlevels.append(min_sim_wlevel)

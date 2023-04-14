@@ -142,6 +142,7 @@ from heatmap import heatmap, corrplot
 corrplot(obs_corr)
 corrplot(cop_corr)
 
+corrplot(cop_corr-obs_corr)
 
 
 #%% functions from https://towardsdatascience.com/better-heatmaps-and-correlation-matrix-plots-in-python-41445d0f2bec
@@ -408,7 +409,7 @@ plt.xlabel('Number of clusters')
 plt.ylabel('Inertia')
 plt.show()
 
-n_clusters = 4
+n_clusters = 5
 
 kmeans = KMeans(n_clusters=n_clusters)
 kmeans.fit(df_vars_stormclass_scaled)
