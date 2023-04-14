@@ -47,6 +47,9 @@ time_buffer = 6 # hours before and after start date; should correspond to the SW
 c4b_gen_plots = False
 wlevel_threshold = 0.5 # i don't want simulated time series that are 50% above or below the min and max observed waterlevel since 2000
 
+n_attempts = 50
+n_clusters = 5
+
 # c5
 dir_swmm_sst_models_hrly = dir_swmm_sst_scenarios_hrly_proj + "models/"
 f_inp_base_hrly = dir_swmm_sst_scenarios_hrly_proj + "hague_sst_model_template.inp"

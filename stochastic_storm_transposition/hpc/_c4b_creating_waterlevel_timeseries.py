@@ -16,7 +16,7 @@ from __utils import c4b_creating_wlevel_tseries
 
 yr = int(sys.argv[1]) # a number between 1 and 1000
 
-f_mrms_event_summaries, f_mrms_event_timeseries, f_water_level_storm_surge, f_realizations, f_key_subnames_gridind, nrealizations, sst_tstep_min, start_date, time_buffer, dir_time_series, gen_plots, wlevel_threshold = c4b_creating_wlevel_tseries()
+f_mrms_event_summaries, f_mrms_event_timeseries, f_water_level_storm_surge, f_realizations, f_key_subnames_gridind, nrealizations, sst_tstep_min, start_date, time_buffer, dir_time_series, gen_plots, wlevel_threshold, n_attempts, n_clusters = c4b_creating_wlevel_tseries()
 
 script_start_time = datetime.now()
 #%% load data
@@ -321,8 +321,6 @@ if gen_plots:
     plt.ylabel('Inertia')
     plt.show()
 
-n_clusters = 5
-
 try:
     kmeans = KMeans(n_clusters=n_clusters)
     kmeans.fit(df_vars_stormclass_scaled)
@@ -385,7 +383,7 @@ for ind, s_sim_event_summary in df_synth_hydro_cond.iterrows():
     absurd_simulation = True
     attempts = 0
     while absurd_simulation == True:
-        if attempts >= 20:
+        if attempts >= n_attempts:
             sys.exit("SCRIPT FAILED AFTER {} ATTEMPTS TO GENERATE A SYNTHETIC WATER LEVEL TIME SERIES FOR {}".format(attempts, s_sim_event_summary))
         attempts += 1
         try:
