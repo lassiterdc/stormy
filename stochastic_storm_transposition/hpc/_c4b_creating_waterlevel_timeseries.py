@@ -411,9 +411,6 @@ for ind, s_sim_event_summary in df_synth_hydro_cond.iterrows():
     i += 1
     absurd_simulation = True
     attempts = 0
-    if lag_reset:
-        print("After {} failed attempts to generate a reasonable time series, the lag was reset from an original value of {} to {} after re-generating it {} times.".format(attempts_before_resetting_lab))
-    lag_reset = False
     while absurd_simulation == True:
         if attempts >= n_attempts:
             sys.exit("SCRIPT FAILED FOR YEAR {}: FAILED AFTER {} ATTEMPTS TO GENERATE A SYNTHETIC WATER LEVEL TIME SERIES FOR {}".format(yr, attempts, s_sim_event_summary))
@@ -473,7 +470,6 @@ for ind, s_sim_event_summary in df_synth_hydro_cond.iterrows():
 
             if (max_sim_wlevel < (1+wlevel_threshold)*max_obs_wlevel) and (min_sim_wlevel > (1+wlevel_threshold)*min_obs_wlevel):
                 absurd_simulation = False
-                success = True
             # else:
             #     print("Absurd simulation encountered. Observed event id = {}; Max simulated water level = {}; Min simulated water level = {}. Resampling from observed events...".format(obs_event_id, max_sim_wlevel, min_sim_wlevel))
         except:
@@ -531,7 +527,7 @@ df_sim_summary.to_csv(f_summary, index=False,)
 
 #%% report run times
 
-# time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
-# print("Wrote {} time series files for each storm realizations for year {}. Script runtime: {} (min)".format(count, yr, time_script_min))
+time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
+print("Wrote {} time series files for each storm realizations for year {}. Script runtime: {} (min)".format(count, yr, time_script_min))
 
 # sys.exit("THE SCRIPT RAN THROUGH TO COMPLETION")
