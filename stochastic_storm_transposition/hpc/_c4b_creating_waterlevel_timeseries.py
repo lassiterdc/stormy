@@ -221,6 +221,7 @@ depths = []
 mean_int = []
 max_int = []
 lst_tstep_max = []
+lst_tstep_last = []
 lst_no_rain = []
 
 event_id = -1
@@ -236,6 +237,7 @@ for rz_yr_strm in df_sst_storms.rz_yr_strm.unique():
         mean_int.append(np.nan)
         max_int.append(np.nan)
         lst_tstep_max.append(np.nan)
+        lst_tstep_last.append(np.nan)
         lst_no_rain.append(rain)
         continue
         # sys.exit()
@@ -257,11 +259,13 @@ for rz_yr_strm in df_sst_storms.rz_yr_strm.unique():
     tstep_max_ind = df_subset.precip_mm_per_hour.idxmax()
     tstep_max = pd.to_datetime(start_date) + pd.Timedelta(tstep_max_ind*sst_tstep_min, "minutes")
     lst_tstep_max.append(tstep_max)
+    # compute last tstep
+    lst_tstep_last.append(pd.to_datetime(start_date) + pd.Timedelta(len(df_subset)*sst_tstep_min, "minutes"))
 
 df_sst_storm_summaries = pd.DataFrame(dict(rz_yr_strm = df_sst_storms.rz_yr_strm.unique(), 
                               duration_hr = durations, depth_mm = depths, 
                               mean_mm_per_hr = mean_int, max_mm_per_hour = max_int, rain_in_sst_tseries = lst_no_rain,
-                              tstep_of_max_intensity = lst_tstep_max))
+                              tstep_of_max_intensity = lst_tstep_max, last_timestep_w_rainfall = lst_tstep_last))
 
 # if there are negative values in the storm catalog, replace them with nan
 df_sst_storm_summaries[df_sst_storm_summaries.max_mm_per_hour < 0] = np.nan
@@ -331,7 +335,7 @@ df_sims = df_synth_hydro_cond.loc[:, vars_sim]
 #%% determine number of clusters
 # https://www.w3schools.com/python/python_ml_k-means.asp
 vars_k = ["depth_mm", "max_mm_per_hour", "max_surge_ft"]
-df_vars_stormclass = df_vars_all.loc[:, vars_k]
+df_vars_stormclass = df_compound_summary.loc[:, vars_k]
 
 df_vars_stormclass_scaler = preprocessing.StandardScaler().fit(df_vars_stormclass)
 df_vars_stormclass_scaled = df_vars_stormclass_scaler.transform(df_vars_stormclass)
@@ -386,7 +390,8 @@ obs_ks = kmeans.labels_
 # define function to randomly select an event from the same category
 def get_storm_to_rescale(pred_k):
     ind_obs_same_class = np.where(obs_ks==pred_k)[0]
-    obs_event_id = np.random.choice(ind_obs_same_class)
+    obs_event_index = np.random.choice(ind_obs_same_class)
+    obs_event_id = df_compound_summary.event_id[obs_event_index] # necessary because the event IDs are 1-indexed
     return obs_event_id
 #%% create synthetic time series
 # df_water_levels
@@ -436,9 +441,14 @@ for ind, s_sim_event_summary in df_synth_hydro_cond.iterrows():
             # calculate the start of the event
             event_starttime = min(pd.to_datetime(start_date), sim_tstep_max_surge-pd.Timedelta(time_buffer, "hours"))
             # event_endtime =max(pd.to_datetime(start_date) + pd.Timedelta(s_sim_event_summary["duration_hr"], "hr"), sim_tstep_max_surge+pd.Timedelta(time_buffer, "hours"))
-            duration = pd.to_datetime(start_date) - event_starttime + pd.Timedelta(72, 'hours')
-            event_endtime = event_starttime + duration
-            sim_wlevel_times = pd.date_range(event_starttime, event_endtime, freq=wlevel_freq)
+            # end time is either the time of the last tstep or the time of peak surge
+            sim_tstep_lastrain = df_sst_storm_summaries.last_timestep_w_rainfall[i]
+            event_endtime = max(sim_tstep_lastrain, sim_tstep_max_surge+pd.Timedelta(time_buffer, "hours"))
+
+            # duration is start minus end
+            duration = event_endtime - event_starttime
+
+            sim_wlevel_times = pd.date_range(event_starttime, event_endtime+pd.Timedelta(time_buffer, "hours"), freq=wlevel_freq)
 
             time_to_peak_surge = sim_tstep_max_surge - min(sim_wlevel_times)
             tstep_peak = event_starttime + time_to_peak_surge
@@ -485,7 +495,7 @@ for ind, s_sim_event_summary in df_synth_hydro_cond.iterrows():
                 # s_sim_event_summary["surge_peak_after_rain_peak_min"] = new_lag
                 # write code to resample from the copula conditioned on this stuff
                 df_new_sim = gen_conditioned_samples(cop_hydro, s_sim_event_summary.loc[vars_cond].to_frame().T.reset_index(drop=True), n_samples=1)
-                print("After {} unsuccesful attempts to generate a water level time series without errors, the peak surge and time lag were resampled using the copula. Former values: {}, New values: {}".format(attempts,s_sim_event_summary,df_new_sim.loc[0,:]))
+                print("After {} unsuccesful attempts to generate a water level time series without errors, the peak surge and time lag were resampled using the copula. Former values:\n {}\nNew values: \n{}".format(attempts,s_sim_event_summary,df_new_sim.loc[0,:]))
                 s_sim_event_summary = df_new_sim.loc[0,:]
             continue
 
@@ -528,7 +538,7 @@ df_sim_summary = df_sim_summary.rename(columns=dict(tstep_of_max_intensity = "ts
 df_sim_summary.drop(columns=["rz_yr_strm"], inplace=True)
 
 f_summary = dir_time_series + "_event_summary_year{}.csv".format(yr)
-df_sim_summary.to_csv(f_summary, index=False,)
+df_sim_summary.to_csv(f_summary, index=False)
 
 #%% report run times
 
