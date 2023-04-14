@@ -95,7 +95,7 @@ except:
     # BEGIN WORK
     time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
     prnt_statement = "Made it to first except statement in {} minutes".format(time_script_min)
-    print(prnt_statement)
+    # print(prnt_statement)
     # sys.exit(prnt_statement)
     # END WORK
     try:
@@ -108,7 +108,7 @@ except:
         # BEGIN WORK
         time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
         prnt_statement = "Made it to second except statement in {} minutes".format(time_script_min)
-        print(prnt_statement)
+        # print(prnt_statement)
         # sys.exit(prnt_statement)
         # END WORK
         lst_mrms_indices = []
@@ -125,7 +125,7 @@ except:
 # BEGIN WORK
 time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
 prnt_statement = "Joined grid coords to subs in {} minutes".format(time_script_min)
-print(prnt_statement)
+# print(prnt_statement)
 # sys.exit(prnt_statement)
 
 # END WORK
@@ -144,7 +144,7 @@ df_mrms_at_subs_unique = df_mrms_at_subs.drop_duplicates()
 # BEGIN WORK
 time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
 prnt_statement = "Part 2 joined subs to grid coordinates in {} minutes".format(time_script_min)
-print(prnt_statement)
+# print(prnt_statement)
 # sys.exit(prnt_statement)
 # END WORK
 
@@ -177,12 +177,21 @@ for rz in realization_ids:
             # extract rainfall time series from the storm catalog
             idx = dict(realization_id = rz, year = yr, storm_id = storm_id, latitude = coords.y_lat, longitude = coords.x_lon)
             ds_rlztns_subset = ds_rlztns.sel(idx)
-            dti = pd.date_range(start_date, periods = len(ds_rlztns_subset.timestep_index.values), freq = freq)
             rainrate_inperhr = ds_rlztns_subset.rainrate.values / mm_per_inch
+            # remove preceding and trailing zeros
+            ### BE AWARE THAT THE THE START DATE CORRESOPNDS TO THE FIRST TIMESTEP OF PRECIPITATION
+            df_rr = pd.DataFrame(dict(rainrate = rainrate_inperhr))
+            non_zero_indices = df_rr[df_rr.rainrate != 0].index
+            first_tstep_with_rain = non_zero_indices[0]
+            last_tstep_with_rain = non_zero_indices[-1]
+            rainrate_inperhr = rainrate_inperhr[first_tstep_with_rain:last_tstep_with_rain]
+            dti = pd.date_range(start_date, periods = len(rainrate_inperhr), freq = freq)
+            # create dataframe to write to .dat file
             df = pd.DataFrame(dict(date=dti.strftime('%m/%d/%Y'),
                                 time = dti.time,
                                 rainrate_inperhr = rainrate_inperhr))
             f_out_swmm_rainfall = dir_yr + "rz{}_yr{}_strm{}_grid-ind{}.dat".format(rz, yr, storm_id, mrms_index)
+            # write .dat file
             with open(f_out_swmm_rainfall, "w+") as file:
                 file.write(";;sst_storm\n")
                 file.write(";;Rainfall (in/hr)\n")
