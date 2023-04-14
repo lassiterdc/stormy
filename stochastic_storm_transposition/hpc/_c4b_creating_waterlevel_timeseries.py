@@ -268,7 +268,18 @@ n_samples = len(df_cond)
 try:
     df_synth_hydro_cond = gen_conditioned_samples(cop_hydro, df_cond, n_samples)
 except:
-    sys.exit("Failed to generate synthetic data. There are {} storms in the storm catalog. Here is the storm catalog summary: {}".format(len(df_sst_storm_summaries), df_sst_storm_summaries))
+    print("##########################")
+    print("df_sst_storm_summaries")
+    print(df_sst_storm_summaries)
+    print("##########################")
+    print("df_cond")
+    print(df_cond)
+    print("##########################")
+    print("df_sst_storm_summaries.loc[:, vars_cond]")
+    print(df_sst_storm_summaries.loc[:, vars_cond])
+    print("##########################")
+    sys.exit("Failed to generate synthetic data. There are {} storms in the storm catalog.".format(len(df_cond)))
+
 
 #%% plot synthetically generated data
 # define columns names
