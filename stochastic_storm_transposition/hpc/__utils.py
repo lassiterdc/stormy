@@ -17,7 +17,7 @@ f_sst_nrflk_hrly_combined_catalog_reformatted = dir_sst_nrflk_hrly + "strmcat_mr
 # swmm stuff
 dir_swmm_model = dir_repo + "swmm/hague/"
 f_shp_swmm_subs = dir_swmm_model + "swmm_model/exported_layers/subcatchments.shp"
-lst_template_keys = ["rainfall_1", "rainfall_2", "rainfall_4", "rainfall_5", "rainfall_7", "water_level"]
+lst_template_keys = ["START_DATE", "START_TIME", "REPORT_START_DATE", "REPORT_START_TIME", "END_DATE", "END_TIME", "rainfall_1", "rainfall_2", "rainfall_4", "rainfall_5", "rainfall_7", "water_level"]
 # work_f_water_level_path = dir_swmm_model + "swmm_timeseries/a_water_levels_ft.dat"
 
 # script c3
@@ -43,7 +43,7 @@ f_mrms_event_timeseries = dir_mrms_events + "mrms_event_timeseries.csv"
 dir_noaa_water_levels = dir_ssr_outputs + "a_NOAA_water_levels/"
 f_water_level_storm_surge = dir_noaa_water_levels + "a_water-lev_tide_surge.csv"
 sst_hrly_tstep_min = 60
-time_buffer = 6 # hours before and after start date; should correspond to the SWMM model
+time_buffer = 6 # hours before and after start and end of rainfall or peak surge; should correspond to the SWMM model
 c4b_gen_plots = False
 wlevel_threshold = 0.5 # i don't want simulated time series that are 50% above or below the min and max observed waterlevel since 2000
 
