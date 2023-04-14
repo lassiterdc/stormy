@@ -129,7 +129,7 @@ cop_hydro = GaussianMultivariate()
 try:
     cop_hydro.fit(df_vars_all)
 except:
-    sys.exit("FAILED TO FIT GAUSSIAN MULTIVARIATE COPULA...")
+    sys.exit("SCRIPT FAILED FOR YEAR {}: FAILED TO FIT GAUSSIAN MULTIVARIATE COPULA...".format(yr))
 
 
 
@@ -278,7 +278,7 @@ except:
     print("df_sst_storm_summaries.loc[:, vars_cond]")
     print(df_sst_storm_summaries.loc[:, vars_cond])
     print("##########################")
-    sys.exit("Failed to generate synthetic data. There are {} storms in the storm catalog.".format(len(df_cond)))
+    sys.exit("SCRIPT FAILED FOR YEAR {}: to generate synthetic data. There are {} storms in the storm catalog.".format(yr, len(df_cond)))
 
 # if the lag is excessively high or low, shift it to be within the accepted range
 idx_of_excessive_high_lag = df_synth_hydro_cond.surge_peak_after_rain_peak_min > lag_limit_hr * 60
@@ -342,7 +342,7 @@ try:
     kmeans = KMeans(n_clusters=n_clusters)
     kmeans.fit(df_vars_stormclass_scaled)
 except:
-    sys.exit("FAILED TO FIT THE K-MEANS MODEL.")
+    sys.exit("SCRIPT FAILED FOR YEAR {}:  TO FIT THE K-MEANS MODEL.".format(yr))
 #%%
 # plt.scatter(x = df_vars_all.max_surge_ft, y= df_vars_all.duration_hr, c=kmeans.labels_)
 # plt.show()
@@ -401,7 +401,7 @@ for ind, s_sim_event_summary in df_synth_hydro_cond.iterrows():
     attempts = 0
     while absurd_simulation == True:
         if attempts >= n_attempts:
-            sys.exit("SCRIPT FAILED AFTER {} ATTEMPTS TO GENERATE A SYNTHETIC WATER LEVEL TIME SERIES FOR {}".format(attempts, s_sim_event_summary))
+            sys.exit("SCRIPT FAILED FOR YEAR {}: FAILED AFTER {} ATTEMPTS TO GENERATE A SYNTHETIC WATER LEVEL TIME SERIES FOR {}".format(yr, attempts, s_sim_event_summary))
         attempts += 1
         try:
             obs_event_id = get_storm_to_rescale(i)
@@ -463,7 +463,7 @@ for ind, s_sim_event_summary in df_synth_hydro_cond.iterrows():
             print("An error was encountered on attempt {}. Re-sampling from historical timeseries...".format(attempts))
             if attempts >= 20:
                 new_lag = np.random.uniform(0,lag_limit_hr*60)
-                print("After {} failed attempts, the time lag was reset from {} to {}".format(attempts, s_sim_event_summary["surge_peak_after_rain_peak_min"], new_lag))
+                print("After {} unsuccesful attempts, the time lag was reset from {} to {}".format(attempts, s_sim_event_summary["surge_peak_after_rain_peak_min"], new_lag))
                 s_sim_event_summary["surge_peak_after_rain_peak_min"] = new_lag
                 print("#####################")
                 print("s_sim_event_summary[\"surge_peak_after_rain_peak_min\"]")
