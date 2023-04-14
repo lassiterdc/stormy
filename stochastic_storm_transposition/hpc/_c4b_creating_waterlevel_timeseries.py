@@ -461,6 +461,10 @@ for ind, s_sim_event_summary in df_synth_hydro_cond.iterrows():
                 print("Absurd simulation encountered. Max simulated water level = {}; Min simulated water level = {}. Resampling from observed events...".format(max_sim_wlevel, min_sim_wlevel))
         except:
             print("An error was encountered on attempt {}. Re-sampling from historical timeseries...".format(attempts))
+            if attempts >= 20:
+                new_lag = np.random.uniform(0,lag_limit_hr*60)
+                print("After {} failed attempts, the time lag was reset from {} to {}".format(s_sim_event_summary["surge_peak_after_rain_peak_min"], new_lag))
+                s_sim_event_summary["surge_peak_after_rain_peak_min"] = new_lag
             continue
 
     min_sim_wlevels.append(min_sim_wlevel)
