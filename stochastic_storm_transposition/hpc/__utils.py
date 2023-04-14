@@ -43,7 +43,8 @@ f_mrms_event_timeseries = dir_mrms_events + "mrms_event_timeseries.csv"
 dir_noaa_water_levels = dir_ssr_outputs + "a_NOAA_water_levels/"
 f_water_level_storm_surge = dir_noaa_water_levels + "a_water-lev_tide_surge.csv"
 sst_hrly_tstep_min = 60
-time_buffer = 6 # hours before and after start and end of rainfall or peak surge; should correspond to the SWMM model
+time_buffer = 6 # hours; this is the amount of time before either the start of rain or the peak storm surge and AFTER the end of rain or peak storm surge; this will also determine simulation start and end dates
+
 c4b_gen_plots = False
 wlevel_threshold = 0.5 # i don't want simulated time series that are 50% above or below the min and max observed waterlevel since 2000
 

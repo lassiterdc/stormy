@@ -68,7 +68,7 @@ f_key_subnames_gridind = dir_swmm_sst_scenarios_hrly + "_key_subnames_and_grid-i
 
 sst_hrly_tstep_min = 60 # number of minutes per tstep
 
-time_buffer = 6 # hours; this is the amount that must be included before and after peak storm surge while generating the water level time series
+time_buffer = 6 # hours; this is the amount of time before either the start of rain or the peak storm surge and AFTER the end of rain or peak storm surge
 
 wlevel_threshold = 0.5 # i don't want simulated time series that are 50% above or below the min and max observed waterlevel since 2000
 
