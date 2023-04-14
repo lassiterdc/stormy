@@ -11,7 +11,7 @@ import geopandas as gpd
 from pathlib import Path
 from _inputs import def_inputs_for_d
 
-yr = 1
+yr = 14
 
 f_mrms_event_summaries, f_mrms_event_timeseries, f_water_level_storm_surge, f_realizations, f_key_subnames_gridind, nrealizations, sst_tstep_min, start_date, time_buffer, dir_time_series, wlevel_threshold = def_inputs_for_d()
 
@@ -333,6 +333,8 @@ df_sst_storm_summaries = pd.DataFrame(dict(rz_yr_strm = df_sst_storms.rz_yr_strm
                               duration_hr = durations, depth_mm = depths, 
                               mean_mm_per_hr = mean_int, max_mm_per_hour = max_int, rain_in_sst_tseries = lst_no_rain,
                               tstep_of_max_intensity = lst_tstep_max))
+
+df_sst_storm_summaries[df_sst_storm_summaries.max_mm_per_hour < 0] = np.nan
 
 #%% generating synthetic data with conditions
 df_cond = df_sst_storm_summaries.loc[:, vars_cond].dropna()
