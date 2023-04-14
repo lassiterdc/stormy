@@ -17,7 +17,7 @@ from __utils import c4b_creating_wlevel_tseries
 
 yr = int(sys.argv[1]) # a number between 1 and 1000
 
-f_mrms_event_summaries, f_mrms_event_timeseries, f_water_level_storm_surge, f_realizations, f_key_subnames_gridind, nrealizations, sst_tstep_min, start_date, time_buffer, dir_time_series, gen_plots, wlevel_threshold, n_attempts, n_clusters, lag_limit_hr, attempts_before_resetting_lab = c4b_creating_wlevel_tseries()
+f_mrms_event_summaries, f_mrms_event_timeseries, f_water_level_storm_surge, f_realizations, f_key_subnames_gridind, nrealizations, sst_tstep_min, start_date, time_buffer, dir_time_series, gen_plots, wlevel_threshold, n_attempts, n_clusters, resampling_inteval = c4b_creating_wlevel_tseries()
 
 script_start_time = datetime.now()
 #%% load data
@@ -266,11 +266,13 @@ df_sst_storm_summaries = pd.DataFrame(dict(rz_yr_strm = df_sst_storms.rz_yr_strm
 # if there are negative values in the storm catalog, replace them with nan
 df_sst_storm_summaries[df_sst_storm_summaries.max_mm_per_hour < 0] = np.nan
 
+df_sst_storm_summaries = df_sst_storm_summaries.dropna()
+
 if len(df_sst_storm_summaries.dropna()) == 0:
        sys.exit("NO RAINFALL WAS REGISTERED IN THE STORM CATALOG FOR YEAR {}".format(yr))
 
 #%% generating synthetic data with conditions
-df_cond = df_sst_storm_summaries.loc[:, vars_cond].dropna()
+df_cond = df_sst_storm_summaries.loc[:, vars_cond]
 n_samples = len(df_cond)
 try:
     df_synth_hydro_cond = gen_conditioned_samples(cop_hydro, df_cond, n_samples)
@@ -474,7 +476,7 @@ for ind, s_sim_event_summary in df_synth_hydro_cond.iterrows():
             #     print("Absurd simulation encountered. Observed event id = {}; Max simulated water level = {}; Min simulated water level = {}. Resampling from observed events...".format(obs_event_id, max_sim_wlevel, min_sim_wlevel))
         except:
             # print("An error was encountered on attempt {}. Re-sampling from observed events...".format(attempts))
-            if ((attempts % 10) == 0) and (attempts > 1):
+            if ((attempts % resampling_inteval) == 0) and (attempts > 1):
                 # new_lag = np.random.uniform(0,lag_limit_hr*60)
                 
                 # s_sim_event_summary["surge_peak_after_rain_peak_min"] = new_lag
