@@ -12,6 +12,7 @@ from pathlib import Path
 from datetime import datetime
 from sklearn.cluster import KMeans
 from sklearn import preprocessing
+import warnings
 from __utils import c4b_creating_wlevel_tseries
 
 yr = int(sys.argv[1]) # a number between 1 and 1000
@@ -125,13 +126,19 @@ vars_sim = ["max_surge_ft", "surge_peak_after_rain_peak_min"]
 
 df_vars_all = df_compound_summary.loc[:, vars_all]
 
-cop_hydro = GaussianMultivariate()
-try:
+# cop_hydro = GaussianMultivariate()
+# try:
+#     cop_hydro.fit(df_vars_all)
+# except:
+#     sys.exit("SCRIPT FAILED FOR YEAR {}: FAILED TO FIT GAUSSIAN MULTIVARIATE COPULA...".format(yr))
+
+def fxn():
+    warnings.warn("RuntimeWarning", RuntimeWarning)
+
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    cop_hydro = GaussianMultivariate()
     cop_hydro.fit(df_vars_all)
-except:
-    sys.exit("SCRIPT FAILED FOR YEAR {}: FAILED TO FIT GAUSSIAN MULTIVARIATE COPULA...".format(yr))
-
-
 
 #%% define functions
 def scatter_3d(data, fig=None, title=None, position=None):
