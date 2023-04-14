@@ -10,11 +10,16 @@ from string import Template
 import sys
 from datetime import datetime
 
+from __utils import c5_creating_inps
+
 nyears, nperyear, nrealizations, dir_swmm_sst_models_hrly, f_inp_base, f_out_realizations, seed_mrms_hourly, dir_time_series, f_key_subnames_gridind, lst_template_keys, f_swmm_scenarios_catalog = c5_creating_inps()
 
 yr = int(sys.argv[1]) # a number between 1 and 1000
 
 script_start_time = datetime.now()
+#%% load event summary table
+f_summary = dir_time_series + "_event_summary_year{}.csv".format(yr) # must match formatting in script _c4b
+df_event_summaries = pd.read_csv(f_summary, parse_dates=["event_start", "event_end", "tstep_peak_surge","tstep_max_rain_intensity"])
 #%% define functions
 def get_rainfiles(rz, yr, storm_id, df_key):
     # format: dir_time_series + "weather_realization{}/year{}/".format(rz, yr) + "rz{}yr{}_strm{}_grid-ind{}.dat".format(rz, yr, storm_id, mrms_index)
@@ -31,7 +36,7 @@ def get_rainfiles(rz, yr, storm_id, df_key):
                            rain_dats_fullpath = lst_f_rain_dats))
     return df
 
-def generate_water_level_series(rz, yr, strm):
+def get_water_level_series(rz, yr, strm):
         fpath_waterlevel = dir_time_series + "weather_realization{}/year{}/_waterlevel_rz{}_yr{}_strm{}.dat".format(rz, yr, rz, yr, strm)
         return fpath_waterlevel
 
@@ -68,7 +73,7 @@ with open(f_inp_base, 'r') as T:
         except:
             pass
         Path(dir_yr).mkdir(parents=True, exist_ok=True)
-        for storm_id in ds_rlztns.storm_id.values:
+        for storm_id in df_event_summaries.storm_id.values: # this eliminates SST time series with 0 rainfall
             count += 1
             df_strms.loc[count, "realization"] = rz
             df_strms.loc[count, "year"] = yr
@@ -82,12 +87,25 @@ with open(f_inp_base, 'r') as T:
             ## shutil.copy(f_inp_base, f_inp_scen)
             df_rain_paths = get_rainfiles(rz, yr, storm_id, df_key)
             # fill in template stuff
+            df_single_event = df_event_summaries[df_event_summaries.realization_id==rz][df_event_summaries.storm_id==storm_id]
             d_fields = {}
             for key in lst_template_keys:
                 fpath = None
                 if key == "water_level":
-                    fpath = generate_water_level_series(rz, yr, storm_id)
+                    fpath = get_water_level_series(rz, yr, storm_id)
                 key_grid = key.split("_")[-1]
+                if key == "START_DATE":
+                    d_fields[key] = df_single_event.event_start.dt.strftime('%m/%d/%Y')[0]
+                if key == "START_TIME":
+                    d_fields[key] = df_single_event.event_start.dt.strftime("%H:%M:%S")[0]
+                if key == "REPORT_START_DATE":
+                    d_fields[key] = df_single_event.event_start.dt.strftime('%m/%d/%Y')[0]
+                if key == "REPORT_START_TIME":
+                    d_fields[key] = df_single_event.event_start.dt.strftime("%H:%M:%S")[0]
+                if key == "END_DATE":
+                    d_fields[key] = df_single_event.event_end.dt.strftime('%m/%d/%Y')[0]
+                if key == "END_TIME":
+                    d_fields[key] = df_single_event.event_start.dt.strftime('%m/%d/%Y')[0]
                 for grid_ind in df_rain_paths.grid_ind:
                     if grid_ind == key_grid:
                         fpath = df_rain_paths.rain_dats_fullpath[df_rain_paths.grid_ind == grid_ind].values[0]
