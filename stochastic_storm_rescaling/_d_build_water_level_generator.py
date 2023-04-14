@@ -13,7 +13,7 @@ from _inputs import def_inputs_for_d
 
 yr = 1
 
-f_mrms_event_summaries, f_mrms_event_timeseries, f_water_level_storm_surge, f_realizations, f_key_subnames_gridind, nrealizations, sst_tstep_min, start_date, time_buffer, dir_time_series = def_inputs_for_d()
+f_mrms_event_summaries, f_mrms_event_timeseries, f_water_level_storm_surge, f_realizations, f_key_subnames_gridind, nrealizations, sst_tstep_min, start_date, time_buffer, dir_time_series, wlevel_threshold = def_inputs_for_d()
 
 #%% load data
 ds_rlztns = xr.open_dataset(f_realizations)
@@ -114,8 +114,11 @@ df_compound_summary["duration_hr"] = df_compound_summary['duration'] / pd.Timede
 #%% fit statistical models
 # predictors: [duration_hr, depth_mm, mean_mm_per_hour, max_mm_per_hour]
 # response: [max_surge_ft, surge_peak_after_rain_peak_min]
-vars_all = ["duration_hr", "depth_mm", "mean_mm_per_hr", "max_mm_per_hour", "max_surge_ft", "surge_peak_after_rain_peak_min"]
-vars_cond = ["duration_hr", "depth_mm", "mean_mm_per_hr", "max_mm_per_hour"]
+# https://scikit-learn.org/stable/modules/preprocessing.html#scaling-features-to-a-range
+# vars_all = ["duration_hr", "depth_mm", "mean_mm_per_hr", "max_mm_per_hour", "max_surge_ft", "surge_peak_after_rain_peak_min"]
+# vars_cond = ["duration_hr", "depth_mm", "mean_mm_per_hr", "max_mm_per_hour"]
+vars_all = ["depth_mm", "mean_mm_per_hr", "max_mm_per_hour", "max_surge_ft", "surge_peak_after_rain_peak_min"]
+vars_cond = ["depth_mm", "mean_mm_per_hr", "max_mm_per_hour"]
 vars_sim = ["max_surge_ft", "surge_peak_after_rain_peak_min"]
 
 df_vars_all = df_compound_summary.loc[:, vars_all]
@@ -123,6 +126,83 @@ df_vars_all = df_compound_summary.loc[:, vars_all]
 cop_hydro = GaussianMultivariate()
 cop_hydro.fit(df_vars_all)
 
+#%% compare correlation structure
+obs_corr = df_vars_all.corr()
+cop_corr = pd.DataFrame(cop_hydro.to_dict()["covariance"], columns = df_vars_all.corr().columns, index = df_vars_all.corr().index)
+
+dfs = [obs_corr, cop_corr]
+
+
+
+#%% using heatmapz library
+from heatmap import heatmap, corrplot
+
+corrplot(obs_corr)
+corrplot(cop_corr)
+
+
+
+#%% functions from https://towardsdatascience.com/better-heatmaps-and-correlation-matrix-plots-in-python-41445d0f2bec
+# import seaborn as sns
+# n_colors = 256 # Use 256 colors for the diverging color palette
+# palette = sns.diverging_palette(20, 220, n=n_colors) # Create the palette
+# color_min, color_max = [-1, 1] # Range of values that will be mapped to the palette, i.e. min and max possible correlation
+
+# def value_to_color(val):
+#     val_position = float((val - color_min)) / (color_max - color_min) # position of value in the input range, relative to the length of the input range
+#     ind = int(val_position * (n_colors - 1)) # target index in the color palette
+#     return palette[ind]
+
+# def heatmap(x, y, size):
+#     fig, ax = plt.subplots()
+    
+#     # Mapping from column names to integer coordinates
+#     x_labels = [v for v in sorted(x.unique())]
+#     y_labels = [v for v in sorted(y.unique())]
+#     x_to_num = {p[1]:p[0] for p in enumerate(x_labels)} 
+#     y_to_num = {p[1]:p[0] for p in enumerate(y_labels)} 
+    
+#     size_scale = 500
+#     # ax.scatter(
+#     #     x=x.map(x_to_num), # Use mapping for x
+#     #     y=y.map(y_to_num), # Use mapping for y
+#     #     s=size * size_scale, # Vector of square sizes, proportional to size parameter
+#     #     marker='s' # Use square as scatterplot marker
+#     # )
+#     ax.scatter(
+#         x=x.map(x_to_num),
+#         y=y.map(y_to_num),
+#         s=size * size_scale,
+#         c=color.apply(value_to_color), # Vector of square color values, mapped to color palette
+#         marker='s'
+#     )
+    
+#     # Show column labels on the axes
+#     ax.set_xticks([x_to_num[v] for v in x_labels])
+#     ax.set_xticklabels(x_labels, rotation=45, horizontalalignment='right')
+#     ax.set_yticks([y_to_num[v] for v in y_labels])
+#     ax.set_yticklabels(y_labels)
+
+#     ax.grid(False, 'major')
+#     ax.grid(True, 'minor')
+#     ax.set_xticks([t + 0.5 for t in ax.get_xticks()], minor=True)
+#     ax.set_yticks([t + 0.5 for t in ax.get_yticks()], minor=True)
+
+#     ax.set_xlim([-0.5, max([v for v in x_to_num.values()]) + 0.5]) 
+#     ax.set_ylim([-0.5, max([v for v in y_to_num.values()]) + 0.5])
+
+
+
+
+
+# #%% creating plots
+# corr = pd.melt(obs_corr.reset_index(), id_vars='index') # Unpivot the dataframe, so we can get pair of arrays for x and y
+# corr.columns = ['x', 'y', 'value']
+# heatmap(
+#     x=corr['x'],
+#     y=corr['y'],
+#     size=corr['value'].abs()
+# )
 
 
 #%% define functions
@@ -271,10 +351,15 @@ for cols in list(itertools.combinations(vars_all,3)):
         col_names_for3d.append(cols)
 
 plot_snth_vs_real(df_vars_all, df_synth_hydro_cond, col_names_for3d)
+#%%
+plot_snth_vs_real(df_vars_all, cop_hydro.sample(len(df_vars_all)), col_names_for3d)
 #%% plot histograms
 for var in vars_sim:
     comp_hists(var, df_vars_all, df_synth_hydro_cond)
 
+#%%
+for var in vars_sim:
+    comp_hists(var, df_vars_all, cop_hydro.sample(len(df_vars_all)))
 
 #%% generate water level time series from synthetic values
 df_water_rain_tseries
@@ -290,16 +375,23 @@ df_sims = df_synth_hydro_cond.loc[:, vars_sim]
 #%% determine number of clusters
 # https://www.w3schools.com/python/python_ml_k-means.asp
 from sklearn.cluster import KMeans
+from sklearn import preprocessing
+vars_k = ["depth_mm", "max_mm_per_hour", "max_surge_ft"]
+df_vars_stormclass = df_vars_all.loc[:, vars_k]
 
-data = df_vars_all
+df_vars_stormclass_scaler = preprocessing.StandardScaler().fit(df_vars_stormclass)
+df_vars_stormclass_scaled = df_vars_stormclass_scaler.transform(df_vars_stormclass)
+
 inertias = []
 
-for i in range(1,11):
+ks_to_try = 20
+
+for i in range(1,ks_to_try):
     kmeans = KMeans(n_clusters=i)
-    kmeans.fit(data)
+    kmeans.fit(df_vars_stormclass_scaled)
     inertias.append(kmeans.inertia_)
 
-plt.plot(range(1,11), inertias, marker='o')
+plt.plot(range(1,ks_to_try), inertias, marker='o')
 plt.title('Elbow method')
 plt.xlabel('Number of clusters')
 plt.ylabel('Inertia')
@@ -308,7 +400,7 @@ plt.show()
 n_clusters = 5
 
 kmeans = KMeans(n_clusters=n_clusters)
-kmeans.fit(data)
+kmeans.fit(df_vars_stormclass_scaled)
 
 #%%
 # plt.scatter(x = df_vars_all.max_surge_ft, y= df_vars_all.duration_hr, c=kmeans.labels_)
@@ -328,15 +420,17 @@ for v_sim in vars_sim:
             col = 0
 
 #%% predict k label of synthetic data
-pred_ks = kmeans.predict(df_synth_hydro_cond)
+df_synth_hydro_cond_scaled = df_vars_stormclass_scaler.transform(df_synth_hydro_cond.loc[:, vars_k])
+
+pred_ks = kmeans.predict(df_synth_hydro_cond_scaled)
 obs_ks = kmeans.labels_
 
 # randomly select another event with the same category
-obs_event_ids = []
-for pred_k in pred_ks:
-    ind_obs_same_class = np.where(obs_ks==4)[0]
+def get_storm_to_rescale(storm_index):
+    pred_k = pred_ks[storm_index]
+    ind_obs_same_class = np.where(obs_ks==pred_k)[0]
     obs_event_id = np.random.choice(ind_obs_same_class)
-    obs_event_ids.append(obs_event_id)
+    return obs_event_id
 
 #%% create synthetic time series
 # df_water_levels
@@ -346,66 +440,88 @@ wlevel_tdiff = (pd.Series(df_water_rain_tseries.index).diff().dropna().mode())[0
 wlevel_freq = pd.tseries.frequencies.to_offset(wlevel_tdiff).freqstr
 
 # run loop
+min_obs_wlevel = df_water_levels.water_level.min()
+max_obs_wlevel = df_water_levels.water_level.max()
 
 i = -1
 lst_s_wlevel_tseries = []
 lst_keys = []
 source_event_id = []
-for obs_event_id in obs_event_ids:
-    source_event_id.append(obs_event_id)
+min_sim_wlevels = []
+max_sim_wlevels = []
+lst_event_starts = []
+lst_event_ends = []
+lst_event_durations = []
+lst_peak_surge_tsteps = []
+for ind, s_sim_event_summary in df_synth_hydro_cond.iterrows():
+    absurd_simulation = True
     i += 1
-    df_obs_event_tseries = df_water_rain_tseries[df_water_rain_tseries.event_id == obs_event_id]
-    df_obs_event_summary = df_compound_summary.loc[df_compound_summary.event_id == obs_event_id, vars_all]
-    # df_sst_strm_summary = df_sst_storm_summaries.loc[i, :]
-    s_sim_event_summary = df_synth_hydro_cond.loc[i,:]
+    while absurd_simulation == True:
+        obs_event_id = get_storm_to_rescale(i)
+        source_event_id.append(obs_event_id)
+        df_obs_event_tseries = df_water_rain_tseries[df_water_rain_tseries.event_id == obs_event_id]
+        df_obs_event_summary = df_compound_summary.loc[df_compound_summary.event_id == obs_event_id, vars_all]
+        # df_sst_strm_summary = df_sst_storm_summaries.loc[i, :]
+
+        # sim_idx_max = df_sim_tseries.idxmax()
+        # print("length: {}, idx_max: {}".format(len(df_sim_tseries), sim_idx_max))
+
+        # compute timestep of peak storm surge
+        sim_tstep_max_int = df_sst_storm_summaries.tstep_of_max_intensity[i]
+        sim_tstep_max_surge = sim_tstep_max_int + pd.Timedelta(s_sim_event_summary["surge_peak_after_rain_peak_min"], "minutes")
+        # round to the closest timestep
+        sim_tstep_max_surge = sim_tstep_max_surge.round(wlevel_freq)
+        # calculate the start of the event
+        event_starttime = min(pd.to_datetime(start_date), sim_tstep_max_surge-pd.Timedelta(time_buffer, "hours"))
+        # event_endtime =max(pd.to_datetime(start_date) + pd.Timedelta(s_sim_event_summary["duration_hr"], "hr"), sim_tstep_max_surge+pd.Timedelta(time_buffer, "hours"))
+        duration = pd.to_datetime(start_date) - event_starttime + pd.Timedelta(72, 'hours')
+        event_endtime = event_starttime + duration
+        sim_wlevel_times = pd.date_range(event_starttime, event_endtime, freq=wlevel_freq)
+
+        time_to_peak_surge = sim_tstep_max_surge - min(sim_wlevel_times)
+        tstep_peak = event_starttime + time_to_peak_surge
+
+        # extract observed surge data
+        obs_tstep_max_surge = df_obs_event_tseries.surge_ft.idxmax()
+        obs_start_time = obs_tstep_max_surge - time_to_peak_surge
+        obs_end_time = obs_start_time + duration
+        obs_surge_times = pd.date_range(obs_start_time, obs_end_time, freq=wlevel_freq)
+        obs_surges = df_water_levels.surge_ft.loc[obs_surge_times]
+        obs_peak_tstep = obs_surges.index[0]+time_to_peak_surge
+        obs_peak = obs_surges[obs_peak_tstep]
 
 
-    # sim_idx_max = df_sim_tseries.idxmax()
-    # print("length: {}, idx_max: {}".format(len(df_sim_tseries), sim_idx_max))
+        # add predicted water level with a random shift of plus or minus 12 hours
+        tide_shift = pd.Timedelta(np.random.choice(np.arange(-12, 12+1)), "hr")
+        s_tides_times = pd.date_range(obs_start_time+tide_shift, obs_end_time+tide_shift, freq=wlevel_freq)
+        s_tides = df_water_levels.predicted_wl.loc[s_tides_times]
+        s_tides.index = sim_wlevel_times
 
-    # compute timestep of peak storm surge
-    sim_tstep_max_int = df_sst_storm_summaries.tstep_of_max_intensity[i]
-    sim_tstep_max_surge = sim_tstep_max_int + pd.Timedelta(s_sim_event_summary["surge_peak_after_rain_peak_min"], "minutes")
-    # round to the closest timestep
-    sim_tstep_max_surge = sim_tstep_max_surge.round(wlevel_freq)
-    # calculate the start of the event
-    event_starttime = min(pd.to_datetime(start_date), sim_tstep_max_surge-pd.Timedelta(time_buffer, "hours"))
-    # event_endtime =max(pd.to_datetime(start_date) + pd.Timedelta(s_sim_event_summary["duration_hr"], "hr"), sim_tstep_max_surge+pd.Timedelta(time_buffer, "hours"))
-    duration = pd.to_datetime(start_date) - event_starttime + pd.Timedelta(72, 'hours')
-    event_endtime = event_starttime + duration
-    sim_wlevel_times = pd.date_range(event_starttime, event_endtime, freq=wlevel_freq)
+        # rescaling
+        ## compute multiplier
+        obs_frac_of_max_tseries = obs_surges / obs_peak # unit surge as fraction of the maximum
+        # rescaling
+        s_sim_surge_tseries = (s_sim_event_summary["max_surge_ft"] * obs_frac_of_max_tseries).reset_index(drop=True)
+        s_sim_surge_tseries.index = sim_wlevel_times
+        
+        # adding tide
+        s_sim_wlevel = s_sim_surge_tseries + s_tides
+        s_sim_wlevel.name = "water_level_ft"
 
-    time_to_peak_surge = sim_tstep_max_surge - min(sim_wlevel_times)
-    tstep_peak = event_starttime + time_to_peak_surge
+        min_sim_wlevel = s_sim_wlevel.min()
+        max_sim_wlevel = s_sim_wlevel.max()
 
-    # extract observed surge data
-    obs_tstep_max_surge = df_obs_event_tseries.surge_ft.idxmax()
-    obs_start_time = obs_tstep_max_surge - time_to_peak_surge
-    obs_end_time = obs_start_time + duration
-    obs_surge_times = pd.date_range(obs_start_time, obs_end_time, freq=wlevel_freq)
-    obs_surges = df_water_levels.surge_ft.loc[obs_surge_times]
-    obs_peak_tstep = obs_surges.index[0]+time_to_peak_surge
-    obs_peak = obs_surges[obs_peak_tstep]
+        if (max_sim_wlevel < (1+wlevel_threshold)*max_obs_wlevel) and (min_sim_wlevel > (1+wlevel_threshold)*min_obs_wlevel):
+            absurd_simulation = False
+        else:
+            print("Absurd simulation encountered. Max simulated water level = {}; Min simulated water level = {}. Resampling from observed events...".format(max_sim_wlevel, min_sim_wlevel))
 
-
-    # add predicted water level with a random shift of plus or minus 12 hours
-    tide_shift = pd.Timedelta(np.random.choice(np.arange(-12, 12+1)), "hr")
-    s_tides_times = pd.date_range(obs_start_time+tide_shift, obs_end_time+tide_shift, freq=wlevel_freq)
-    s_tides = df_water_levels.predicted_wl.loc[s_tides_times]
-    s_tides.index = sim_wlevel_times
-
-    # rescaling
-    ## compute multiplier
-    obs_frac_of_max_tseries = obs_surges / obs_peak # unit surge as fraction of the maximum
-    # rescaling
-    s_sim_surge_tseries = (s_sim_event_summary["max_surge_ft"] * obs_frac_of_max_tseries).reset_index(drop=True)
-    s_sim_surge_tseries.index = sim_wlevel_times
-    
-    # adding tide
-    s_sim_wlevel = s_sim_surge_tseries + s_tides
-    s_sim_wlevel.name = "water_level_ft"
-
-    # confirming statistics
+    min_sim_wlevels.append(min_sim_wlevel)
+    max_sim_wlevels.append(max_sim_wlevel)
+    lst_event_starts.append(event_starttime)
+    lst_event_ends.append(event_endtime)
+    lst_event_durations.append(duration)
+    lst_peak_surge_tsteps.append(sim_tstep_max_surge)
 
     # writing to a file
     ## id the realization, and storm
@@ -419,3 +535,26 @@ for obs_event_id in obs_event_ids:
         file.write(";;synthetic water level\n")
         file.write(";;Water Level (ft)\n")
     s_sim_wlevel.reset_index().to_csv(f_out, sep = '\t', index = False, header = False, mode="a")
+
+
+#%% export event summaries
+
+df_idx = df_sst_storm_summaries.rz_yr_strm.str.split("_", expand=True)
+df_idx.columns = ["realization_id", "year", "storm_id"]
+
+df_simulated_event_summaries = pd.DataFrame(dict(min_sim_wlevel = min_sim_wlevels,max_sim_wlevel = max_sim_wlevels,
+                                                 event_start = lst_event_starts, event_end = lst_event_ends,
+                                                 event_duration_hr = lst_event_durations, tstep_peak_surge = lst_peak_surge_tsteps))
+
+df_sim_summary = df_idx.join(df_simulated_event_summaries, how="outer")
+df_sim_summary = df_sim_summary.join(df_sst_storm_summaries, how="outer")
+
+df_sim_summary = df_sim_summary.join(df_synth_hydro_cond.surge_peak_after_rain_peak_min, how = "outer")
+
+df_sim_summary = df_sim_summary.rename(columns=dict(tstep_of_max_intensity = "tstep_max_rain_intensity",
+                                                    duration_hr = "rainfall_duration_hr"))
+
+df_sim_summary.drop(columns=["rz_yr_strm"], inplace=True)
+
+f_summary = dir_time_series + "_event_summary_year{}.csv".format(yr)
+df_sim_summary.to_csv(f_summary, index=False,)
