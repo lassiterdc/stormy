@@ -212,10 +212,11 @@ for rz in realization_ids:
             rainrate_inperhr[rainrate_inperhr<0] = 0
             # slice rainrate array where rainfall is present in s_meanrain (need to add 1 when using integer indices)
             rainrate_inperhr_subset = rainrate_inperhr[first_tstep_with_rain:last_tstep_with_rain+1] 
+            # print(rainrate_inperhr_subset)
             # create dataframe to write to .dat file
             df = pd.DataFrame(dict(date=dti.strftime('%m/%d/%Y'),
                                 time = dti.time,
-                                rainrate_inperhr = np.zeros(len(rainrate_inperhr_subset))))
+                                rainrate_inperhr = rainrate_inperhr_subset))
             f_out_swmm_rainfall = dir_yr + "rz{}_yr{}_strm{}_grid-ind{}.dat".format(rz, yr, storm_id, mrms_index)
             # write .dat file
             with open(f_out_swmm_rainfall, "w+") as file:
