@@ -34,22 +34,31 @@ def parse_inp(f_inp):
 #%% run simulations
 runtimes = []
 successes = []
+problems = []
 count = -1
 for f_inp in df_strms.swmm_inp:
+    problem = "None"
     count += 1
     rz, yr, storm_id = parse_inp(f_inp)
     print("Running simulation for realization {}/{}, year {}, storm {}/{}. {} out of {} simulations complete.".format(rz, s_tot_rz, yr, storm_id, s_tot_storms, count, s_tot_sims))
     success = True
-    with Simulation(f_inp) as sim:
-        sim_start_time = datetime.now()
-        for step in sim:
-            sim_time = datetime.now()
-            sim_runtime_min = round((sim_time - sim_start_time).seconds / 60, 1)
-            if sim_runtime_min > max_runtime_min:
-                print("triggered")
-                success = False
-                break
-            pass
+    try:
+        with Simulation(f_inp) as sim:
+            sim_start_time = datetime.now()
+            for step in sim:
+                sim_time = datetime.now()
+                sim_runtime_min = round((sim_time - sim_start_time).seconds / 60, 1)
+                if sim_runtime_min > max_runtime_min:
+                    problem = "User-defined maximum simulation time limit of {} minutes reached, so simulation was halted.".format(max_runtime_min)
+                    print(problem)
+                    success = False
+                    break
+                pass
+    except Exception as e:
+        print("Simulation failed due to error: {}".format(e))
+        problem = e
+        success = False
+        problems.append(problem)
     successes.append(success)
     tot_elapsed_time_hr = round((sim_time - script_start_time).seconds / 60 / 60, 1)
     runtimes.append(sim_runtime_min)
@@ -63,7 +72,9 @@ for f_inp in df_strms.swmm_inp:
         print("Simulation cancelled after {} minutes due to user-defined runtime limits, Mean simulation runtime (min): {}, Total elapsed time (hr): {}, Expected total time (hr): {}, Estimated time remaining (hr): {}".format(sim_runtime_min, mean_sim_time, tot_elapsed_time_hr, expected_tot_runtime_hr, expected_remaining_time_hr)) 
 
 #%% export model runtimes to a file
-df_strms['runtime_min'] = runtimes
-df_strms['run_completed'] = successes
+df_strms = pd.DataFrame(dict(run_completed = successes, problem = problems,
+                             runtime_min = runtimes))
+
+
 
 df_strms.to_csv(f_out_runtimes, index=False)
