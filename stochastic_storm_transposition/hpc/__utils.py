@@ -59,7 +59,7 @@ f_inp_base_hrly = dir_swmm_sst_scenarios_hrly_proj + "hague_sst_model_template.i
 f_swmm_scenarios_catalog = dir_swmm_sst_scenarios_hrly_proj + "swmm_scenario_catalogs/" + "_swmm_scenarios_catalog_yr{}.csv"
 
 # c6
-max_runtime_min_hrly = 20 # maximum minutes of runtime allowable for each SWMM simulation
+max_runtime_min_hrly = 25 # maximum minutes of runtime allowable for each SWMM simulation
 #%% hard coded variables
 # name_out_realizations = "_combined_realizations.nc"
 f_realizations_hourly = dir_swmm_model + "swmm_scenarios_sst_hourly/_combined_realizations.nc"
