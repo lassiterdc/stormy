@@ -170,6 +170,36 @@ for rz in realization_ids:
         pass
     Path(dir_yr).mkdir(parents=True, exist_ok=True)
     for storm_id in ds_rlztns.storm_id.values:
+        # figure out first and last timesteps with rain and create datetime index
+        # create mean_rainrate_timeseries
+        lst_rainrates = []
+        lst_grid_ind = []
+        for row in df_mrms_at_subs_unique.iterrows():
+            mrms_index, coords = row
+            # extract rainfall time series from the storm catalog
+            idx = dict(realization_id = rz, year = yr, storm_id = storm_id, latitude = coords.y_lat, longitude = coords.x_lon)
+            ds_rlztns_subset = ds_rlztns.sel(idx)
+            rainrate_inperhr = ds_rlztns_subset.rainrate.values / mm_per_inch
+            # replace negative values with 0 if any are present
+            rainrate_inperhr[rainrate_inperhr<0] = 0
+            # append to list
+            lst_rainrates.append(rainrate_inperhr)
+            lst_grid_ind.append("grid_{}".format(mrms_index))
+        # create series of mean rain
+        df_allrain = pd.DataFrame(lst_rainrates)
+        df_allrain = df_allrain.T
+        df_allrain.columns = lst_grid_ind
+        s_meanrain = df_allrain.mean(axis=1)
+        # if there is no rain in the storm event, don't write a time series file
+        if s_meanrain.sum() == 0:
+            continue
+        else: # find the indices of the first and last rainfall and create a datetime index
+            non_zero_indices = s_meanrain[s_meanrain != 0].index
+            first_tstep_with_rain = non_zero_indices[0]
+            last_tstep_with_rain = non_zero_indices[-1]
+            s_meanrain = s_meanrain.loc[first_tstep_with_rain:last_tstep_with_rain]
+            dti = pd.date_range(start_date, periods = len(s_meanrain), freq = freq)
+        # create a time series file for each grid that overlaps a subcatchment
         for row in df_mrms_at_subs_unique.iterrows():
             count += 1
             time_start_fwrite = datetime.now()
@@ -178,20 +208,14 @@ for rz in realization_ids:
             idx = dict(realization_id = rz, year = yr, storm_id = storm_id, latitude = coords.y_lat, longitude = coords.x_lon)
             ds_rlztns_subset = ds_rlztns.sel(idx)
             rainrate_inperhr = ds_rlztns_subset.rainrate.values / mm_per_inch
-            # remove preceding and trailing zeros (this means that the first precipitation plug will happen exactly on start_date)
-            if rainrate_inperhr.sum() > 0:
-                df_rr = pd.DataFrame(dict(rainrate = rainrate_inperhr))
-                non_zero_indices = df_rr[df_rr.rainrate != 0].index
-                first_tstep_with_rain = non_zero_indices[0]
-                last_tstep_with_rain = non_zero_indices[-1]
-                rainrate_inperhr = rainrate_inperhr[first_tstep_with_rain:last_tstep_with_rain]
-                dti = pd.date_range(start_date, periods = len(rainrate_inperhr), freq = freq)
-            else: 
-                dti = pd.date_range(start_date, periods = len(rainrate_inperhr), freq = freq)
+            # replace negative values with 0 if any are present
+            rainrate_inperhr[rainrate_inperhr<0] = 0
+            # slice rainrate array where rainfall is present in s_meanrain (need to add 1 when using integer indices)
+            rainrate_inperhr_subset = rainrate_inperhr[first_tstep_with_rain:last_tstep_with_rain+1] 
             # create dataframe to write to .dat file
             df = pd.DataFrame(dict(date=dti.strftime('%m/%d/%Y'),
                                 time = dti.time,
-                                rainrate_inperhr = rainrate_inperhr))
+                                rainrate_inperhr = np.zeros(len(rainrate_inperhr_subset))))
             f_out_swmm_rainfall = dir_yr + "rz{}_yr{}_strm{}_grid-ind{}.dat".format(rz, yr, storm_id, mrms_index)
             # write .dat file
             with open(f_out_swmm_rainfall, "w+") as file:
@@ -202,13 +226,6 @@ for rz in realization_ids:
             time_fwright_min = round((time_end_fwrite - time_start_fwrite).seconds / 60, 1)
             times_fwright_min.append(time_fwright_min)
             mean_times = round(np.mean(times_fwright_min), 1)
-            # BEGIN WORK
-            # print("Wrote file {} out of {}. File write time (min): {}   Average write time (min): {}".format(count, num_files, time_fwright_min, mean_times))
-            # if count == 5:
-            #     sys.exit("STOPPED SCRIPT EARLY TO SEE SOME PRELIMINARY RESULTS.")
-            # END WORK
-
-
 #%% generate a csv file for matching rain time series to subcatchments
 if yr == 1:
     df_subnames_and_gridind = pd.DataFrame(dict(sub_names = gdf_subs.NAME,
