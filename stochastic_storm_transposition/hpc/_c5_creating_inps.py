@@ -48,13 +48,15 @@ if nrealizations < len(ds_rlztns.realization_id.values):
 else:
     realization_ids = ds_rlztns.realization_id.values
 
-num_storms = len(realization_ids) * len(ds_rlztns.year.values) * len(ds_rlztns.storm_id.values)
-df_strms = pd.DataFrame(dict(storm_number = np.arange(1, num_storms+1)))
+# num_storms = len(realization_ids) * len(ds_rlztns.year.values) * len(ds_rlztns.storm_id.values)
 
-df_key = pd.read_csv(f_key_subnames_gridind)
 
 #%% create the folders and duplicate the model
 num_files = len(realization_ids) * len(df_event_summaries.storm_id.values)
+
+df_strms = pd.DataFrame(dict(storm_id = df_event_summaries.storm_id.values))
+
+df_key = pd.read_csv(f_key_subnames_gridind)
 
 # print("begin writing {} .inp files...".format(num_files))
 
@@ -66,16 +68,16 @@ with open(f_inp_base, 'r') as T:
         dir_r = dir_swmm_sst_models_hrly + "weather_realization{}/".format(rz)
         dir_yr = dir_r + "year{}/".format(yr)
         # clear folder of any other swmm files from previous runs in case I update the naming convention
-        try:
-            shutil.rmtree(dir_yr)
-        except:
-            pass
+        # try:
+        #     shutil.rmtree(dir_yr)
+        # except:
+        #     pass
         Path(dir_yr).mkdir(parents=True, exist_ok=True)
         for storm_id in df_event_summaries.storm_id.values: # this eliminates SST time series with 0 rainfall
             count += 1
             df_strms.loc[count, "realization"] = rz
             df_strms.loc[count, "year"] = yr
-            df_strms.loc[count, "storm_num"] = storm_id
+            # df_strms.loc[count, "storm_num"] = storm_id
             # append new row to pandas dataframe
             # dic_scen = dict(realization = rz, year = yr, storm = storm_id)
             # create copy of input file
@@ -102,6 +104,7 @@ with open(f_inp_base, 'r') as T:
                     d_fields[key] = fpath
                 elif key == "water_level":
                     fpath = get_water_level_series(rz, yr, storm_id)
+                    df_strms.loc[count, key] = fpath
                     # fpath = fpath.replace("/", "\\")
                     d_fields[key] = fpath
                 elif key == "START_DATE":
