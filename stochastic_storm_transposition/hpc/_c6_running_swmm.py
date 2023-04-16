@@ -17,10 +17,10 @@ f_out_runtimes = dir_swmm_sst_models + "_model_performance_year{}.csv".format(si
 script_start_time = datetime.now()
 #%% loading data
 df_strms = pd.read_csv(f_swmm_scenarios_catalog.format(sim_year))
-df_strms = df_strms.loc[df_strms.year==sim_year]
+# df_strms = df_strms.loc[df_strms.year==sim_year]
 
 s_tot_rz = int(df_strms.realization.max())
-s_tot_storms = int(df_strms.storm_num.max())
+s_tot_storms = int(len(df_strms))
 s_tot_sims = s_tot_rz * s_tot_storms
 #%% define functions
 def parse_inp(f_inp):
@@ -69,7 +69,7 @@ for f_inp in df_strms.swmm_inp:
     if success == True:
         print("Simulation runtime (min): {}, Mean simulation runtime (min): {}, Total elapsed time (hr): {}, Expected total time (hr): {}, Estimated time remaining (hr): {}".format(sim_runtime_min, mean_sim_time, tot_elapsed_time_hr, expected_tot_runtime_hr, expected_remaining_time_hr)) 
     else: 
-        print("Simulation cancelled after {} minutes due to user-defined runtime limits, Mean simulation runtime (min): {}, Total elapsed time (hr): {}, Expected total time (hr): {}, Estimated time remaining (hr): {}".format(sim_runtime_min, mean_sim_time, tot_elapsed_time_hr, expected_tot_runtime_hr, expected_remaining_time_hr)) 
+        print("Simulation failed after {} minutes.".format(sim_runtime_min))
 
 #%% export model runtimes to a file
 df_strms["run_completed"] = successes
