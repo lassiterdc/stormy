@@ -60,6 +60,10 @@ f_swmm_scenarios_catalog = dir_swmm_sst_scenarios_hrly_proj + "swmm_scenario_cat
 
 # c6
 max_runtime_min_hrly = 25 # maximum minutes of runtime allowable for each SWMM simulation
+
+# c6b
+f_model_perf_summary_hrly = dir_swmm_sst_scenarios_hrly_proj + "model_performance_summary.csv"
+
 #%% hard coded variables
 # name_out_realizations = "_combined_realizations.nc"
 f_realizations_hourly = dir_swmm_model + "swmm_scenarios_sst_hourly/_combined_realizations.nc"
@@ -79,7 +83,7 @@ nrealizations = 1
 
 #%% functions
 def c6b_analyzing_swmm_runs():
-    return dir_swmm_sst_models_hrly
+    return dir_swmm_sst_models_hrly, f_model_perf_summary_hrly
 
 
 def c6_running_swmm():
