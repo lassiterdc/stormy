@@ -78,6 +78,10 @@ nrealizations = 1
 # END WORK
 
 #%% functions
+def c6b_analyzing_swmm_runs():
+    return dir_swmm_sst_models_hrly
+
+
 def c6_running_swmm():
     return f_swmm_scenarios_catalog, dir_swmm_sst_models_hrly, max_runtime_min_hrly
 
