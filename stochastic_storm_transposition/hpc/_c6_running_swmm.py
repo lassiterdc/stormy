@@ -58,7 +58,7 @@ for f_inp in df_strms.swmm_inp:
         print("Simulation failed due to error: {}".format(e))
         problem = e
         success = False
-        problems.append(problem)
+    problems.append(problem)
     successes.append(success)
     tot_elapsed_time_hr = round((sim_time - script_start_time).seconds / 60 / 60, 1)
     runtimes.append(sim_runtime_min)
