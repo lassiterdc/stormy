@@ -21,7 +21,7 @@ df_perf = pd.concat(lst_dfs_perf)
 # export
 df_perf.to_csv(f_model_perf_summary)
 #%% analyze
-df_perf_failed = df_perf[df_perf.run_completed==False]
-df_perf_succeeded = df_perf[df_perf.run_completed==True]
+# df_perf_failed = df_perf[df_perf.run_completed==False]
+# df_perf_succeeded = df_perf[df_perf.run_completed==True]
 
 #%% export consolidated summary
