@@ -26,6 +26,7 @@ assar_dirs[hpc_c4_py]=${assar_dirs[hpc_scripts]}"_c4_creating_rainfall_timeserie
 assar_dirs[hpc_c4b_py]=${assar_dirs[hpc_scripts]}"_c4b_creating_waterlevel_timeseries.py"
 assar_dirs[hpc_c5_py]=${assar_dirs[hpc_scripts]}"_c5_creating_inps.py"
 assar_dirs[hpc_c6_py]=${assar_dirs[hpc_scripts]}"_c6_running_swmm.py"
+assar_dirs[hpc_c6b_py]=${assar_dirs[hpc_scripts]}"_c6b_analyzing_swmm_runs.py"
 assar_dirs[hpc_d_py]=${assar_dirs[hpc_scripts]}"_d_running_rainyday_mrms.py"
 
 # RainyDay Inputs
