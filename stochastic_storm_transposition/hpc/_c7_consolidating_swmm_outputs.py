@@ -48,12 +48,5 @@ for f_inp in df_perf_success.swmm_inp:
         lst_ds_node_fld.append(ds)
 
 #%% concatenate the dataset
-
-
 ds_all_node_fld = xr.combine_by_coords(lst_ds_node_fld)
 ds_all_node_fld.to_netcdf(f_out_modelresults, encoding= {"node_flooding":{"zlib":True}})
-
-
-
-
-
