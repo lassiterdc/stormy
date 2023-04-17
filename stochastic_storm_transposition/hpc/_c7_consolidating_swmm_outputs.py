@@ -5,6 +5,7 @@ from swmm.toolkit.shared_enum import NodeAttribute
 from pathlib import Path
 import numpy as np
 from datetime import datetime
+import sys
 
 from __utils import c7_consolidating_outputs, parse_inp
 
