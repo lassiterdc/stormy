@@ -66,6 +66,8 @@ f_model_perf_summary_hrly = dir_swmm_sst_scenarios_hrly_proj + "model_performanc
 
 # c7
 f_model_outputs_consolidated_hrly = dir_swmm_sst_scenarios_hrly_proj + "model_outputs_consolidated.nc"
+dir_swmm_sst_models_hrly_home = dir_swmm_sst_scenarios_hrly_home + "models/"
+
 #%% hard coded variables
 # name_out_realizations = "_combined_realizations.nc"
 f_realizations_hourly = dir_swmm_model + "swmm_scenarios_sst_hourly/_combined_realizations.nc"
@@ -85,10 +87,10 @@ nrealizations = 1
 
 #%% script specific functions
 def c7b_consolidating_outputs():
-    return f_model_outputs_consolidated_hrly, dir_swmm_sst_models_hrly
+    return f_model_outputs_consolidated_hrly, dir_swmm_sst_models_hrly_home
 
 def c7_consolidating_outputs():
-    return f_model_perf_summary_hrly, dir_swmm_sst_models_hrly
+    return f_model_perf_summary_hrly, dir_swmm_sst_models_hrly_home
 
 def c6b_analyzing_swmm_runs():
     return dir_swmm_sst_models_hrly, f_model_perf_summary_hrly

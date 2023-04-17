@@ -11,6 +11,7 @@ from __utils import c7_consolidating_outputs, parse_inp
 
 f_model_perf_summary, dir_swmm_sst_models = c7_consolidating_outputs()
 
+script_start_time = datetime.now()
 # sim_year = 1
 #%% inputs from bash
 sim_year = int(sys.argv[1]) # a number between 1 and 1000
@@ -50,3 +51,7 @@ for f_inp in df_perf_success.swmm_inp:
 #%% concatenate the dataset
 ds_all_node_fld = xr.combine_by_coords(lst_ds_node_fld)
 ds_all_node_fld.to_netcdf(f_out_modelresults, encoding= {"node_flooding":{"zlib":True}})
+
+tot_elapsed_time_min = round((datetime.now() - script_start_time).seconds / 60, 1)
+
+print("Total script runtime (min): {}".format(tot_elapsed_time_min))
