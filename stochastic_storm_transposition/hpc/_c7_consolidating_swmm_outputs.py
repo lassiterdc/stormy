@@ -43,7 +43,7 @@ for f_inp in df_perf_success.swmm_inp:
         # if there is a gap in the models that were run, fill with NA's to make concatenation easier in script c7b
         # (it is essential that coordinates are monotonically increasing).
         while storm_id > storm_number:
-            print("storm id greater than storm number")  
+            # print("storm id greater than storm number")  
             # create dataset with na values with same shape as the flood data
             a_zeros = np.empty(a_fld_reshaped.shape)
             # create dataset with those na values
