@@ -212,8 +212,8 @@ def comp_hists(var, df_obs, df_synth):
     plt.tight_layout()
     return
 #%% defining df_cond using the sst data
-vars_cond
-df_sst_storms
+# vars_cond
+# df_sst_storms
 # df_sst_storms_grp = df_sst_storms.groupby("rz_yr_strm")
 
 durations = []
@@ -277,7 +277,7 @@ df_sst_storm_summaries.reset_index(drop=True, inplace=True)
 if len(df_sst_storm_summaries.dropna()) == 0:
        sys.exit("NO RAINFALL WAS REGISTERED IN THE STORM CATALOG FOR YEAR {}".format(yr))
 
-#%% generating synthetic data with conditions
+#%% generating synthetic data with conditions for evaluating fit
 df_cond = df_sst_storm_summaries.loc[:, vars_cond]
 n_samples = len(df_cond)
 # df_synth_hydro_cond = gen_conditioned_samples(cop_hydro, df_cond, n_samples)
@@ -326,7 +326,7 @@ if gen_plots:
 # df_vars_all
 # df_cond
 
-df_sims = df_synth_hydro_cond.loc[:, vars_sim]
+# df_sims = df_synth_hydro_cond.loc[:, vars_sim]
 
 #%% using K means to identify time series to use
 # from sklearn.cluster import KMeans
@@ -382,9 +382,9 @@ if gen_plots:
                 col = 0
 
 #%% predict k label of synthetic data
-df_synth_hydro_cond_scaled = df_vars_stormclass_scaler.transform(df_synth_hydro_cond.loc[:, vars_k])
+# df_synth_hydro_cond_scaled = df_vars_stormclass_scaler.transform(df_synth_hydro_cond.loc[:, vars_k])
 
-pred_ks = kmeans.predict(df_synth_hydro_cond_scaled)
+# pred_ks = kmeans.predict(df_synth_hydro_cond_scaled)
 obs_ks = kmeans.labels_
 
 # define function to randomly select an event from the same category
@@ -399,6 +399,8 @@ def get_storm_to_rescale(pred_k):
 wlevel_tdiff = (pd.Series(df_water_rain_tseries.index).diff().dropna().mode())[0]
 
 wlevel_freq = pd.tseries.frequencies.to_offset(wlevel_tdiff).freqstr
+
+max_allowable_duration = (pd.Timedelta(3, "days") + 2 * pd.Timedelta(time_buffer, "hours"))
 
 # run loop
 min_obs_wlevel = df_water_levels.water_level.min()
@@ -416,16 +418,23 @@ lst_event_durations = []
 lst_peak_surge_tsteps = []
 count = 0
 lag_reset = False
-for ind, s_sim_event_summary in df_synth_hydro_cond.iterrows():
+for i, cond in df_cond.iterrows():
     count += 1
-    i += 1
-    absurd_simulation = True
+    # i += 1
     attempts = 0
-    while absurd_simulation == True:
+    # absurd_simulation = True
+    generate_new_sim = True
+    while generate_new_sim == True:
         if attempts >= n_attempts:
             sys.exit("SCRIPT FAILED FOR YEAR {}: FAILED AFTER {} ATTEMPTS TO GENERATE A SYNTHETIC WATER LEVEL TIME SERIES FOR {}".format(yr, attempts, s_sim_event_summary))
         attempts += 1
-        try:
+        try:           
+            if generate_new_sim == True:
+                df_new_sim = gen_conditioned_samples(cop_hydro, cond.to_frame().T.reset_index(drop=True), n_samples=1)
+                s_sim_event_summary = df_new_sim.loc[0,:]
+                generate_new_sim = False
+                print("After {} unsuccesful attempts to generate a reasonable water level time series, the peak surge and time lag were resampled using the copula. Former values:\n {}\nNew values: \n{}".format(attempts,s_sim_event_summary,df_new_sim.loc[0,:]))
+
             s_sim_event_summary_scaled = df_vars_stormclass_scaler.transform(pd.DataFrame(s_sim_event_summary.loc[vars_k]).T)
             pred_k = kmeans.predict(s_sim_event_summary_scaled)
             obs_event_id = get_storm_to_rescale(pred_k)
@@ -446,6 +455,11 @@ for ind, s_sim_event_summary in df_synth_hydro_cond.iterrows():
 
             # duration is start minus end
             duration = event_endtime - event_starttime
+            
+            # if duration is greater than allowable, generate new sim
+            if duration > max_allowable_duration:
+                generate_new_sim = True
+                continue
 
             sim_wlevel_times = pd.date_range(event_starttime, event_endtime, freq=wlevel_freq)
 
@@ -474,7 +488,7 @@ for ind, s_sim_event_summary in df_synth_hydro_cond.iterrows():
             # rescaling
             s_sim_surge_tseries = (s_sim_event_summary["max_surge_ft"] * obs_frac_of_max_tseries).reset_index(drop=True)
             s_sim_surge_tseries.index = sim_wlevel_times
-            
+
             # adding tide
             s_sim_wlevel = s_sim_surge_tseries + s_tides
             s_sim_wlevel.name = "water_level_ft"
@@ -482,20 +496,15 @@ for ind, s_sim_event_summary in df_synth_hydro_cond.iterrows():
             min_sim_wlevel = s_sim_wlevel.min()
             max_sim_wlevel = s_sim_wlevel.max()
 
-            if (max_sim_wlevel < (1+wlevel_threshold)*max_obs_wlevel) and (min_sim_wlevel > (1+wlevel_threshold)*min_obs_wlevel):
-                absurd_simulation = False
-            # else:
-            #     print("Absurd simulation encountered. Observed event id = {}; Max simulated water level = {}; Min simulated water level = {}. Resampling from observed events...".format(obs_event_id, max_sim_wlevel, min_sim_wlevel))
+            # if the the simulated water levels exceed user defined thresholds, generate new sim
+            if (max_sim_wlevel >= (1+wlevel_threshold)*max_obs_wlevel) and (min_sim_wlevel <= (1+wlevel_threshold)*min_obs_wlevel):
+                generate_new_sim = True
+                continue
+
         except:
-            # print("An error was encountered on attempt {}. Re-sampling from observed events...".format(attempts))
+            # if there is an error, generate a new sim
             if ((attempts % resampling_inteval) == 0) and (attempts > 1):
-                # new_lag = np.random.uniform(0,lag_limit_hr*60)
-                
-                # s_sim_event_summary["surge_peak_after_rain_peak_min"] = new_lag
-                # write code to resample from the copula conditioned on this stuff
-                df_new_sim = gen_conditioned_samples(cop_hydro, s_sim_event_summary.loc[vars_cond].to_frame().T.reset_index(drop=True), n_samples=1)
-                print("After {} unsuccesful attempts to generate a water level time series without errors, the peak surge and time lag were resampled using the copula. Former values:\n {}\nNew values: \n{}".format(attempts,s_sim_event_summary,df_new_sim.loc[0,:]))
-                s_sim_event_summary = df_new_sim.loc[0,:]
+                generate_new_sim = True
             continue
 
     min_sim_wlevels.append(min_sim_wlevel)
