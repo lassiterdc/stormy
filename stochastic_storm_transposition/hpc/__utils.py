@@ -85,7 +85,7 @@ nrealizations = 1
 
 #%% script specific functions
 def c7b_consolidating_outputs():
-    return f_model_outputs_consolidated_hrly
+    return f_model_outputs_consolidated_hrly, dir_swmm_sst_models_hrly
 
 def c7_consolidating_outputs():
     return f_model_perf_summary_hrly, dir_swmm_sst_models_hrly
