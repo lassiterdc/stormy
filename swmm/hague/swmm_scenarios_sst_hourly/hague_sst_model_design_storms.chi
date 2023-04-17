@@ -10,11 +10,10 @@ Last Report Date=04/17/2023 6:50:15 PM
 2DModeling=False
 [Project Summary]
 Compute Time=2 minutes and 26 seconds
-Routing Error=-0.898
-Runoff Error=-0.148
-Run Incomplete=False
+Routing Error=-0.017
+Runoff Error=-0.188
 [Authors]
-Author0=Daniel Lassiter,45033.7831403472
+Author0=Daniel Lassiter,45033.7959462847
 [Layers]
 layer0=Subcatchments
 layer1=Outlets
