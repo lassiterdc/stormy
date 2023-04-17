@@ -20,4 +20,4 @@ source __directories.sh
 # echo "Running SWMM for year ${SLURM_ARRAY_TASK_ID}..."
 
 # running swmm
-python ${assar_dirs[hpc_c7_py]}
+python ${assar_dirs[hpc_c7b_py]}
