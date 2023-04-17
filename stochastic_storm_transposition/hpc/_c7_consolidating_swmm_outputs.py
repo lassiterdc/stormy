@@ -23,7 +23,7 @@ f_out_modelresults = dir_swmm_sst_models + "_model_outputs_year{}.nc".format(sim
 df_perf = pd.read_csv(f_model_perf_summary)
 df_perf_success = df_perf[df_perf.run_completed==True]
 # select for just the sim year
-# df_perf_success = df_perf_success[df_perf_success.year==sim_year]
+df_perf_success = df_perf_success[df_perf_success.year==sim_year]
 
 # lst_df_node_fld = []
 lst_ds_node_fld = []
