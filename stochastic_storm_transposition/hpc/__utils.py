@@ -93,7 +93,7 @@ def c7_consolidating_outputs():
     return f_model_perf_summary_hrly, dir_swmm_sst_models_hrly
 
 def c6b_analyzing_swmm_runs():
-    return dir_swmm_sst_models_hrly, f_model_perf_summary_hrly
+    return dir_swmm_sst_models_hrly, f_model_perf_summary_hrly, dir_time_series_hrly
 
 
 def c6_running_swmm():
