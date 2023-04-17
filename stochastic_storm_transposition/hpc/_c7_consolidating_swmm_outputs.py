@@ -25,9 +25,10 @@ df_perf_success = df_perf[df_perf.run_completed==True]
 # select for just the sim year
 df_perf_success = df_perf_success[df_perf_success.year==sim_year]
 
-# lst_df_node_fld = []
+storm_number = 0
 lst_ds_node_fld = []
 for f_inp in df_perf_success.swmm_inp:
+    storm_number += 1
     rz, yr, storm_id = parse_inp(f_inp)
     f_swmm_out = f_inp.split('.inp')[0] + '.out'
     with Output(f_swmm_out) as out:
@@ -38,14 +39,31 @@ for f_inp in df_perf_success.swmm_inp:
         for key in d_node_fld:
             lst_keys.append(key)
             lst_vals.append(d_node_fld[key])
-        df_node_fld = pd.DataFrame(dict(node_id = lst_keys, flood_vol_cf = lst_vals))
         a_fld_reshaped = np.reshape(np.array(lst_vals), (1,1,1,len(lst_vals))) # rz, yr, storm, node_id
+        # if there is a gap in the models that were run, fill with NA's to make concatenation easier in script c7b
+        # (it is essential that coordinates are monotonically increasing).
+        while storm_id > storm_number:  
+            # create dataset with na values with same shape as the flood data
+            a_zeros = np.empty(a_fld_reshaped.shape)
+            # create dataset with those na values
+            ds = xr.Dataset(data_vars=dict(node_flooding = (['realization', 'year', 'storm_id', 'node_id'], a_zeros)),
+                            coords = dict(realization = np.atleast_1d(rz),
+                                            year = np.atleast_1d(yr),
+                                            storm_id = np.atleast_1d(storm_id),
+                                            node_id = lst_keys
+                                            ))
+            # append the dataset to the list of datasets
+            lst_ds_node_fld.append(ds)
+            # increment storm number by 1
+            storm_number += 1
+        # create dataset with the flood values
         ds = xr.Dataset(data_vars=dict(node_flooding = (['realization', 'year', 'storm_id', 'node_id'], a_fld_reshaped)),
                         coords = dict(realization = np.atleast_1d(rz),
                                         year = np.atleast_1d(yr),
                                         storm_id = np.atleast_1d(storm_id),
                                         node_id = lst_keys
                                         ))
+        # eppend the dataset to the list of datasets
         lst_ds_node_fld.append(ds)
 
 #%% concatenate the dataset
