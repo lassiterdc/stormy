@@ -63,6 +63,7 @@ max_runtime_min_hrly = 60 # maximum minutes of runtime allowable for each SWMM s
 
 # c6b
 f_model_perf_summary_hrly = dir_swmm_sst_scenarios_hrly_proj + "model_performance_summary.csv"
+f_events_summary = dir_swmm_sst_scenarios_hrly_proj + "event_summaries.csv"
 
 # c7
 f_model_outputs_consolidated_hrly = dir_swmm_sst_scenarios_hrly_proj + "model_outputs_consolidated.nc"
@@ -93,7 +94,7 @@ def c7_consolidating_outputs():
     return f_model_perf_summary_hrly, dir_swmm_sst_models_hrly
 
 def c6b_analyzing_swmm_runs():
-    return dir_swmm_sst_models_hrly, f_model_perf_summary_hrly, dir_time_series_hrly
+    return dir_swmm_sst_models_hrly, f_model_perf_summary_hrly, dir_time_series_hrly, f_events_summary
 
 
 def c6_running_swmm():
