@@ -441,6 +441,7 @@ for i, cond in df_cond.iterrows():
             source_event_id.append(obs_event_id)
             df_obs_event_tseries = df_water_rain_tseries[df_water_rain_tseries.event_id == obs_event_id]
             df_obs_event_summary = df_compound_summary.loc[df_compound_summary.event_id == obs_event_id, vars_all]
+            print(df_obs_event_summary)
 
             # compute timestep of peak storm surge
             sim_tstep_max_int = df_sst_storm_summaries.tstep_of_max_intensity[i]
@@ -482,6 +483,8 @@ for i, cond in df_cond.iterrows():
             # set index to align with timesteps of sim_wlevel_times to add later
             s_tides.index = sim_wlevel_times
 
+            # s_obs_wlevel = 
+
             # rescaling
             ## compute multiplier
             obs_frac_of_max_tseries = obs_surges / obs_peak # unit surge as fraction of the maximum
@@ -518,6 +521,8 @@ for i, cond in df_cond.iterrows():
     lst_event_ends.append(event_endtime)
     lst_event_durations.append(duration)
     lst_peak_surge_tsteps.append(sim_tstep_max_surge)
+    # lst_obs_peak.append(obs_peak)
+    # lst_obs_min.append(obs_peak)
 
     # writing to a file
     ## id the realization, and storm
