@@ -18,4 +18,8 @@ attrs = dict(date_created = str(datetime.now())
              )
 ds.attrs = attrs
 
-ds.to_netcdf(f_model_outputs_consolidated, encoding= {"node_flooding":{"zlib":True}})
+ds_loaded = ds.load() # this seems to speed up the writing of the netcdf file
+
+ds_loaded.to_netcdf(f_model_outputs_consolidated, encoding= {"node_flooding":{"zlib":True}})
+
+#%% also export
