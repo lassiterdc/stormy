@@ -423,8 +423,9 @@ for i, cond in df_cond.iterrows():
     # i += 1
     attempts = 0
     # absurd_simulation = True
+    reasonable_sample = False
     generate_new_sim = True
-    while generate_new_sim == True:
+    while reasonable_sample == False:
         if attempts >= n_attempts:
             sys.exit("SCRIPT FAILED FOR YEAR {}: FAILED AFTER {} ATTEMPTS TO GENERATE A SYNTHETIC WATER LEVEL TIME SERIES FOR {}".format(yr, attempts, s_sim_event_summary))
         attempts += 1
@@ -496,9 +497,13 @@ for i, cond in df_cond.iterrows():
             max_sim_wlevel = s_sim_wlevel.max()
 
             # if the the simulated water levels exceed user defined thresholds, generate new sim
-            if (max_sim_wlevel >= (1+wlevel_threshold)*max_obs_wlevel) and (min_sim_wlevel <= (1+wlevel_threshold)*min_obs_wlevel):
-                generate_new_sim = True
+            if (max_sim_wlevel >= (1+wlevel_threshold)*max_obs_wlevel) or (min_sim_wlevel <= (1+wlevel_threshold)*min_obs_wlevel):
+                # if these are exceeded and there have been at least some number of attempts to select and rescale a historical event
+                if ((attempts % resampling_inteval) == 0) and (attempts > 1):
+                    generate_new_sim = True
                 continue
+
+            reasonable_sample = True
 
         except:
             # if there is an error, generate a new sim
