@@ -50,7 +50,7 @@ for f_inp in df_perf_success.swmm_inp:
             ds = xr.Dataset(data_vars=dict(node_flooding = (['realization', 'year', 'storm_id', 'node_id'], a_zeros)),
                             coords = dict(realization = np.atleast_1d(rz),
                                             year = np.atleast_1d(yr),
-                                            storm_id = np.atleast_1d(storm_id),
+                                            storm_id = np.atleast_1d(storm_number),
                                             node_id = lst_keys
                                             ))
             # append the dataset to the list of datasets
