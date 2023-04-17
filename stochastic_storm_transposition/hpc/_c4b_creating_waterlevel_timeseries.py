@@ -433,7 +433,6 @@ for i, cond in df_cond.iterrows():
                 df_new_sim = gen_conditioned_samples(cop_hydro, cond.to_frame().T.reset_index(drop=True), n_samples=1)
                 s_sim_event_summary = df_new_sim.loc[0,:]
                 generate_new_sim = False
-                print("After {} unsuccesful attempts to generate a reasonable water level time series, the peak surge and time lag were resampled using the copula. Former values:\n {}\nNew values: \n{}".format(attempts,s_sim_event_summary,df_new_sim.loc[0,:]))
 
             s_sim_event_summary_scaled = df_vars_stormclass_scaler.transform(pd.DataFrame(s_sim_event_summary.loc[vars_k]).T)
             pred_k = kmeans.predict(s_sim_event_summary_scaled)
@@ -504,6 +503,7 @@ for i, cond in df_cond.iterrows():
         except:
             # if there is an error, generate a new sim
             if ((attempts % resampling_inteval) == 0) and (attempts > 1):
+                print("After {} unsuccesful attempts to generate a reasonable water level time series, the peak surge and time lag were resampled using the copula. Former values:\n {}\nNew values: \n{}".format(attempts,s_sim_event_summary,df_new_sim.loc[0,:]))
                 generate_new_sim = True
             continue
 
