@@ -30,3 +30,16 @@ with Output(f_swmm_out) as out:
         lst_keys.append(key)
         lst_vals.append(d_node_fld[key])
     df_node_fld = pd.DataFrame(dict(node_id = lst_keys, flood_vol_cf = lst_vals))
+
+#%% writing to a netcdf dataset
+ds = xr.Dataset(data_vars=dict(
+        rainrate = (['year', 'storm_id', 'timestep_index', 'latitude', 'longitude'], outrain)),
+        coords=dict(
+            year = np.arange(1, lst_precrate_dimshape[0]+1),
+            storm_id = np.arange(1, lst_precrate_dimshape[1]+1),
+            timestep_index = np.arange(1, lst_precrate_dimshape[2]+1),
+            time = (["year", "storm_id", "datetime"], outtime), 
+            latitude = outlatitude, 
+            longitude = outlongitude),
+        attrs=d_nc_attributes
+        )
