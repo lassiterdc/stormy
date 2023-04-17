@@ -503,7 +503,7 @@ for i, cond in df_cond.iterrows():
         except:
             # if there is an error, generate a new sim
             if ((attempts % resampling_inteval) == 0) and (attempts > 1):
-                print("After {} unsuccesful attempts to generate a reasonable water level time series, the peak surge and time lag were resampled using the copula. Former values:\n {}\nNew values: \n{}".format(attempts,s_sim_event_summary,df_new_sim.loc[0,:]))
+                print("After {} unsuccesful attempts to generate a reasonable water level time series, the peak surge and time lag were resampled using the copula.".format(attempts)
                 generate_new_sim = True
             continue
 
