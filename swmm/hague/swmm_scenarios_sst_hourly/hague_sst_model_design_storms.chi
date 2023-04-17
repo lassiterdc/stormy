@@ -1,0 +1,36 @@
+#PCSWMM project file
+#Please do not edit
+[General]
+PCSWMM.NET Version=7.4.3240
+SWMM5 Version=5.1.015
+Version=3
+Package Path=D:\Dropbox\_GradSchool\_norfolk\stormy\swmm\hague\swmm_scenarios_sst_hourly\hague_sst_model_design_storms.pcz
+[2D]
+2DModeling=False
+[Project Summary]
+Compute Time=n/a
+Routing Error=n/a
+Runoff Error=n/a
+[Authors]
+Author0=Daniel Lassiter,45033.6328435417
+[Layers]
+layer0=Subcatchments
+layer1=Outlets
+layer2=Weirs
+layer3=Orifices
+layer4=Pumps
+layer5=Conduits
+layer6=Storages
+layer7=Dividers
+layer8=Outfalls
+layer9=Junctions
+[Scenarios]
+"Scenarios0"="D:\Dropbox\_GradSchool\_norfolk\stormy\swmm\hague\swmm_scenarios_sst_hourly\hague_sst_model_design_storms.inp",False,False,hague_sst_model_design_storms
+[Graph]
+Path1=D:\Dropbox\_GradSchool\_norfolk\stormy\swmm\hague\swmm_timeseries\design_storms.tsb
+Plotting Position=Gringorten
+[Erosion]
+ErosionOn=False
+Use C TS=False
+Calculate LS=False
+Use TSS=False
