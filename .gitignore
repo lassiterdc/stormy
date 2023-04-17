@@ -17,6 +17,13 @@ _temp
 # *_test*
 *_inputs*
 *~$*
+# PCSWMM generated files
+*.chi
+*.db
+*.ini
+*.rpt
+*.thm
+*.~inp
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
