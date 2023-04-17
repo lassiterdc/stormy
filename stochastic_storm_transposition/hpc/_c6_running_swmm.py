@@ -6,7 +6,7 @@ import sys
 from pyswmm import Simulation
 from datetime import datetime
 
-from __utils import c6_running_swmm
+from __utils import c6_running_swmm, parse_inp
 
 f_swmm_scenarios_catalog, dir_swmm_sst_models, max_runtime_min = c6_running_swmm()
 
@@ -22,14 +22,6 @@ df_strms = pd.read_csv(f_swmm_scenarios_catalog.format(sim_year))
 s_tot_rz = int(df_strms.realization.max())
 s_tot_storms = int(len(df_strms))
 s_tot_sims = s_tot_rz * s_tot_storms
-#%% define functions
-def parse_inp(f_inp):
-    # format "rz{}_yr{}_strm{}.inp"
-    lst_name_comp = f_inp.split("/")[-1].split("_")
-    rz = lst_name_comp[0].split("rz")[-1]
-    yr = lst_name_comp[1].split("yr")[-1]
-    storm_id = lst_name_comp[2].split(".")[0].split('strm')[-1]
-    return int(rz), int(yr), int(storm_id)
 
 #%% run simulations
 runtimes = []
