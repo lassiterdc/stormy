@@ -11,7 +11,7 @@ from __utils import c7_consolidating_outputs, parse_inp
 
 f_model_perf_summary, dir_swmm_sst_models = c7_consolidating_outputs()
 
-sim_year = 1
+# sim_year = 1
 #%% inputs from bash
 sim_year = int(sys.argv[1]) # a number between 1 and 1000
 
