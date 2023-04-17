@@ -154,3 +154,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+*.chi
+swmm/hague/swmm_scenarios_sst_hourly/hague_sst_model_design_storms.chi
+swmm/hague/swmm_scenarios_sst_hourly/hague_sst_model_design_storms.db
+swmm/hague/swmm_scenarios_sst_hourly/hague_sst_model_design_storms.ini
+swmm/hague/swmm_scenarios_sst_hourly/hague_sst_model_design_storms.inp
+swmm/hague/swmm_scenarios_sst_hourly/hague_sst_model_design_storms.thm
+swmm/hague/swmm_scenarios_sst_hourly/hague_sst_model_design_storms.~inp
