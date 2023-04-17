@@ -81,7 +81,10 @@ nrealizations = 1
 # nrealizations = 2
 # END WORK
 
-#%% functions
+#%% script specific functions
+def c7_consolidating_outputs():
+    return f_model_perf_summary_hrly
+
 def c6b_analyzing_swmm_runs():
     return dir_swmm_sst_models_hrly, f_model_perf_summary_hrly
 
@@ -132,7 +135,14 @@ def da_rainyday_in():
     dir_for_sst_files = dir_mrms + "_inputs/"
     return dir_mrms, f_sst_mrms, dir_for_sst_files
 
-
+#%% functions
+def parse_inp(f_inp):
+    # format "rz{}_yr{}_strm{}.inp"
+    lst_name_comp = f_inp.split("/")[-1].split("_")
+    rz = lst_name_comp[0].split("rz")[-1]
+    yr = lst_name_comp[1].split("yr")[-1]
+    storm_id = lst_name_comp[2].split(".")[0].split('strm')[-1]
+    return int(rz), int(yr), int(storm_id)
 
 
 
