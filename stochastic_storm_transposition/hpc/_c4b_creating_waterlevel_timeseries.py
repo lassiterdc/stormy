@@ -570,7 +570,7 @@ df_sim_summary.drop(columns=["rz_yr_strm"], inplace=True)
 f_summary = dir_time_series + "_event_summary_year{}.csv".format(yr)
 df_sim_summary.to_csv(f_summary, index=False)
 
-print(f_summary)
+# print(f_summary)
 
 #%% report run times
 
