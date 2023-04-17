@@ -441,6 +441,11 @@ for i, cond in df_cond.iterrows():
             source_event_id.append(obs_event_id)
             df_obs_event_tseries = df_water_rain_tseries[df_water_rain_tseries.event_id == obs_event_id]
             df_obs_event_summary = df_compound_summary.loc[df_compound_summary.event_id == obs_event_id, vars_all]
+            print("obs_event_id")
+            print(obs_event_id)
+            print("df_compound_summary")
+            print(df_compound_summary)
+            print("df_obs_event_summary")
             print(df_obs_event_summary)
 
             # compute timestep of peak storm surge
