@@ -416,6 +416,7 @@ lst_event_starts = []
 lst_event_ends = []
 lst_event_durations = []
 lst_peak_surge_tsteps = []
+lst_event_ids = []
 count = 0
 lag_reset = False
 for i, cond in df_cond.iterrows():
@@ -441,12 +442,13 @@ for i, cond in df_cond.iterrows():
             source_event_id.append(obs_event_id)
             df_obs_event_tseries = df_water_rain_tseries[df_water_rain_tseries.event_id == obs_event_id]
             df_obs_event_summary = df_compound_summary.loc[df_compound_summary.event_id == obs_event_id, vars_all]
-            print("obs_event_id")
-            print(obs_event_id)
-            print("df_compound_summary")
-            print(df_compound_summary)
-            print("df_obs_event_summary")
-            print(df_obs_event_summary)
+            # print("obs_event_id")
+            # print(obs_event_id)
+            # print("df_compound_summary")
+            # print(df_compound_summary)
+            # print("df_obs_event_summary")
+            # print(df_obs_event_summary)
+            
 
             # compute timestep of peak storm surge
             sim_tstep_max_int = df_sst_storm_summaries.tstep_of_max_intensity[i]
@@ -519,7 +521,7 @@ for i, cond in df_cond.iterrows():
                 print("After {} unsuccesful attempts to generate a reasonable water level time series, the peak surge and time lag were resampled using the copula.".format(attempts))
                 generate_new_sim = True
             continue
-
+    lst_event_ids.append(obs_event_id)
     min_sim_wlevels.append(min_sim_wlevel)
     max_sim_wlevels.append(max_sim_wlevel)
     lst_event_starts.append(event_starttime)
@@ -551,7 +553,7 @@ for i, cond in df_cond.iterrows():
 df_idx = df_sst_storm_summaries.rz_yr_strm.str.split("_", expand=True)
 df_idx.columns = ["realization_id", "year", "storm_id"]
 
-df_simulated_event_summaries = pd.DataFrame(dict(min_sim_wlevel = min_sim_wlevels,max_sim_wlevel = max_sim_wlevels,
+df_simulated_event_summaries = pd.DataFrame(dict(min_sim_wlevel = min_sim_wlevels,max_sim_wlevel = max_sim_wlevels, obs_event_id_for_rescaling = lst_event_ids,
                                                  event_start = lst_event_starts, event_end = lst_event_ends,
                                                  event_duration_hr = lst_event_durations, tstep_peak_surge = lst_peak_surge_tsteps))
 
@@ -567,6 +569,8 @@ df_sim_summary.drop(columns=["rz_yr_strm"], inplace=True)
 
 f_summary = dir_time_series + "_event_summary_year{}.csv".format(yr)
 df_sim_summary.to_csv(f_summary, index=False)
+
+print(f_summary)
 
 #%% report run times
 
