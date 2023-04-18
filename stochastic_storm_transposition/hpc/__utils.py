@@ -75,6 +75,7 @@ f_realizations_hourly = dir_swmm_model + "swmm_scenarios_sst_hourly/_combined_re
 mm_per_inch = 25.4
 grid_spacing = 0.009999999776482582
 start_date = "2020-09-01" # start date for each of the time series
+cubic_feet_per_cubic_meter = 35.3147
 
 # SST parameters (should line up with the SST input file)
 # WORK 
@@ -91,7 +92,7 @@ def c7b_consolidating_outputs():
     return f_model_outputs_consolidated_hrly, dir_swmm_sst_models_hrly
 
 def c7_consolidating_outputs():
-    return f_model_perf_summary_hrly, dir_swmm_sst_models_hrly
+    return f_model_perf_summary_hrly, dir_swmm_sst_models_hrly, cubic_feet_per_cubic_meter
 
 def c6b_analyzing_swmm_runs():
     return dir_swmm_sst_models_hrly, f_model_perf_summary_hrly, dir_time_series_hrly, f_events_summary
