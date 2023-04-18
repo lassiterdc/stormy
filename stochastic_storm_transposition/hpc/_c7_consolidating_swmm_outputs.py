@@ -6,6 +6,7 @@ from pathlib import Path
 import numpy as np
 from datetime import datetime
 import sys
+from tqdm import tqdm
 
 from __utils import c7_consolidating_outputs, parse_inp
 
@@ -27,7 +28,7 @@ df_perf_success = df_perf_success[df_perf_success.year==sim_year]
 
 storm_number = 0
 lst_ds_node_fld = []
-for f_inp in df_perf_success.swmm_inp:
+for f_inp in tqdm(df_perf_success.swmm_inp):
     storm_number += 1
     rz, yr, storm_id = parse_inp(f_inp)
     f_swmm_out = f_inp.split('.inp')[0] + '.out'
@@ -47,7 +48,6 @@ for f_inp in df_perf_success.swmm_inp:
         # if there is a gap in the models that were run, fill with NA's to make concatenation easier in script c7b
         # (it is essential that coordinates are monotonically increasing).
         while storm_id > storm_number:
-            # print("storm id greater than storm number")  
             # create dataset with na values with same shape as the flood data
             a_zeros = np.empty(a_fld_reshaped.shape)
             # create dataset with those na values
@@ -68,7 +68,7 @@ for f_inp in df_perf_success.swmm_inp:
                                         storm_id = np.atleast_1d(storm_id),
                                         node_id = lst_keys
                                         ))
-        # eppend the dataset to the list of datasets
+        # append the dataset to the list of datasets
         lst_ds_node_fld.append(ds)
 
 #%% concatenate the dataset
