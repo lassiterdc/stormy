@@ -48,7 +48,7 @@ time_buffer = 6 # hours; this is the amount of time before either the start of r
 c4b_gen_plots = False
 wlevel_threshold = 0.5 # i don't want simulated time series that are 50% above or below the min and max observed waterlevel since 2000
 
-n_attempts = 100
+n_attempts = 200
 n_clusters = 5
 resampling_inteval = 10 # after a number of attempts equal to a multiple of this value, the copula will be used to resample storm surge and peak lag  
 
