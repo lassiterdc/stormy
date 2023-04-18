@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 from datetime import datetime
 import sys
-from tqdm import tqdm
+# from tqdm import tqdm
 
 from __utils import c7_consolidating_outputs, parse_inp
 
@@ -28,7 +28,7 @@ df_perf_success = df_perf_success[df_perf_success.year==sim_year]
 
 storm_number = 0
 lst_ds_node_fld = []
-for f_inp in tqdm(df_perf_success.swmm_inp):
+for f_inp in df_perf_success.swmm_inp:
     storm_number += 1
     rz, yr, storm_id = parse_inp(f_inp)
     f_swmm_out = f_inp.split('.inp')[0] + '.out'
@@ -72,11 +72,8 @@ for f_inp in tqdm(df_perf_success.swmm_inp):
         lst_ds_node_fld.append(ds)
 
 #%% concatenate the dataset
-print("combining data...")
 ds_all_node_fld = xr.combine_by_coords(lst_ds_node_fld)
-print("loading data...")
 ds_all_node_fld_loaded = ds_all_node_fld.load()
-print("exporting data to netcdf....")
 ds_all_node_fld_loaded.to_netcdf(f_out_modelresults, encoding= {"node_flooding_cubic_meters":{"zlib":True}})
 
 tot_elapsed_time_min = round((datetime.now() - script_start_time).seconds / 60, 1)
