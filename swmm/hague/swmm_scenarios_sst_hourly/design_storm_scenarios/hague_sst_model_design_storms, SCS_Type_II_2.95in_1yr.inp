@@ -11,10 +11,10 @@ MIN_SLOPE            1
 ALLOW_PONDING        NO
 SKIP_STEADY_STATE    NO
 
-START_DATE           08/08/2014
-START_TIME           00:00:00
-REPORT_START_DATE    08/08/2014
-REPORT_START_TIME    00:00:00
+START_DATE           08/07/2014
+START_TIME           18:00:00
+REPORT_START_DATE    08/07/2014
+REPORT_START_TIME    18:00:00
 END_DATE             08/09/2014
 END_TIME             06:00:00
 SWEEP_START          01/01
@@ -3811,8 +3811,10 @@ UN91             -0.28      4.544      0          0          2800
 [OUTFALLS]
 ;;Name           Elevation  Type       Stage Data       Gated    Route To        
 ;;-------------- ---------- ---------- ---------------- -------- ----------------
-E143250          -3.54      TIMESERIES sewels_point     NO                       
-E147007          -3.54      TIMESERIES sewels_point     NO                       
+;Using fixed water level associated with the 1 year recurrence interval of the Sewells Point tide gage: https://tidesandcurrents.noaa.gov/est/stickdiagram.shtml?stnid=8638610
+E143250          -3.54      FIXED      2.920            NO                       
+;Using fixed water level associated with the 1 year recurrence interval of the Sewells Point tide gage: https://tidesandcurrents.noaa.gov/est/stickdiagram.shtml?stnid=8638610
+E147007          -3.54      FIXED      2.920            NO                       
 
 [STORAGE]
 ;;Name           Elev.    MaxDepth   InitDepth  Shape      Curve Name/Params            N/A      Fevap    Psi      Ksat     IMD     
