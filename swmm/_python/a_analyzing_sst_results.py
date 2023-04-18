@@ -69,4 +69,4 @@ df_biggest_annual_strms = df_annual_tot_fld.merge(df_sst_events, on=["realizatio
 df_biggest_annual_strms.to_csv(f_sst_annual_max_volumes, index=False)
 
 #%%
-print("yay it completed succesfully.")
+# print("yay it completed succesfully.")
