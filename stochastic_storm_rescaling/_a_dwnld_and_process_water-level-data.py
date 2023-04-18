@@ -19,6 +19,7 @@ import geopandas as gp
 import noaa_coops as nc
 import numpy as np
 from datetime import date
+from tqdm import tqdm
 
 begin_year, f_out_a_meta, f_water_level_storm_surge, f_out_a_shp, f_out_swmm_waterlevel= def_inputs_for_a()
 
@@ -26,7 +27,7 @@ begin_year, f_out_a_meta, f_water_level_storm_surge, f_out_a_shp, f_out_swmm_wat
 b_md = "0101" # start date of each year downloaded
 e_md = "1231" # end date of each year downloaded
 record_start = "19270701" # beginning of record for station
-sta_id = 8638610 # sewells point gage id
+sta_id = "8638610" # sewells point gage id
 
 
 
@@ -71,7 +72,9 @@ def dwnld_data(sta, b_date, e_date):
     return data_wl, data_tide_pred
 
 #%% execute loop to download data
-for y in years:
+lst_problems = []
+for y in tqdm(years):
+    problem = "none"
     yr = str(y)
     # e_yr = str(y)
 
@@ -85,30 +88,37 @@ for y in years:
     else:
         e_date = yr + e_md
     
-    # download day prior to first day desired (in case time zone conversion causes truncation)
-    if dwnlded_time_cushion == False:
-        b_date_cushion = str(y-1) + e_md
-        e_date_cushion = yr + b_md
-        data_wl, data_tide_pred = dwnld_data(sta, b_date_cushion, e_date_cushion)
+    try:
+        # download day prior to first day desired (in case time zone conversion causes truncation)
+        if dwnlded_time_cushion == False:
+            b_date_cushion = str(y-1) + e_md
+            e_date_cushion = yr + b_md
+            data_wl, data_tide_pred = dwnld_data(sta, b_date_cushion, e_date_cushion)
+            dfs_wl.append(data_wl)
+            dfs_tide_pred.append(data_tide_pred)
+            dwnlded_time_cushion = True
+        
+        err = True
+        download_attempt = 0
+        print("Begin: {}, End: {}".format(b_date, e_date))
+        while err == True:
+            download_attempt += 1
+            print('download attempt {}...'.format(download_attempt))
+            try:
+                data_wl, data_tide_pred = dwnld_data(sta, b_date, e_date)
+                err = False
+                print("####################################")
+            except:
+                pass
+        
         dfs_wl.append(data_wl)
         dfs_tide_pred.append(data_tide_pred)
-        dwnlded_time_cushion = True
-    
-    err = True
-    download_attempt = 0
-    print("Begin: {}, End: {}".format(b_date, e_date))
-    while err == True:
-        download_attempt += 1
-        print('download attempt {}...'.format(download_attempt))
-        try:
-            data_wl, data_tide_pred = dwnld_data(sta, b_date, e_date)
-            err = False
-            print("####################################")
-        except:
-            pass
-    
-    dfs_wl.append(data_wl)
-    dfs_tide_pred.append(data_tide_pred)
+    except Exception as e:
+        problem = e
+        print("Failed to download data for year {}. Problem: {}".format(yr, problem))
+        print(e)
+    lst_problems.append(problem)
+
     
 metadata = sta.metadata
 

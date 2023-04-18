@@ -7,7 +7,7 @@ import os
 mm_per_inch = 25.4
 
 # script a
-in_a_begin_year = 2001
+in_a_begin_year = 1928
 
 # minimum record length to use an NCEI dataset
 min_record_length = 30
