@@ -5,15 +5,15 @@ PCSWMM.NET Version=7.4.3240
 SWMM5 Version=5.1.015
 Version=3
 Package Path=D:\Dropbox\_GradSchool\_norfolk\stormy\swmm\hague\swmm_scenarios_sst_hourly\hague_sst_model_design_storms.pcz
-Last Report Date=04/17/2023 6:50:15 PM
+Last Report Date=04/17/2023 7:13:32 PM
 [2D]
 2DModeling=False
 [Project Summary]
-Compute Time=2 minutes and 26 seconds
-Routing Error=-0.017
-Runoff Error=-0.188
+Compute Time=2 minutes and 25 seconds
+Routing Error=-0.744
+Runoff Error=-0.148
 [Authors]
-Author0=Daniel Lassiter,45033.7959462847
+Author0=Daniel Lassiter,45033.8021499537
 [Layers]
 layer0=Subcatchments
 layer1=Outlets
@@ -27,13 +27,13 @@ layer8=Outfalls
 layer9=Junctions
 [Scenarios]
 "Scenarios0"="D:\Dropbox\_GradSchool\_norfolk\stormy\swmm\hague\swmm_scenarios_sst_hourly\hague_sst_model_design_storms.inp",False,False,hague_sst_model_design_storms
-"Scenarios1"="D:\Dropbox\_GradSchool\_norfolk\stormy\swmm\hague\swmm_scenarios_sst_hourly\hague_sst_model_design_storms, SCS_Type_II_2.95in_1yr.inp",False,False,SCS_Type_II_2.95in_1yr
-"Scenarios2"="D:\Dropbox\_GradSchool\_norfolk\stormy\swmm\hague\swmm_scenarios_sst_hourly\hague_sst_model_design_storms, SCS_Type_II_3.58in_2yr.inp",False,False,SCS_Type_II_3.58in_2yr
-"Scenarios3"="D:\Dropbox\_GradSchool\_norfolk\stormy\swmm\hague\swmm_scenarios_sst_hourly\hague_sst_model_design_storms, SCS_Type_II_4.63in_5yr.inp",False,False,SCS_Type_II_4.63in_5yr
-"Scenarios4"="D:\Dropbox\_GradSchool\_norfolk\stormy\swmm\hague\swmm_scenarios_sst_hourly\hague_sst_model_design_storms, SCS_Type_II_5.52in_10yr.inp",False,False,SCS_Type_II_5.52in_10yr
-"Scenarios5"="D:\Dropbox\_GradSchool\_norfolk\stormy\swmm\hague\swmm_scenarios_sst_hourly\hague_sst_model_design_storms, SCS_Type_II_6.83in_25yr.inp",False,False,SCS_Type_II_6.83in_25yr
-"Scenarios6"="D:\Dropbox\_GradSchool\_norfolk\stormy\swmm\hague\swmm_scenarios_sst_hourly\hague_sst_model_design_storms, SCS_Type_II_7.97in_50yr.inp",False,False,SCS_Type_II_7.97in_50yr
-"Scenarios7"="D:\Dropbox\_GradSchool\_norfolk\stormy\swmm\hague\swmm_scenarios_sst_hourly\hague_sst_model_design_storms, SCS_Type_II_9.22in_100yr.inp",False,False,SCS_Type_II_9.22in_100yr
+"Scenarios1"="D:\Dropbox\_GradSchool\_norfolk\stormy\swmm\hague\swmm_scenarios_sst_hourly\design_storm_scenarios\hague_sst_model_design_storms, SCS_Type_II_2.95in_1yr.inp",False,False,SCS_Type_II_2.95in_1yr
+"Scenarios2"="D:\Dropbox\_GradSchool\_norfolk\stormy\swmm\hague\swmm_scenarios_sst_hourly\design_storm_scenarios\hague_sst_model_design_storms, SCS_Type_II_3.58in_2yr.inp",False,False,SCS_Type_II_3.58in_2yr
+"Scenarios3"="D:\Dropbox\_GradSchool\_norfolk\stormy\swmm\hague\swmm_scenarios_sst_hourly\design_storm_scenarios\hague_sst_model_design_storms, SCS_Type_II_4.63in_5yr.inp",False,False,SCS_Type_II_4.63in_5yr
+"Scenarios4"="D:\Dropbox\_GradSchool\_norfolk\stormy\swmm\hague\swmm_scenarios_sst_hourly\design_storm_scenarios\hague_sst_model_design_storms, SCS_Type_II_5.52in_10yr.inp",False,False,SCS_Type_II_5.52in_10yr
+"Scenarios5"="D:\Dropbox\_GradSchool\_norfolk\stormy\swmm\hague\swmm_scenarios_sst_hourly\design_storm_scenarios\hague_sst_model_design_storms, SCS_Type_II_6.83in_25yr.inp",False,False,SCS_Type_II_6.83in_25yr
+"Scenarios6"="D:\Dropbox\_GradSchool\_norfolk\stormy\swmm\hague\swmm_scenarios_sst_hourly\design_storm_scenarios\hague_sst_model_design_storms, SCS_Type_II_7.97in_50yr.inp",False,False,SCS_Type_II_7.97in_50yr
+"Scenarios7"="D:\Dropbox\_GradSchool\_norfolk\stormy\swmm\hague\swmm_scenarios_sst_hourly\design_storm_scenarios\hague_sst_model_design_storms, SCS_Type_II_9.22in_100yr.inp",False,False,SCS_Type_II_9.22in_100yr
 [Graph]
 Path1=D:\Dropbox\_GradSchool\_norfolk\stormy\swmm\hague\swmm_scenarios_sst_hourly\design_storms.tsb
 Plotting Position=Gringorten
