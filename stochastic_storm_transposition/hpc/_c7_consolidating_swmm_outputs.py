@@ -41,7 +41,7 @@ for f_inp in df_perf_success.swmm_inp:
             d_t_series = d_t_series * tstep_seconds * cubic_feet_per_cubic_meter
             # sum all flooded volumes and append lists
             lst_tot_node_flding.append(d_t_series.sum())
-            lst_keys.append()
+            lst_keys.append(key)
         # create array of flooded values with the correct shape for placing in xarray dataset
         a_fld_reshaped = np.reshape(np.array(lst_tot_node_flding), (1,1,1,len(lst_tot_node_flding))) # rz, yr, storm, node_id
         # if there is a gap in the models that were run, fill with NA's to make concatenation easier in script c7b
