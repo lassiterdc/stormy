@@ -73,7 +73,8 @@ for f_inp in tqdm(df_perf_success.swmm_inp):
 
 #%% concatenate the dataset
 ds_all_node_fld = xr.combine_by_coords(lst_ds_node_fld)
-ds_all_node_fld.to_netcdf(f_out_modelresults, encoding= {"node_flooding_cubic_meters":{"zlib":True}})
+ds_all_node_fld_loaded = ds_all_node_fld.load()
+ds_all_node_fld_loaded.to_netcdf(f_out_modelresults, encoding= {"node_flooding_cubic_meters":{"zlib":True}})
 
 tot_elapsed_time_min = round((datetime.now() - script_start_time).seconds / 60, 1)
 
