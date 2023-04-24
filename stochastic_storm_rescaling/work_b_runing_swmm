@@ -1,0 +1,16 @@
+#%% import libraries and load directories
+from _inputs import def_work_b
+from pyswmm import Simulation
+import pandas as pd
+from tqdm import tqdm
+
+f_swmm_model, f_out_b_csv_rainfall, f_out_b_csv_subs_w_mrms_grid = def_work_b()
+
+# load data
+df_rain = pd.read_csv(f_out_b_csv_rainfall)
+df_subs = pd.read_csv(f_out_b_csv_subs_w_mrms_grid)
+
+#%% test run simulation
+with Simulation(f_swmm_model) as sim:
+    for step in tqdm(sim):
+        pass

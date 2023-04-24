@@ -1,0 +1,47 @@
+#PCSWMM project file
+#Please do not edit
+[General]
+PCSWMM.NET Version=7.4.3240
+SWMM5 Version=5.1.015
+Version=3
+Package Path=C:\Users\dcl3nd\Dropbox\_GradSchool\_norfolk\norfolk_ffa\swmm\hague\V1_using_norfolk_data_directly\hague_V1_using_norfolk_data.pcz
+Map EPSG=102747
+CS Name=NAD 1983 StatePlane Virginia South FIPS 4502 Feet
+Last Report Date=01/05/2023 11:40:48 AM
+[2D]
+2DModeling=False
+[Project Summary]
+Compute Time=4 minutes and 57 seconds
+Routing Error=-0.104
+Runoff Error=-0.103
+Run Incomplete=False
+[Authors]
+Author0=Daniel Lassiter,44931.4831622685
+[Layers]
+layer0=Outlets
+layer1=Subcatchments
+layer2=Weirs
+layer3=Orifices
+layer4=Pumps
+layer5=Conduits
+layer6=Dividers
+layer7=Outfalls
+layer8=Junctions
+layer9=Storages
+[Graph]
+Plotting Position=Gringorten
+[Erosion]
+ErosionOn=False
+Use C TS=False
+Calculate LS=False
+Use TSS=False
+[Scenarios]
+"Scenarios0"="D:\Dropbox\_GradSchool\_norfolk\stormy\swmm\hague\swmm_model\hague_V1_using_norfolk_data.inp",False,False,hague_V1_using_norfolk_data
+"Scenarios1"="D:\Dropbox\_GradSchool\_norfolk\norfolk_ffa\swmm\hague\swmm_model\hague_V1_using_norfolk_data.inp",False,False,hague_V1_using_norfolk_data
+"Scenarios2"="C:\Users\Daniel\Dropbox\_GradSchool\_norfolk\norfolk_ffa\swmm\hague\swmm_model\hague_V1_using_norfolk_data.inp",False,False,hague_V1_using_norfolk_data
+"Scenarios3"="C:\Users\dcl3nd\Dropbox\_GradSchool\_norfolk\norfolk_ffa\swmm\hague\swmm_model\hague_V1_using_norfolk_data.inp",False,False,hague_V1_using_norfolk_data
+"Scenarios4"="C:\Users\Daniel\Dropbox\_GradSchool\Courses\SYS6582\assignments\final_project_less_rain\swmm\hague_sub_model.inp",False,False,hague_sub_model
+"Scenarios5"="C:\Users\Daniel\Dropbox\_GradSchool\_norfolk\norfolk_ffa\swmm\hague\hague_V1.inp",False,False,hague_V1
+"Scenarios6"="C:\Users\Daniel\Dropbox\_GradSchool\_norfolk\norfolk_ffa\swmm\hague\V1_using_norfolk_data_directly\hague_V1_using_norfolk_data.inp",False,False,hague_V1_using_norfolk_data
+"Scenarios7"="C:\Users\Daniel\Dropbox\_GradSchool\Courses\SYS6582\assignments\final_project\swmm\hague_sub_model.inp",False,False,hague_sub_model
+"Scenarios8"="C:\Users\Daniel\Dropbox\_GradSchool\Courses\SYS6582\assignments\final_project_less_rain\rivanna_scripts\hague_sub_model.inp",False,False,hague_sub_model
