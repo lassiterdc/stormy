@@ -3809,8 +3809,8 @@ UN91             -0.28      4.544      0          0          2800
 [OUTFALLS]
 ;;Name           Elevation  Type       Stage Data       Gated    Route To        
 ;;-------------- ---------- ---------- ---------------- -------- ----------------
-E143250          -3.54      TIMESERIES water_level      NO                       
-E147007          -3.54      TIMESERIES water_level      NO                       
+E143250          -3.54      ${outfall_type} water_level      NO                       
+E147007          -3.54      ${outfall_type} water_level      NO                       
 
 [STORAGE]
 ;;Name           Elev.    MaxDepth   InitDepth  Shape      Curve Name/Params            N/A      Fevap    Psi      Ksat     IMD     
