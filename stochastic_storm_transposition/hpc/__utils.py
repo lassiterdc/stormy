@@ -17,7 +17,7 @@ f_sst_nrflk_hrly_combined_catalog_reformatted = dir_sst_nrflk_hrly + "strmcat_mr
 # swmm stuff
 dir_swmm_model = dir_repo + "swmm/hague/"
 f_shp_swmm_subs = dir_swmm_model + "swmm_model/exported_layers/subcatchments.shp"
-lst_template_keys = ["START_DATE", "START_TIME", "REPORT_START_DATE", "REPORT_START_TIME", "END_DATE", "END_TIME", "rainfall_1", "rainfall_2", "rainfall_4", "rainfall_5", "rainfall_7", "water_level", "OUTFALL_TYPE"]
+lst_template_keys = ["START_DATE", "START_TIME", "REPORT_START_DATE", "REPORT_START_TIME", "END_DATE", "END_TIME", "rainfall_1", "rainfall_2", "rainfall_4", "rainfall_5", "rainfall_7", "water_level", "OF_TYPE"]
 # work_f_water_level_path = dir_swmm_model + "swmm_timeseries/a_water_levels_ft.dat"
 
 # script c3

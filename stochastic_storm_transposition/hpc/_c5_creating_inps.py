@@ -129,7 +129,7 @@ for outfall_type in lst_outfall_types:
                         df_strms.loc[count, key] = fpath
                         # fpath = fpath.replace("/", "\\")
                         d_fields[key] = fpath
-                    elif key == "OUTFALL_TYPE":
+                    elif key == "OF_TYPE":
                         d_fields[key] = outfall_type
                     elif key == "START_DATE":
                         d_fields[key] = df_single_event.event_start.dt.strftime('%m/%d/%Y')[0]
