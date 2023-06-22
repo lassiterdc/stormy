@@ -62,7 +62,7 @@ else:
 df_key = pd.read_csv(f_key_subnames_gridind)
 
 # print("begin writing {} .inp files...".format(num_files))
-lst_outfall_types = ["TIMESERIES", "FREE"]
+lst_outfall_types = ["TIMESERIES", "FREE      "] #space needed after free to ensure variables line up with columns in the .inp
 
 
 # initialize df_strms
