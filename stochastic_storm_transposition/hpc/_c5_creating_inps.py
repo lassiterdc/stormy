@@ -52,20 +52,35 @@ else:
 
 
 #%% create the folders and duplicate the model
-num_files = len(realization_ids) * len(df_event_summaries.storm_id.values)
+# num_files = len(realization_ids) * len(df_event_summaries.storm_id.values)
 
-df_strms = pd.DataFrame(dict(storm_id = df_event_summaries.storm_id.values))
+# df_strms = pd.DataFrame(dict(storm_id = df_event_summaries.storm_id.values))
+
+
+
 
 df_key = pd.read_csv(f_key_subnames_gridind)
 
 # print("begin writing {} .inp files...".format(num_files))
 lst_outfall_types = ["TIMESERIES", "FREE"]
 
+
+# initialize df_strms
+ind = []
+count = -1
+for outfall_type in lst_outfall_types:
+    for rz in realization_ids:
+        for storm_id in df_event_summaries.storm_id.values:
+            count += 1
+            ind.append(count)
+
+df_strms = pd.DataFrame(dict(simulation_index = ind))
+
+count = -1
 for outfall_type in lst_outfall_types:
     with open(f_inp_base, 'r') as T:
         # loading template
         template = Template(T.read())
-        count = -1
         for rz in realization_ids:
             dir_r = dir_swmm_sst_models_hrly + "weather_realization{}/".format(rz)
             dir_yr = dir_r + "year{}/".format(yr)
@@ -79,7 +94,7 @@ for outfall_type in lst_outfall_types:
                 count += 1
                 df_strms.loc[count, "realization"] = rz
                 df_strms.loc[count, "year"] = yr
-                # df_strms.loc[count, "storm_num"] = storm_id
+                df_strms.loc[count, "storm_num"] = storm_id
                 # append new row to pandas dataframe
                 # dic_scen = dict(realization = rz, year = yr, storm = storm_id)
                 # create copy of input file
@@ -157,5 +172,7 @@ pth_parent.mkdir(parents=True, exist_ok=True)
 df_strms.to_csv(f_swmm_scenarios_catalog.format(yr), index = False)
 
 time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
+
+num_files = len(df_strms)
 
 print("Wrote {} .inp files for each realization and storm in year {}. Script runtime: {} (min)".format(num_files, yr, time_script_min))
