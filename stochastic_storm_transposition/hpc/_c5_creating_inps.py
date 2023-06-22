@@ -136,7 +136,7 @@ for outfall_type in lst_outfall_types:
                         if "TIMESERIES" in outfall_type:
                             d_fields[key] = "water_level"    
                         elif "FREE" in outfall_type:
-                            d_fields[key] = ""
+                            d_fields[key] = "           "
                     elif key == "START_DATE":
                         d_fields[key] = df_single_event.event_start.dt.strftime('%m/%d/%Y')[0]
                     elif key == "START_TIME":
