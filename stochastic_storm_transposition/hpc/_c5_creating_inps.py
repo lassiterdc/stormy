@@ -92,6 +92,7 @@ for outfall_type in lst_outfall_types:
             Path(dir_yr).mkdir(parents=True, exist_ok=True)
             for storm_id in df_event_summaries.storm_id.values: # this eliminates SST time series with 0 rainfall
                 count += 1
+                d_fields = {}
                 df_strms.loc[count, "realization"] = rz
                 df_strms.loc[count, "year"] = yr
                 df_strms.loc[count, "storm_num"] = storm_id
@@ -111,7 +112,7 @@ for outfall_type in lst_outfall_types:
                 # fill in template stuff
                 df_single_event = df_event_summaries[df_event_summaries.realization_id==rz][df_event_summaries.storm_id==storm_id]
                 df_single_event.reset_index(drop=True, inplace = True)
-                d_fields = {}
+                
                 for key in lst_template_keys:
                     # check if the key is for one of the rainfall time series
                     key_grid = key.split("_")[-1]
@@ -131,6 +132,11 @@ for outfall_type in lst_outfall_types:
                         d_fields[key] = fpath
                     elif key == "OF_TYPE":
                         d_fields[key] = outfall_type
+                    elif key == "STAGE_DATA":
+                        if "TIMESERIES" in outfall_type:
+                            d_fields[key] = "water_level"    
+                        elif "FREE" in outfall_type:
+                            d_fields[key] = ""
                     elif key == "START_DATE":
                         d_fields[key] = df_single_event.event_start.dt.strftime('%m/%d/%Y')[0]
                     elif key == "START_TIME":
