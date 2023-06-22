@@ -100,9 +100,9 @@ for outfall_type in lst_outfall_types:
                 # create copy of input file
                 # dir_strm = dir_yr + "rz{}_yr{}_strm{}/".format(rz, yr, storm_id)
                 # define suffix based on downstream boundary condition
-                if outfall_type == "TIMESERIES":
+                if "TIMESERIES" in outfall_type:
                     sfx = ""
-                elif outfall_type == "FREE":
+                elif "FREE" in outfall_type:
                     sfx = "_freebndry"
                 f_inp_scen = dir_yr + "rz{}_yr{}_strm{}{}.inp".format(rz, yr, storm_id, sfx)
                 df_strms.loc[count, "swmm_inp"] = f_inp_scen
