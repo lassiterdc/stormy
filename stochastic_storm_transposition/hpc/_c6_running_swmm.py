@@ -34,6 +34,7 @@ for f_inp in df_strms.swmm_inp:
     rz, yr, storm_id = parse_inp(f_inp)
     print("Running simulation for realization {}/{}, year {}, storm {}/{}. {} out of {} simulations complete.".format(rz, s_tot_rz, yr, storm_id, s_tot_storms, count, s_tot_sims))
     success = True
+    sim_time = datetime.now()
     try:
         with Simulation(f_inp) as sim:
             sim_start_time = datetime.now()
