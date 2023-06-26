@@ -67,7 +67,12 @@ f_events_summary = dir_swmm_sst_scenarios_hrly_proj + "event_summaries.csv"
 
 # c7
 f_model_outputs_consolidated_hrly = dir_swmm_sst_scenarios_hrly_proj + "model_outputs_consolidated.nc"
-dir_swmm_sst_models_hrly_home = dir_swmm_sst_scenarios_hrly_home + "models/"
+# dir_swmm_sst_models_hrly_home = dir_swmm_sst_scenarios_hrly_home + "models/"
+
+# c8
+f_bootstrapped_quant_estimates = dir_swmm_sst_scenarios_hrly_proj + "models/boostrapping/"
+sst_recurrence_intervals = [2,10,100]
+
 
 #%% hard coded variables
 # name_out_realizations = "_combined_realizations.nc"
@@ -88,6 +93,9 @@ nrealizations = 1
 # END WORK
 
 #%% script specific functions
+def c8_bootstrapping():
+    return f_model_outputs_consolidated_hrly, dir_swmm_sst_models_hrly, f_bootstrapped_quant_estimates, sst_recurrence_intervals
+
 def c7b_consolidating_outputs():
     return f_model_outputs_consolidated_hrly, dir_swmm_sst_models_hrly
 
