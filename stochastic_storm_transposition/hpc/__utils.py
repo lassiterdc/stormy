@@ -151,7 +151,10 @@ def parse_inp(f_inp):
     rz = lst_name_comp[0].split("rz")[-1]
     yr = lst_name_comp[1].split("yr")[-1]
     storm_id = lst_name_comp[2].split(".")[0].split('strm')[-1]
-    return int(rz), int(yr), int(storm_id)
+    freebndry = False
+    if len(lst_name_comp) == 4:
+        freebndry = True
+    return int(rz), int(yr), int(storm_id), freebndry
 
 
 
