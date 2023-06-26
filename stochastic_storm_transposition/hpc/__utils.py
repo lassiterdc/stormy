@@ -154,7 +154,7 @@ def parse_inp(f_inp):
     freebndry = False
     if len(lst_name_comp) == 4:
         freebndry = True
-    return int(rz), int(yr), int(storm_id), freebndry
+    return int(rz), int(yr), int(storm_id), str(freebndry)
 
 
 
