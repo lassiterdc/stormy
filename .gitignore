@@ -161,3 +161,4 @@ swmm/hague/swmm_scenarios_sst_hourly/hague_sst_model_design_storms.ini
 swmm/hague/swmm_scenarios_sst_hourly/hague_sst_model_design_storms.inp
 swmm/hague/swmm_scenarios_sst_hourly/hague_sst_model_design_storms.thm
 swmm/hague/swmm_scenarios_sst_hourly/hague_sst_model_design_storms.~inp
+swmm/hague/swmm_scenarios_sst_hourly/models/year*
