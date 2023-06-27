@@ -30,6 +30,7 @@ assar_dirs[hpc_c6b_py]=${assar_dirs[hpc_scripts]}"_c6b_analyzing_swmm_runs.py"
 assar_dirs[hpc_c7_py]=${assar_dirs[hpc_scripts]}"_c7_consolidating_swmm_outputs.py"
 assar_dirs[hpc_c7b_py]=${assar_dirs[hpc_scripts]}"_c7b_consolidating_swmm_outputs.py"
 assar_dirs[hpc_8_py]=${assar_dirs[hpc_scripts]}"_c8_bootstrapping_results.py"
+assar_dirs[hpc_8b_py]=${assar_dirs[hpc_scripts]}"_c8b_consolidating_bs_samples.py"
 assar_dirs[hpc_d_py]=${assar_dirs[hpc_scripts]}"_d_running_rainyday_mrms.py"
 
 # RainyDay Inputs
