@@ -13,7 +13,7 @@ f_out_bs_results = f_bootstrapped_quant_estimates + "return_pds_btstrp_{}.nc".fo
 lst_f_modresults = glob(f_out_bs_results)
 
 #%% export to single netcdf file
-ds = xr.open_mfdataset(lst_f_modresults, engine="h5netcdf")
+ds = xr.open_mfdataset(lst_f_modresults, engine="h5netcdf", concat_dim = "bootstrap_sample", combine="nested")
 attrs = dict(date_created = str(datetime.now())
              )
 ds.attrs = attrs
