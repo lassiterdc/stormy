@@ -3,7 +3,7 @@ import xarray as xr
 import pandas as pd
 # from pyswmm import Output
 # from swmm.toolkit.shared_enum import NodeAttribute
-# from pathlib import Path
+from pathlib import Path
 import numpy as np
 # from datetime import datetime
 import sys
@@ -48,15 +48,16 @@ for j in np.arange(n_samples):
     d_idx = dict(storm_id = strm, realization = rz, year = yr)
     ds_bs_smpl = ds_sst_compound.sel(d_idx)
     lst_ds.append(ds_bs_smpl)
-    ds_bs = xr.concat(lst_ds, dim = "resample_id")
-    ds_bs_qaunts = ds_bs.quantile(quants, dim = "resample_id")
-    lst_bs_quants.append(ds_bs_qaunts)
 
+ds_bs = xr.concat(lst_ds, dim = "resample_id")
+ds_bs_qaunts = ds_bs.quantile(quants, dim = "resample_id")
+# lst_bs_quants.append(ds_bs_qaunts)
 #%% compute upper and lower bound 
-ds_bs_quants_all = xr.concat(lst_bs_quants, dim = "bootstrap_id")
-ds_bs_quants_all = ds_bs_quants_all.assign_coords(dict(quantile = sst_recurrence_intervals))
-ds_bs_quants_all = ds_bs_quants_all.rename((dict(quantile="flood_return_yrs")))
+# ds_bs_quants_all = xr.concat(lst_bs_quants, dim = "bootstrap_id")
+ds_bs_qaunts = ds_bs_qaunts.assign_coords(dict(quantile = sst_recurrence_intervals))
+ds_bs_qaunts = ds_bs_qaunts.rename((dict(quantile="flood_return_yrs")))
 
 
-ds_bs_quants_all_loaded = ds_bs_quants_all.load()
-ds_bs_quants_all_loaded.to_netcdf(f_out_bs_results, encoding= {"node_flooding_cubic_meters":{"zlib":True}})
+ds_bs_qaunts_loaded = ds_bs_qaunts.load()
+Path(f_bootstrapped_quant_estimates).mkdir(parents=True, exist_ok=True)
+ds_bs_qaunts_loaded.to_netcdf(f_out_bs_results, encoding= {"node_flooding_cubic_meters":{"zlib":True}})
