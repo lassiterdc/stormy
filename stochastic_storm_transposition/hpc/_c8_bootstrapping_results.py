@@ -17,6 +17,7 @@ f_model_outputs_consolidated, dir_swmm_sst_models, f_bootstrapped_quant_estimate
 bs_id = int(sys.argv[1]) # a number between 1 and 1000
 
 f_out_bs_results = f_bootstrapped_quant_estimates + "return_pds_btstrp_{}.nc".format(bs_id)
+f_out_bs_results_raw = f_bootstrapped_quant_estimates + "raw_btstrp_{}.nc".format(bs_id)
 
 #%%
 ds_sst = xr.open_dataset(f_model_outputs_consolidated)
@@ -61,3 +62,6 @@ ds_bs_qaunts = ds_bs_qaunts.rename((dict(quantile="flood_return_yrs")))
 ds_bs_qaunts_loaded = ds_bs_qaunts.load()
 Path(f_bootstrapped_quant_estimates).mkdir(parents=True, exist_ok=True)
 ds_bs_qaunts_loaded.to_netcdf(f_out_bs_results, encoding= {"node_flooding_cubic_meters":{"zlib":True}})
+
+ds_bs_loaded = ds_bs.load()
+ds_bs_loaded.to_netcdf(f_out_bs_results_raw, encoding= {"node_flooding_cubic_meters":{"zlib":True}})
