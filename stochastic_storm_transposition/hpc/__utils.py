@@ -7,6 +7,7 @@ dir_sst_nrflk = dir_sst + "norfolk/"
 dir_sst_nrflk_hrly = dir_sst_nrflk + "sst_mrms_hourly/"
 dir_home = "/home/dcl3nd/stormy/"
 dir_home_sst = dir_home + "sst/"
+dir_scratch_sst = "/scratch/dcl3nd/stormy/"
 
 # WORK
 f_sst_nrflk_hrly_parameterfile = dir_sst_nrflk_hrly + "mrms_hourly_combined.sst"
@@ -28,6 +29,7 @@ dir_sst_realizations_hrly = dir_sst_nrflk_hrly + "mrms_hourly_combined/Realizati
 # c4
 # BEGIN WORK
 dir_swmm_sst_scenarios_hrly_proj = dir_swmm_model + "swmm_scenarios_sst_hourly/"
+dir_swmm_sst_scenarios_hrly_scratch = dir_scratch_sst + "swmm_sst_hourly/"
 dir_swmm_sst_scenarios_hrly_home = dir_home_sst + "swmm_sst_hourly/"
 dir_time_series_hrly = dir_swmm_sst_scenarios_hrly_home + "time_series/"
 f_key_subnames_gridind = dir_time_series_hrly + "_key_subnames_and_grid-indices.csv"
@@ -53,7 +55,9 @@ n_clusters = 5
 resampling_inteval = 10 # after a number of attempts equal to a multiple of this value, the copula will be used to resample storm surge and peak lag  
 
 # c5
-dir_swmm_sst_models_hrly = dir_swmm_sst_scenarios_hrly_proj + "models/"
+# dir_swmm_sst_models_hrly = dir_swmm_sst_scenarios_hrly_proj + "models/"
+dir_swmm_sst_models_hrly = dir_swmm_sst_scenarios_hrly_scratch + "models/"
+
 f_inp_base_hrly = dir_swmm_sst_scenarios_hrly_proj + "hague_sst_model_template.inp"
 # dir_time_series_hrly = dir_swmm_sst_scenarios_hrly + "time_series/"
 f_swmm_scenarios_catalog = dir_swmm_sst_scenarios_hrly_proj + "swmm_scenario_catalogs/" + "_swmm_scenarios_catalog_yr{}.csv"
@@ -70,7 +74,7 @@ f_model_outputs_consolidated_hrly = dir_swmm_sst_scenarios_hrly_proj + "model_ou
 # dir_swmm_sst_models_hrly_home = dir_swmm_sst_scenarios_hrly_home + "models/"
 
 # c8
-f_bootstrapped_quant_estimates = dir_swmm_sst_scenarios_hrly_proj + "models/boostrapping/"
+f_bootstrapped_quant_estimates = dir_swmm_sst_scenarios_hrly_scratch + "models/boostrapping/"
 sst_recurrence_intervals = [2,10,100]
 f_bootstrapped_consolidated_hrly = dir_swmm_sst_scenarios_hrly_proj + "bootstrapping_consolidated.nc"
 f_bootstrapped_consolidated_hrly_raw = dir_swmm_sst_scenarios_hrly_proj + "bootstrapping_allsamples_consolidated.nc"
