@@ -42,7 +42,8 @@ count = -1
 diffs = df_perf_success.storm_num.diff() # these are the differences in storm id; a value more than 1 means that a storm was skipped because it had 0 rain
 max_storm_num = df_perf_success.storm_num.max()
 lst_ds_node_fld = []
-for f_inp in tqdm(df_perf_success.swmm_inp):
+# for f_inp in tqdm(df_perf_success.swmm_inp):
+for f_inp in df_perf_success.swmm_inp:
     count += 1
     diff = diffs.iloc[count]
     rz, yr, storm_id, freebndry = parse_inp(f_inp)
@@ -84,9 +85,15 @@ for f_inp in tqdm(df_perf_success.swmm_inp):
 
 #%% concatenate the dataset
 ds_all_node_fld = xr.combine_by_coords(lst_ds_node_fld)
+# WORK DELETE OR COMMENT BEFORE PUSHING
+# for i in ds_all_node_fld.storm_id.values:
+#     print("storm {}".format(i))
+#     print(ds_all_node_fld.sel(dict(storm_id = i)).node_flooding_cubic_meters.to_dataframe())
+# END WORK
 ds_all_node_fld_loaded = ds_all_node_fld.load()
 ds_all_node_fld_loaded.to_netcdf(f_out_modelresults, encoding= {"node_flooding_cubic_meters":{"zlib":True}})
 
 tot_elapsed_time_min = round((datetime.now() - script_start_time).seconds / 60, 1)
 
 print("Total script runtime (min): {}".format(tot_elapsed_time_min))
+# %%
