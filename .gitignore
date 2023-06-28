@@ -5,6 +5,7 @@
 *.jpg4
 *.csv
 _temp
+*.svg
 *_archive*
 # data/raw_data/*
 *.out
