@@ -3816,7 +3816,7 @@ E147007          -3.54      ${OF_TYPE} ${STAGE_DATA}      NO
 ;;Name           Elev.    MaxDepth   InitDepth  Shape      Curve Name/Params            N/A      Fevap    Psi      Ksat     IMD     
 ;;-------------- -------- ---------- ---------- ---------- ---------------------------- -------- --------          -------- --------
 F134155          5.71     1.35       0          TABULAR    p3                         0        0       
-S1               0.54     0          0          TABULAR    p2                         0        0       
+S1               0.54     5          0          TABULAR    p2                         0        0       
 T66              -1.1     5.437      0          TABULAR    p1                         0        0       
 
 [CONDUITS]
