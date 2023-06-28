@@ -6,6 +6,7 @@ from pathlib import Path
 import numpy as np
 from datetime import datetime
 import sys
+from tqdm import tqdm 
 
 from __utils import c7_consolidating_outputs, parse_inp
 
@@ -41,7 +42,7 @@ count = -1
 diffs = df_perf_success.storm_num.diff() # these are the differences in storm id; a value more than 1 means that a storm was skipped because it had 0 rain
 max_storm_num = df_perf_success.storm_num.max()
 lst_ds_node_fld = []
-for f_inp in df_perf_success.swmm_inp:
+for f_inp in tqdm(df_perf_success.swmm_inp):
     count += 1
     diff = diffs.iloc[count]
     rz, yr, storm_id, freebndry = parse_inp(f_inp)
@@ -59,14 +60,12 @@ for f_inp in df_perf_success.swmm_inp:
             lst_keys.append(key)
         # create array of flooded values with the correct shape for placing in xarray dataset
         a_fld_reshaped = np.reshape(np.array(lst_tot_node_flding), (1,1,1,1,len(lst_tot_node_flding))) # rz, yr, storm, node_id, freeboundary
-
         # add datasets with na flooding as place holders to make concatenation easier in script c7b
         if diff > 1:
             last_storm_id = storm_id - diff
             for storm_number in np.arange(last_storm_id+1, last_storm_id + diff): # for each missing storm
                 ds = create_all_nan_dataset(a_fld_reshaped, rz, yr, storm_number, freebndry, lst_keys)
                 lst_ds_node_fld.append(ds)          
-
         # create dataset with the flood values 
         ds = xr.Dataset(data_vars=dict(node_flooding_cubic_meters = (['realization', 'year', 'storm_id', 'freeboundary', 'node_id'], a_fld_reshaped)),
                         coords = dict(realization = np.atleast_1d(rz),
@@ -76,7 +75,6 @@ for f_inp in df_perf_success.swmm_inp:
                                         node_id = lst_keys
                                         ))
         lst_ds_node_fld.append(ds)
-        
         # add datasets with na flooding as place holders to ensure the right number of storms per year
         if (storm_id==max_storm_num and max_storm_num < nperyear):
             for storm_number in np.arange(max_storm_num+1, nperyear+1):
