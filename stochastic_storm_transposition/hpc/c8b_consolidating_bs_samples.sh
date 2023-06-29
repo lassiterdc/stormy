@@ -6,7 +6,7 @@
 #SBATCH -A quinnlab_paid				# allocation name # can use dev for testing
 #SBATCH -t 01:00:00				# Run time per serial job (hh:mm:ss)
 #SBATCH --array=1	        # Array of jobs, 1 for each of 1000 years
-# SBATCH --mem-per-cpu=36000
+#SBATCH --mem-per-cpu=36000
 #SBATCH --mail-user=dcl3nd@virginia.edu          # address for email notification
 #SBATCH --mail-type=ALL   
 # SBATCH --exclude=udc-ba26-18,udc-ba27-14,udc-ba26-16,udc-ba26-17
