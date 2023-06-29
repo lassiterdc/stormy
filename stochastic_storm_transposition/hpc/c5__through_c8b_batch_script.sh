@@ -1,6 +1,6 @@
 # to run, enter the following in the command line:
-# chmod +x c4_through_c8b_batch_script.sh
-# ./c4_through_c8b_batch_script.sh
+# chmod +x c5__through_c8b_batch_script.sh
+# ./c5__through_c8b_batch_script.sh
 
 ID1=$(sbatch --parsable c5_creating_inps.sh)
 ID2=$(sbatch --parsable --dependency=afterok:$ID1 c6_running_swmm.sh)
