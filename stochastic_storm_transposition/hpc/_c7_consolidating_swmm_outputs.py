@@ -66,7 +66,11 @@ for f_inp in df_perf_success.swmm_inp:
             last_storm_id = storm_id - diff
             for storm_number in np.arange(last_storm_id+1, last_storm_id + diff): # for each missing storm
                 ds = create_all_nan_dataset(a_fld_reshaped, rz, yr, storm_number, freebndry, lst_keys)
-                lst_ds_node_fld.append(ds)          
+                lst_ds_node_fld.append(ds)     
+        if (count == 0 and storm_id > 1):
+            for storm_number in np.arange(1, storm_id): # for each missing storm
+                ds = create_all_nan_dataset(a_fld_reshaped, rz, yr, storm_number, freebndry, lst_keys)
+                lst_ds_node_fld.append(ds)   
         # create dataset with the flood values 
         ds = xr.Dataset(data_vars=dict(node_flooding_cubic_meters = (['realization', 'year', 'storm_id', 'freeboundary', 'node_id'], a_fld_reshaped)),
                         coords = dict(realization = np.atleast_1d(rz),
