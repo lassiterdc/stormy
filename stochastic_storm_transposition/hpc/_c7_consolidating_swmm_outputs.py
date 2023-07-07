@@ -10,7 +10,7 @@ from tqdm import tqdm
 
 from __utils import c7_consolidating_outputs, parse_inp
 
-f_model_perf_summary, dir_swmm_sst_models, cubic_feet_per_cubic_meter, nperyear = c7_consolidating_outputs()
+f_model_perf_summary, dir_swmm_sst_models, cubic_meters_per_cubic_foot, nperyear = c7_consolidating_outputs()
 
 script_start_time = datetime.now()
 #%% inputs from bash
@@ -55,7 +55,7 @@ for f_inp in df_perf_success.swmm_inp:
             d_t_series = pd.Series(out.node_series(key, NodeAttribute.FLOODING_LOSSES)) #cfs
             tstep_seconds = float(pd.Series(d_t_series.index).diff().mode().dt.seconds)
             # convert from cfs to cf per tstep then cubic meters per timestep
-            d_t_series = d_t_series * tstep_seconds * cubic_feet_per_cubic_meter
+            d_t_series = d_t_series * tstep_seconds * cubic_meters_per_cubic_foot
             # sum all flooded volumes and append lists
             lst_tot_node_flding.append(d_t_series.sum())
             lst_keys.append(key)
