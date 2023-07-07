@@ -3,6 +3,7 @@
 *.png
 *.lock
 *.jpg4
+*.gif
 *.csv
 _temp
 *.svg
