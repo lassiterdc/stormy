@@ -11,7 +11,7 @@ import sys
 
 from __utils import c8_bootstrapping
 
-f_model_outputs_consolidated, dir_swmm_sst_models, f_bootstrapped_quant_estimates, sst_recurrence_intervals = c8_bootstrapping()
+f_model_outputs_consolidated, dir_swmm_sst_models, f_bootstrapped_quant_estimates, sst_recurrence_intervals, export_raw_bs_samps = c8_bootstrapping()
 
 #%%
 bs_id = int(sys.argv[1]) # a number between 1 and 1000
@@ -63,5 +63,6 @@ ds_bs_qaunts_loaded = ds_bs_qaunts.load()
 Path(f_bootstrapped_quant_estimates).mkdir(parents=True, exist_ok=True)
 ds_bs_qaunts_loaded.to_netcdf(f_out_bs_results, encoding= {"node_flooding_cubic_meters":{"zlib":True}})
 
-ds_bs_loaded = ds_bs.load()
-ds_bs_loaded.to_netcdf(f_out_bs_results_raw, encoding= {"node_flooding_cubic_meters":{"zlib":True}})
+if export_raw_bs_samps == True:
+    ds_bs_loaded = ds_bs.load()
+    ds_bs_loaded.to_netcdf(f_out_bs_results_raw, encoding= {"node_flooding_cubic_meters":{"zlib":True}})
