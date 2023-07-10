@@ -75,10 +75,10 @@ f_model_outputs_consolidated_hrly = dir_swmm_sst_scenarios_hrly_proj + "model_ou
 
 # c8
 f_bootstrapped_quant_estimates = dir_swmm_sst_scenarios_hrly_scratch + "models/boostrapping/"
-sst_recurrence_intervals = [2,10,100]
+sst_recurrence_intervals = [0.1, 0.25, 0.5, 1, 2, 5, 10, 25, 50, 100]
 f_bootstrapped_consolidated_hrly = dir_swmm_sst_scenarios_hrly_proj + "bootstrapping_consolidated.nc"
 f_bootstrapped_consolidated_hrly_raw = dir_swmm_sst_scenarios_hrly_proj + "bootstrapping_allsamples_consolidated.nc"
-
+export_raw_bs_samps = False
 
 #%% hard coded variables
 # name_out_realizations = "_combined_realizations.nc"
@@ -102,10 +102,10 @@ nrealizations = 1
 
 #%% script specific functions
 def c8b_bootstrapping():
-    return f_bootstrapped_consolidated_hrly, f_bootstrapped_consolidated_hrly_raw, dir_swmm_sst_models_hrly, f_bootstrapped_quant_estimates, sst_recurrence_intervals
+    return f_bootstrapped_consolidated_hrly, f_bootstrapped_consolidated_hrly_raw, dir_swmm_sst_models_hrly, f_bootstrapped_quant_estimates, sst_recurrence_intervals, export_raw_bs_samps
 
 def c8_bootstrapping():
-    return f_model_outputs_consolidated_hrly, dir_swmm_sst_models_hrly, f_bootstrapped_quant_estimates, sst_recurrence_intervals
+    return f_model_outputs_consolidated_hrly, dir_swmm_sst_models_hrly, f_bootstrapped_quant_estimates, sst_recurrence_intervals, export_raw_bs_samps
 
 def c7b_consolidating_outputs():
     return f_model_outputs_consolidated_hrly, dir_swmm_sst_models_hrly
