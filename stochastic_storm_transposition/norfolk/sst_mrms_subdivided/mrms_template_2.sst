@@ -8,7 +8,7 @@ MAINPATH	/project/quinnlab/dcl3nd/norfolk/stormy/stochastic_storm_transposition/
 SCENARIONAME		mrms_${YEAR}_3to5						# THE DIRECTORY NAME IN MAINPATH WHERE THINGS WILL BE WRITTEN, ALSO PREFIX FOR FILES	
 
 # DEFINE THE RAINFALL INPUT DATASET (NOTE: NOT ALL DATASETS ARE CURRENTLY SUPPORTED, BUT SHOULD BE ABLE TO BE ADDED WITH MINIMAL WORK)
-RAINPATH	/project/quinnlab/dcl3nd/norfolk/highres-radar-rainfall-processing/data/mrms_nc_preciprate_fullres_dailyfiles/*.nc
+RAINPATH	/scratch/dcl3nd/highres-radar-rainfall-processing/mrms_nc_preciprate_fullres_dailyfiles_5min/*.nc
 
 
 # SST PARAMETERS
