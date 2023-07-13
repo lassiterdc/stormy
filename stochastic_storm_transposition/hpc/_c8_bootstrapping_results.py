@@ -33,7 +33,8 @@ def return_period_to_quantile(ds, return_pds):
     total_events = storms_per_year * total_years
     quants = []
     for return_pd in return_pds:
-        quants.append(return_pd * storms_per_year / total_events)
+        expected_num_events = total_years / return_pd
+        quants.append(1 - expected_num_events / total_events)
     return quants
 
 quants = return_period_to_quantile(ds_sst_compound, sst_recurrence_intervals)
