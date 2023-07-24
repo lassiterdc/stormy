@@ -5,7 +5,7 @@
 #SBATCH -p standard				# Queue name "standard" (serial)
 #SBATCH -A quinnlab_paid				# allocation name
 #SBATCH -t 168:00:00				# Run time per serial job (hh:mm:ss)
-#SBATCH --array=11-16,21-26,31-36,41-46,51-56,61-66,71-76,81-86,91-96,101-106,111-116,151-156,161-166,171-176,181-186,191-196,201-206,211-216,221-226
+#SBATCH --array=11-12,21-22,31-32,41-42,51-52,61-62,71-72,81-82,91-92,101-102,111-112,151-152,161-162,171-172,181-182,191-192,201-202,211-212,221-222
 #SBATCH --mem-per-cpu=300000
 #SBATCH --mail-user=dcl3nd@virginia.edu          # address for email notification
 #SBATCH --mail-type=ALL   
