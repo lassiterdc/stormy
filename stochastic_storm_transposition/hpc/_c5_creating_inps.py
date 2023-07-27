@@ -113,7 +113,6 @@ for outfall_type in lst_outfall_types:
                 # fill in template stuff
                 df_single_event = df_event_summaries[df_event_summaries.realization_id==rz][df_event_summaries.storm_id==storm_id]
                 df_single_event.reset_index(drop=True, inplace = True)
-                
                 for key in lst_template_keys:
                     # check if the key is for one of the rainfall time series
                     key_grid = key.split("_")[-1]
@@ -177,6 +176,9 @@ for outfall_type in lst_outfall_types:
                     df_strms.loc[count, "swmm_inp"] = f_inp_scen
                     # write inp
                     base_model.inp.save(f_inp_scen)
+                    # DCL WORK
+                    print(f_inp_scen)
+                    # END DCL WORK
 
 #%% export swmm catalog to csv file
 # create directory if it doesn't exist
