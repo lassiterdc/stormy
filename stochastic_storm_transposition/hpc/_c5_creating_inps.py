@@ -176,9 +176,6 @@ for outfall_type in lst_outfall_types:
                     df_strms.loc[count, "swmm_inp"] = f_inp_scen
                     # write inp
                     base_model.inp.save(f_inp_scen)
-                    # DCL WORK
-                    print(f_inp_scen)
-                    # END DCL WORK
 
 #%% export swmm catalog to csv file
 # create directory if it doesn't exist
@@ -196,6 +193,10 @@ pth_parent.mkdir(parents=True, exist_ok=True)
 # df_strms = df_strms.astype(dtypes)
 
 df_strms.to_csv(f_swmm_scenarios_catalog.format(yr), index = False)
+
+# DCL WORK
+print(df_strms)
+# END DCL WORK
 
 time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
 
