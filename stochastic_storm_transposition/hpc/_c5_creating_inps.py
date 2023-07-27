@@ -9,10 +9,11 @@ import pandas as pd
 from string import Template
 import sys
 from datetime import datetime
+import swmmio
 
 from __utils import c5_creating_inps
 
-nyears, nperyear, nrealizations, dir_swmm_sst_models_hrly, f_inp_base, f_out_realizations, seed_mrms_hourly, dir_time_series, f_key_subnames_gridind, lst_template_keys, f_swmm_scenarios_catalog = c5_creating_inps()
+nyears, nperyear, nrealizations, dir_swmm_sst_models_hrly, f_inp_base, f_out_realizations, seed_mrms_hourly, dir_time_series, f_key_subnames_gridind, lst_template_keys, f_swmm_scenarios_catalog, norain_gage_name = c5_creating_inps()
 
 yr = int(sys.argv[1]) # a number between 1 and 1000
 
@@ -64,11 +65,11 @@ df_key = pd.read_csv(f_key_subnames_gridind)
 # print("begin writing {} .inp files...".format(num_files))
 lst_outfall_types = ["TIMESERIES", "FREE      "] #space needed after free to ensure variables line up with columns in the .inp
 
-
+lst_scens = ["surge_and_rain", "surge_no_rain", "rain_no_surge"]
 # initialize df_strms
 ind = []
 count = -1
-for outfall_type in lst_outfall_types:
+for scen in lst_scens:
     for rz in realization_ids:
         for storm_id in df_event_summaries.storm_id.values:
             count += 1
@@ -160,6 +161,23 @@ for outfall_type in lst_outfall_types:
                 # new_file_path.touch()
                 with open (f_inp_scen, "w+") as f1:
                     f1.write(new_in)
+                # write another .inp file with downstream water level but no rain
+                if "TIMESERIES" in outfall_type:
+                    # load model with variable water level boundary condition
+                    base_inp = f_inp_scen
+                    base_model = swmmio.Model(base_inp)
+                    # set the raingage of subcatcments to the one with zero rainfall
+                    base_model.inp.subcatchments.loc[:, "Raingage"] = norain_gage_name
+                    # define filepath to norain inp
+                    sfx = "_norain"
+                    f_inp_scen = dir_yr + "rz{}_yr{}_strm{}{}.inp".format(rz, yr, storm_id, sfx)
+                    # add entry to the df_strms dataframe
+                    count += 1
+                    df_strms.loc[count, :] = df_strms.loc[count-1, :] # everything is same as previous but f_inp_scen
+                    df_strms.loc[count, "swmm_inp"] = f_inp_scen
+                    # write inp
+                    base_model.inp.save(f_inp_scen)
+
 #%% export swmm catalog to csv file
 # create directory if it doesn't exist
 # pth = Path(f_swmm_scenarios_catalog.format(yr)).mkdir(parents=True, exist_ok=True)
