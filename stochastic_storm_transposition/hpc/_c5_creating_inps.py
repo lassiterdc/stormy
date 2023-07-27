@@ -194,10 +194,6 @@ pth_parent.mkdir(parents=True, exist_ok=True)
 
 df_strms.to_csv(f_swmm_scenarios_catalog.format(yr), index = False)
 
-# DCL WORK
-print(df_strms)
-# END DCL WORK
-
 time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
 
 num_files = len(df_strms)
