@@ -8,13 +8,11 @@ from __utils import c8b_bootstrapping
 
 f_bootstrapped_consolidated, f_bootstrapped_consolidated_hrly_raw, dir_swmm_sst_models_hrly, f_bootstrapped_quant_estimates, sst_recurrence_intervals, export_raw_bs_samps = c8b_bootstrapping()
 
-
 f_out_bs_results = f_bootstrapped_quant_estimates + "return_pds_btstrp_{}.nc".format("*")
 lst_f_bsresults = glob(f_out_bs_results)
 
 f_out_bs_results_raw = f_bootstrapped_quant_estimates + "raw_btstrp_{}.nc".format("*")
 lst_f_bsresults_raw = glob(f_out_bs_results_raw)
-
 #%% export to single netcdf file
 ds = xr.open_mfdataset(lst_f_bsresults, engine="h5netcdf", concat_dim = "bootstrap_sample", combine="nested")
 attrs = dict(date_created = str(datetime.now())
