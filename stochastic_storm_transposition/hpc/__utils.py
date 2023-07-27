@@ -1,6 +1,6 @@
 #%% import libraries
 from glob import glob
-#%% filenames, paths, and directories
+# filenames, paths, and directories
 dir_repo = "/project/quinnlab/dcl3nd/norfolk/stormy/"
 dir_sst = dir_repo + "stochastic_storm_transposition/"
 dir_sst_nrflk = dir_sst + "norfolk/"
@@ -62,6 +62,8 @@ f_inp_base_hrly = dir_swmm_sst_scenarios_hrly_proj + "hague_sst_model_template.i
 # dir_time_series_hrly = dir_swmm_sst_scenarios_hrly + "time_series/"
 f_swmm_scenarios_catalog = dir_swmm_sst_scenarios_hrly_proj + "swmm_scenario_catalogs/" + "_swmm_scenarios_catalog_yr{}.csv"
 
+norain_gage_name = "no_rain"
+
 # c6
 max_runtime_min_hrly = 60 # maximum minutes of runtime allowable for each SWMM simulation
 
@@ -122,7 +124,7 @@ def c6_running_swmm():
 
 def c5_creating_inps():
     f_out_realizations = f_realizations_hourly
-    return nyears, nperyear, nrealizations, dir_swmm_sst_models_hrly, f_inp_base_hrly, f_out_realizations, seed_mrms_hourly, dir_time_series_hrly, f_key_subnames_gridind, lst_template_keys, f_swmm_scenarios_catalog
+    return nyears, nperyear, nrealizations, dir_swmm_sst_models_hrly, f_inp_base_hrly, f_out_realizations, seed_mrms_hourly, dir_time_series_hrly, f_key_subnames_gridind, lst_template_keys, f_swmm_scenarios_catalog, norain_gage_name
 
 def c4b_creating_wlevel_tseries():
     return f_mrms_event_summaries, f_mrms_event_timeseries, f_water_level_storm_surge, f_realizations_hourly, f_key_subnames_gridind, nrealizations, sst_hrly_tstep_min, start_date, time_buffer, dir_time_series_hrly, c4b_gen_plots, wlevel_threshold, n_attempts, n_clusters, resampling_inteval
