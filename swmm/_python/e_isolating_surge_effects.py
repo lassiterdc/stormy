@@ -157,38 +157,38 @@ for rtrn in sst_recurrence_intervals:
 #%% quick and imprecise variance analysis by return period
 # node = "E143722"
 # max_storms_to_analyze = 100
-max_margins = 0.1 # I don't want to look at storms that are 10% bigger or smaller than the return period
-lst_ds_comp = []
-for node in tqdm(np.unique(ds_sst_compound.node_id.values)):
-    for flood_return_yrs in sst_recurrence_intervals:
-        node_flooding = df_quants[(df_quants.node_id==node) & (df_quants.flood_return_yrs == flood_return_yrs)].node_flooding_cubic_meters.values
-        df_sst_compound_subset = ds_sst_compound.sel(dict(node_id = node)).to_dataframe().reset_index().drop(["freeboundary", "node_id"], axis = 1)
-        ds_sst_freebndry_subset = ds_sst_freebndry.sel(dict(node_id = node)).to_dataframe().reset_index().drop(["freeboundary", "node_id"], axis = 1)
-        n = 0
-        nearby_storm_margin = 0.01
+# max_margins = 0.1 # I don't want to look at storms that are 10% bigger or smaller than the return period
+# lst_ds_comp = []
+# for node in tqdm(np.unique(ds_sst_compound.node_id.values)):
+#     for flood_return_yrs in sst_recurrence_intervals:
+#         node_flooding = df_quants[(df_quants.node_id==node) & (df_quants.flood_return_yrs == flood_return_yrs)].node_flooding_cubic_meters.values
+#         df_sst_compound_subset = ds_sst_compound.sel(dict(node_id = node)).to_dataframe().reset_index().drop(["freeboundary", "node_id"], axis = 1)
+#         ds_sst_freebndry_subset = ds_sst_freebndry.sel(dict(node_id = node)).to_dataframe().reset_index().drop(["freeboundary", "node_id"], axis = 1)
+#         n = 0
+#         nearby_storm_margin = 0.01
 
-        # df_closest_events = df_sst_compound_subset.iloc[(df_sst_compound_subset['node_flooding_cubic_meters']-node_flooding).abs().argsort()[:min_storms_to_analyze]]
-        # filter events
+#         # df_closest_events = df_sst_compound_subset.iloc[(df_sst_compound_subset['node_flooding_cubic_meters']-node_flooding).abs().argsort()[:min_storms_to_analyze]]
+#         # filter events
 
-        upper_bound = node_flooding * (1+max_margins)
-        upper_cond = df_sst_compound_subset.node_flooding_cubic_meters.values < upper_bound
-        lower_bound = node_flooding * (1-max_margins)
-        lower_cond = df_sst_compound_subset.node_flooding_cubic_meters.values > lower_bound
+#         upper_bound = node_flooding * (1+max_margins)
+#         upper_cond = df_sst_compound_subset.node_flooding_cubic_meters.values < upper_bound
+#         lower_bound = node_flooding * (1-max_margins)
+#         lower_cond = df_sst_compound_subset.node_flooding_cubic_meters.values > lower_bound
 
-        df_closest_events_filtered = df_sst_compound_subset[(upper_cond) & (lower_cond)]
+#         df_closest_events_filtered = df_sst_compound_subset[(upper_cond) & (lower_cond)]
 
-        df_compare = df_closest_events_filtered.merge(ds_sst_freebndry_subset, on = ["storm_id", "realization", "year"], suffixes = ("_cmpnd", "_free"))
+#         df_compare = df_closest_events_filtered.merge(ds_sst_freebndry_subset, on = ["storm_id", "realization", "year"], suffixes = ("_cmpnd", "_free"))
 
-        df_compare['frac_wlevel'] = 1 -df_compare["node_flooding_cubic_meters_free"] / df_compare["node_flooding_cubic_meters_cmpnd"]
+#         df_compare['frac_wlevel'] = 1 -df_compare["node_flooding_cubic_meters_free"] / df_compare["node_flooding_cubic_meters_cmpnd"]
 
-        df_compare['node_id'] = node
+#         df_compare['node_id'] = node
 
-        df_compare['flood_return_yrs'] = flood_return_yrs
+#         df_compare['flood_return_yrs'] = flood_return_yrs
         
-        lst_ds_comp.append(df_compare)
+#         lst_ds_comp.append(df_compare)
 
-df_comparison = pd.concat(lst_ds_comp)
-df_comparison.to_csv(scratch_file.format("df_comparison_quantmethodclosestobs.csv"))
+# df_comparison = pd.concat(lst_ds_comp)
+# df_comparison.to_csv(scratch_file.format("df_comparison_quantmethodclosestobs.csv"))
 
     
 
@@ -196,60 +196,63 @@ df_comparison.to_csv(scratch_file.format("df_comparison_quantmethodclosestobs.cs
 lst_ds_bs_CIs = []
 for node in tqdm(np.unique(ds_sst_compound.node_id.values)):
     count = -1
-    for flood_return_yrs in ds_bootstrap_rtrn.flood_return_yrs.values:
-        count += 1
-        quant = quants[count]
-        node_flooding = df_quants[(df_quants.node_id==node) & (df_quants.flood_return_yrs == flood_return_yrs)].node_flooding_cubic_meters.values
-        # df_sst_compound_subset = ds_sst_compound.sel(dict(node_id = node)).to_dataframe().reset_index().drop(["freeboundary", "node_id"], axis = 1)
-        # ds_sst_freebndry_subset = ds_sst_freebndry.sel(dict(node_id = node)).to_dataframe().reset_index().drop(["freeboundary", "node_id"], axis = 1)
-        # n = 0
+    ds_bs_node = ds_bootstrap_rtrn.sel(dict(node_id = node))
+    if ds_bs_node.node_flooding_cubic_meters.sum().values > 0:
+        # print(node)
+        for flood_return_yrs in ds_bootstrap_rtrn.flood_return_yrs.values:
+            count += 1
+            quant = quants[count]
+            node_flooding = df_quants[(df_quants.node_id==node) & (df_quants.flood_return_yrs == flood_return_yrs)].node_flooding_cubic_meters.values
+            # df_sst_compound_subset = ds_sst_compound.sel(dict(node_id = node)).to_dataframe().reset_index().drop(["freeboundary", "node_id"], axis = 1)
+            # ds_sst_freebndry_subset = ds_sst_freebndry.sel(dict(node_id = node)).to_dataframe().reset_index().drop(["freeboundary", "node_id"], axis = 1)
+            # n = 0
 
-        # df_closest_events = df_sst_compound_subset.iloc[(df_sst_compound_subset['node_flooding_cubic_meters']-node_flooding).abs().argsort()[:min_storms_to_analyze]]
-        # filter events
-        # work
-        lower_quant =  (1-sst_conf_interval) / 2
-        upper_quant = 1 - lower_quant
-        ds_bs_subset = ds_bootstrap_rtrn.sel(dict(flood_return_yrs = flood_return_yrs, node_id = node))
-        upper_bound = float(ds_bs_subset.quantile(q = upper_quant, dim = "bootstrap_sample").node_flooding_cubic_meters.values)
-        # upper_cond = df_sst_compound_subset.node_flooding_cubic_meters.values <= upper_bound
-        lower_bound = float(ds_bs_subset.quantile(q = lower_quant, dim = "bootstrap_sample").node_flooding_cubic_meters.values)
-        # lower_cond = df_sst_compound_subset.node_flooding_cubic_meters.values >= lower_bound
+            # df_closest_events = df_sst_compound_subset.iloc[(df_sst_compound_subset['node_flooding_cubic_meters']-node_flooding).abs().argsort()[:min_storms_to_analyze]]
+            # filter events
+            # work
+            lower_quant =  (1-sst_conf_interval) / 2
+            upper_quant = 1 - lower_quant
+            ds_bs_subset = ds_bs_node.sel(dict(flood_return_yrs = flood_return_yrs))
+            upper_bound = float(ds_bs_subset.quantile(q = upper_quant, dim = "bootstrap_sample").node_flooding_cubic_meters.values)
+            # upper_cond = df_sst_compound_subset.node_flooding_cubic_meters.values <= upper_bound
+            lower_bound = float(ds_bs_subset.quantile(q = lower_quant, dim = "bootstrap_sample").node_flooding_cubic_meters.values)
+            # lower_cond = df_sst_compound_subset.node_flooding_cubic_meters.values >= lower_bound
 
-        # end work
+            # end work
 
-        # df_closest_events_filtered = df_sst_compound_subset[(upper_cond) & (lower_cond)]
+            # df_closest_events_filtered = df_sst_compound_subset[(upper_cond) & (lower_cond)]
 
-        # df_compare = df_closest_events_filtered.merge(ds_sst_freebndry_subset, on = ["storm_id", "realization", "year"], suffixes = ("_cmpnd", "_free"))
+            # df_compare = df_closest_events_filtered.merge(ds_sst_freebndry_subset, on = ["storm_id", "realization", "year"], suffixes = ("_cmpnd", "_free"))
 
-        # df_compare['frac_wlevel'] = 1 -df_compare["node_flooding_cubic_meters_free"] / df_compare["node_flooding_cubic_meters_cmpnd"]
+            # df_compare['frac_wlevel'] = 1 -df_compare["node_flooding_cubic_meters_free"] / df_compare["node_flooding_cubic_meters_cmpnd"]
 
-        df_compare['node_id'] = node
+            # df_compare['node_id'] = node
 
-        # df_compare['flood_return_yrs'] = flood_return_yrs
+            # df_compare['flood_return_yrs'] = flood_return_yrs
 
-        # df_frac_wlevel_var = df_compare.groupby(["node_id", "flood_return_yrs"]).frac_wlevel.var().reset_index().rename(dict(frac_wlevel = "frac_wlevel_var"), axis = 1)
-        # df_frac_wlevel_mean = df_compare.groupby(["node_id", "flood_return_yrs"]).frac_wlevel.mean().reset_index().rename(dict(frac_wlevel = "frac_wlevel_mean"), axis = 1)
-        
+            # df_frac_wlevel_var = df_compare.groupby(["node_id", "flood_return_yrs"]).frac_wlevel.var().reset_index().rename(dict(frac_wlevel = "frac_wlevel_var"), axis = 1)
+            # df_frac_wlevel_mean = df_compare.groupby(["node_id", "flood_return_yrs"]).frac_wlevel.mean().reset_index().rename(dict(frac_wlevel = "frac_wlevel_mean"), axis = 1)
+            
 
-        ds_bs_CIs = pd.DataFrame({"node":[node], "flood_return_yrs":[flood_return_yrs], "upper_CI":[upper_bound],
-                         "lower_CI":[lower_bound]})
+            ds_bs_CIs = pd.DataFrame({"node_id":[node], "flood_return_yrs":[flood_return_yrs], "upper_CI":[upper_bound],
+                            "lower_CI":[lower_bound]})
 
-        ds_bs_CIs = ds_bs_CIs.replace(to_replace=-1*np.inf, value =np.nan)
+            ds_bs_CIs = ds_bs_CIs.replace(to_replace=-1*np.inf, value =np.nan)
 
-        
-        lst_ds_bs_CIs.append(ds_bs_CIs)
+            lst_ds_bs_CIs.append(ds_bs_CIs)
+        else:
+            continue
 
 df_bs_CIs = pd.concat(lst_ds_bs_CIs)
-df_bs_CIs.to_csv(scratch_file.format("df_bootstrapped_CIs.csv"))
+df_bs_CIs.to_csv(scratch_file.format("df_bootstrapped_CIs.csv"), index=False)
 
 #%% create dataframe of all events within bootstrap confidence interval
 df_bs_CIs = pd.read_csv(scratch_file.format("df_bootstrapped_CIs.csv"))
 
-
 df_bs_CIs.groupby("node")
 
 lst_ds_comp = []
-for node in tqdm(np.unique(ds_sst_compound.node_id.values)):
+for node in tqdm(df_bs_CIs.node.unique()):
     count = -1
     for flood_return_yrs in ds_bootstrap_rtrn.flood_return_yrs.values:
         count += 1
@@ -257,7 +260,6 @@ for node in tqdm(np.unique(ds_sst_compound.node_id.values)):
         # node_flooding = df_quants[(df_quants.node_id==node) & (df_quants.flood_return_yrs == flood_return_yrs)].node_flooding_cubic_meters.values
         df_sst_compound_subset = ds_sst_compound.sel(dict(node_id = node)).to_dataframe().reset_index().drop(["freeboundary", "node_id"], axis = 1)
         ds_sst_freebndry_subset = ds_sst_freebndry.sel(dict(node_id = node)).to_dataframe().reset_index().drop(["freeboundary", "node_id"], axis = 1)
-        # n = 0
 
         # df_closest_events = df_sst_compound_subset.iloc[(df_sst_compound_subset['node_flooding_cubic_meters']-node_flooding).abs().argsort()[:min_storms_to_analyze]]
         # filter events
@@ -265,9 +267,11 @@ for node in tqdm(np.unique(ds_sst_compound.node_id.values)):
         df_bs_CIs_subset = df_bs_CIs[(df_bs_CIs.node == node) & (df_bs_CIs.flood_return_yrs==flood_return_yrs)]
 
         upper_bound = float(df_bs_CIs_subset["upper_CI"])
+        if upper_bound <= 0: # if the upper bound is 0, skip the return period 
+            continue
         upper_cond = df_sst_compound_subset.node_flooding_cubic_meters.values <= upper_bound
         lower_bound = float(df_bs_CIs_subset["lower_CI"])
-        lower_cond = df_sst_compound_subset.node_flooding_cubic_meters.values >= lower_bound
+        lower_cond = ((df_sst_compound_subset.node_flooding_cubic_meters.values >= lower_bound) & (df_sst_compound_subset.node_flooding_cubic_meters.values > 0)) # don't want to include events with no flooding
 
         df_closest_events_filtered = df_sst_compound_subset[(upper_cond) & (lower_cond)]
 
@@ -278,11 +282,22 @@ for node in tqdm(np.unique(ds_sst_compound.node_id.values)):
         df_compare['node_id'] = node
 
         df_compare['flood_return_yrs'] = flood_return_yrs
+
+        # DCL WORK
+        df_frac_wlevel_var = df_compare.groupby(["node_id", "flood_return_yrs"]).frac_wlevel.var().reset_index().rename(dict(frac_wlevel = "frac_wlevel_var"), axis = 1)
+        df_frac_wlevel_mean = df_compare.groupby(["node_id", "flood_return_yrs"]).frac_wlevel.mean().reset_index().rename(dict(frac_wlevel = "frac_wlevel_mean"), axis = 1)
+
+        df_attribution_stats = pd.merge(df_frac_wlevel_var, df_frac_wlevel_mean,  on = ["node_id", "flood_return_yrs"])
         
-        lst_ds_comp.append(df_compare)
+        df_out = pd.merge(df_bs_CIs_subset, df_attribution_stats, left_on = ["node", "flood_return_yrs"], right_on = ["node_id", "flood_return_yrs"])
+        
+        df_out["num_strms"] = df_compare.shape[0]
+        # print(df_compare.shape[0])
+        # END WORK
+        lst_ds_comp.append(df_out)
 
 df_comparison = pd.concat(lst_ds_comp)
-df_comparison.to_csv(scratch_file.format("df_comparison_quantmethodclosestobs.csv"))
+df_comparison.to_csv(scratch_file.format("df_comparison_bootstrapped.csv"), index=False)
 
 
 #%% analysis
@@ -290,17 +305,24 @@ df_comparison.to_csv(scratch_file.format("df_comparison_quantmethodclosestobs.cs
 # planning on coloring by mean and sizing points based on variance
 df_comparison = pd.read_csv(scratch_file.format("df_comparison_bootstrapped.csv"))
 
-df_comparison.value_counts(["flood_return_yrs", "node_id"])
-# df_comparison = df_comparison.dropna()
-df_frac_wlevel_var = df_comparison.groupby(["node_id", "flood_return_yrs"]).frac_wlevel.var().reset_index().rename(dict(frac_wlevel = "frac_wlevel_var"), axis = 1)
-df_frac_wlevel_mean = df_comparison.groupby(["node_id", "flood_return_yrs"]).frac_wlevel.mean().reset_index().rename(dict(frac_wlevel = "frac_wlevel_mean"), axis = 1)
+# df_comparison.value_counts(["flood_return_yrs", "node_id"])
+# # df_comparison = df_comparison.dropna()
+# df_frac_wlevel_var = df_comparison.groupby(["node_id", "flood_return_yrs"]).frac_wlevel.var().reset_index().rename(dict(frac_wlevel = "frac_wlevel_var"), axis = 1)
+# df_frac_wlevel_mean = df_comparison.groupby(["node_id", "flood_return_yrs"]).frac_wlevel.mean().reset_index().rename(dict(frac_wlevel = "frac_wlevel_mean"), axis = 1)
 
-df_attribution_stats = pd.merge(df_frac_wlevel_var, df_frac_wlevel_mean,  on = ["node_id", "flood_return_yrs"])
+# df_attribution_stats = pd.merge(df_frac_wlevel_var, df_frac_wlevel_mean,  on = ["node_id", "flood_return_yrs"])
 # merge with the df with the quantile estimate
 
 # merge with the geodataframe for plotting
-gdf_node_attribution = gdf_nodes.merge(df_attribution_stats, how = 'inner', left_on = "NAME", right_on = "node_id").drop("NAME", axis=1)
+gdf_node_attribution = gdf_nodes.merge(df_comparison, how = 'inner', left_on = "NAME", right_on = "node").drop("NAME", axis=1)
 
+gdf_nodes_w_flding = gpd.GeoDataFrame(geometry=gdf_node_attribution.geometry.unique())
+
+# nodes = pd.Series(gdf_node_attribution.geometry.unique())
+
+# gdf_nodes_w_flding = gdf_node_attribution.node == nodes
+
+# gdf_node_attribution = gdf_node_attribution.merge(df_bs_CIs, how = 'inner', left_on = ["node_id", "flood_return_yrs"], right_on = ["node", "flood_return_yrs"]).drop("node", axis=1)
 #%% plotting
 # fig, axes = plt.subplots(1, len(sst_recurrence_intervals), figsize = [width, height], dpi=300) # , subplot_kw=dict(projection=proj)
 # count = -1
@@ -325,7 +347,7 @@ for rtrn in sst_recurrence_intervals:
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)
     # gdf_coast.plot(ax=ax, color='black', zorder=1)
-    gdf_nodes.plot(ax = ax, color = "none", edgecolor = "black", zorder = 1, alpha = 0.7,
+    gdf_nodes_w_flding.plot(ax = ax, color = "none", edgecolor = "black", zorder = 1, alpha = 0.7,
                    linewidths = 0.5)
 
     gdf_subset.plot(ax=ax, column="frac_wlevel_mean",
@@ -340,7 +362,6 @@ for rtrn in sst_recurrence_intervals:
     plt.tight_layout()
     plt.savefig(scratch_file.format(title_fld_attribution.format(rtrn)),
                 transparent=False, bbox_inches='tight')
-    
 
 #%% making an animation
 # https://towardsdatascience.com/how-to-create-a-gif-from-matplotlib-plots-in-python-6bec6c0c952c
