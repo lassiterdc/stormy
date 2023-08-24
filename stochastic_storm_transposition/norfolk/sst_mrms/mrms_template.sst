@@ -22,7 +22,7 @@ NSTORMS			20
 NREALIZATIONS	10														# HOW MANY REPLICATIONS/REALIZATIONS DO YOU WANT?
 TIMESEPARATION	12														# MINIMUM TIME SEPARATION BETWEEN STORMS IN CATALOG IN HOURS
 DOMAINTYPE		irregular												# "irregular" or "rectangular"
-DOMAINSHP		/project/quinnlab/dcl3nd/norfolk/stormy/stochastic_storm_transposition/norfolk/transposition_domain/norfolk_trans_dom_4326.shp
+DOMAINSHP		/project/quinnlab/dcl3nd/norfolk/stormy/stochastic_storm_transposition/norfolk/transposition_domain/norfolk_trans_dom_4326_test.shp
 #DOMAINFILE		
 #LATITUDE_MIN	
 #LATITUDE_MAX	
