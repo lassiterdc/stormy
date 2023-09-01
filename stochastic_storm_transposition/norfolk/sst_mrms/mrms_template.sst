@@ -10,7 +10,7 @@
 "DOMAINSHP" : "/project/quinnlab/dcl3nd/norfolk/stormy/stochastic_storm_transposition/norfolk/transposition_domain/norfolk_trans_dom_4326_test.shp",
 "DIAGNOSTICPLOTS" : "TRUE", "FREQANALYSIS" : "false", 
 "EXCLUDESTORMS" : [], "EXCLUDEMONTHS": [],
-"INCLUDEYEARS" : "$YEAR", 
+"INCLUDEYEARS" : [$YEAR], 
 "DURATIONCORRECTION" : "false", "TRANSPOSITION" : "uniform", "RESAMPLING" : "empirical", "RETURNLEVELS": [1,2,5,10,25,50,100,200,500], "RETURNTHRESHOLD" : 1 , 
 "POINTAREA" : "basin",
 "WATERSHEDSHP" : "/project/quinnlab/dcl3nd/norfolk/stormy/stochastic_storm_transposition/norfolk/watershed/norfolk_wshed_4326.shp",
