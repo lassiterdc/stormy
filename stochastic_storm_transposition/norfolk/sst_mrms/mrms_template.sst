@@ -11,11 +11,8 @@
 "DIAGNOSTICPLOTS" : "TRUE", "FREQANALYSIS" : "false", 
 "EXCLUDESTORMS" : [], "EXCLUDEMONTHS": [],
 "INCLUDEYEARS" : "$YEAR", 
-# "Area_Extent"  : {"LATITUDE_MIN":42.5,"LATITUDE_MAX":44.0,"LONGITUDE_MIN": -90.5, "LONGITUDE_MAX": -88.0},
 "DURATIONCORRECTION" : "false", "TRANSPOSITION" : "uniform", "RESAMPLING" : "empirical", "RETURNLEVELS": [1,2,5,10,25,50,100,200,500], "RETURNTHRESHOLD" : 1 , 
 "POINTAREA" : "basin", # "POINTLAT": 42.299 , 
-# "POINTLON": -83.230, "BOX_YMIN": 43.0, "BOX_YMAX": 43.25, "BOX_XMIN" : -89.5, "BOX_XMAX" : -89.25,
 "WATERSHEDSHP" : "/project/quinnlab/dcl3nd/norfolk/stormy/stochastic_storm_transposition/norfolk/watershed/norfolk_wshed_4326.shp",
-# "CALCTYPE" : "PDS",
 "VARIABLES" : {"rainname": "rainrate","latname":"latitude","longname":"longitude"},
 }
