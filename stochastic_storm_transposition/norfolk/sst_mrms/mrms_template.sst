@@ -7,7 +7,7 @@
 "CREATECATALOG" : "true", "DURATION" : 72,
 "NYEARS" : 10 , "NSTORMS" : 20, "NREALIZATIONS" : 10,
 "TIMESEPARATION" : 12, "DOMAINTYPE" : "irregular",
-"DOMAINSHP" : "/project/quinnlab/dcl3nd/norfolk/stormy/stochastic_storm_transposition/norfolk/transposition_domain/norfolk_trans_dom_4326_test.shp",
+"DOMAINSHP" : "/project/quinnlab/dcl3nd/norfolk/stormy/stochastic_storm_transposition/norfolk/transposition_domain/norfolk_trans_dom_4326_test2.shp",
 "DIAGNOSTICPLOTS" : "TRUE", "FREQANALYSIS" : "false", 
 "EXCLUDESTORMS" : [], "EXCLUDEMONTHS": [],
 "INCLUDEYEARS" : [$YEAR], 
