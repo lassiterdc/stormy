@@ -2,10 +2,17 @@
 from  netCDF4 import Dataset
 import numpy as np
 from datetime import datetime
-from __utils import c1_combine_hrly_cats
+import sys
+from glob import glob
+# from __utils import *
 
 # load files and directories
-dir_sst_nrflk_hrly, parameterfile, f_out, fs = c1_combine_hrly_cats()
+# dir_sst_nrflk_hrly, parameterfile, f_out, fs = c1_combine_hrly_cats()
+
+
+dir_sst = str(sys.argv[1])
+f_sst_combined_cat = dir_sst + "strmcat_combined.nc"
+fs = glob(dir_sst + "*_20*.nc")
 #%% functions from RainyDay_functions.py
 def readcatalog(rfile):
     infile=Dataset(rfile,'r')
@@ -163,7 +170,7 @@ caty = outlocy_comb
 cattime = outtime_comb
 latrange = outlatitude
 lonrange = outlongitude
-catalogname = f_out
+catalogname = f_sst_combined_cat
 nstorms = len(outmax_comb)
 gridmask = outmask
 dmask = domainmask
