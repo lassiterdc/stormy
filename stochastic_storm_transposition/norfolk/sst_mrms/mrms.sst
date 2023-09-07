@@ -1,11 +1,11 @@
 {
-"MAINPATH" : "/project/quinnlab/dcl3nd/norfolk/stormy/stochastic_storm_transposition/norfolk/sst_mrms/" ,
+"MAINPATH" : "/project/quinnlab/dcl3nd/norfolk/stormy/stochastic_storm_transposition/norfolk/sst_mrms_single_run/" ,
 "SCENARIONAME" : "mrms",
 "RAINPATH" : "/project/quinnlab/dcl3nd/norfolk/highres-radar-rainfall-processing/data/mrms_nc_preciprate_fullres_dailyfiles_constant_tstep/*.nc",
 "ISLASSITER" : "true",
 "CATALOGNAME" : "strmcat_mrms.nc",
 "CREATECATALOG" : "true", "DURATION" : 72,
-"NYEARS" : 1000 , "NSTORMS" : 20000, "NREALIZATIONS" : 10,
+"NYEARS" : 100 , "NSTORMS" : 380, "NREALIZATIONS" : 10,
 "TIMESEPARATION" : 12, "DOMAINTYPE" : "irregular",
 "DOMAINSHP" : "/project/quinnlab/dcl3nd/norfolk/stormy/stochastic_storm_transposition/norfolk/transposition_domain/norfolk_trans_dom_4326_test2.shp",
 "DIAGNOSTICPLOTS" : "TRUE", "FREQANALYSIS" : "false", 
