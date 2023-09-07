@@ -10,7 +10,7 @@
 "SCENARIOS" : "TRUE",
 "TIMESEPARATION" : 12, "DOMAINTYPE" : "irregular",
 "DOMAINSHP" : "/project/quinnlab/dcl3nd/norfolk/stormy/stochastic_storm_transposition/norfolk/transposition_domain/norfolk_trans_dom_4326_test2.shp",
-"DIAGNOSTICPLOTS" : "true", "FREQANALYSIS" : "true", 
+"DIAGNOSTICPLOTS" : "false", "FREQANALYSIS" : "true", 
 "EXCLUDESTORMS" : [], "EXCLUDEMONTHS": [],
 "INCLUDEYEARS" : [2015,2016,2017,2018,2019], 
 "DURATIONCORRECTION" : "false", "TRANSPOSITION" : "uniform", "RESAMPLING" : "empirical", "RETURNLEVELS": [1,2,5,10,25,50,100,200,500], "RETURNTHRESHOLD" : 1 , 
