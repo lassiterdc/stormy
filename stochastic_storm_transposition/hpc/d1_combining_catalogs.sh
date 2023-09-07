@@ -25,7 +25,7 @@ source __directories.sh
 
 # run script for combining storm catalogs
 echo "Combining storm catalogs...."
-python ${assar_dirs[hpc_c1_py]} ${assar_dirs[hpc_mrms]}
+python ${assar_dirs[hpc_c1_py]} ${assar_dirs[rainyday]} ${assar_dirs[hpc_mrms]}
 
 
 echo "Finished creating storm catalog for: ${assar_dirs[hpc_mrms]}"
