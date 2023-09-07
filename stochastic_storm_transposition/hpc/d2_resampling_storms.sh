@@ -17,7 +17,7 @@ source activate rainyday
 
 source __directories.sh
 
-echo "Running SST file: ${assar_dirs[hpc_c1_sst]}"
+echo "Running SST file: ${assar_dirs[hpc_d2_sst]}"
 
 # running RainyDay
-python ${assar_dirs[hpc_rainyday_py]} ${assar_dirs[hpc_c1_sst]}
+python ${assar_dirs[hpc_rainyday_py]} ${assar_dirs[hpc_d2_sst]}

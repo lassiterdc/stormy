@@ -50,6 +50,7 @@ assar_dirs[hpc_c1_SST_mrms_hourly_inp]=${assar_dirs[hpc_mrms_hourly]}"_inputs/mr
 assar_dirs[hpc_c1_cmbnd_cat]=${assar_dirs[hpc_mrms_hourly]}"strmcat_mrms_hourly_combined.nc"
 assar_dirs[hpc_c1_sst]=${assar_dirs[hpc_mrms_hourly]}"mrms_hourly_combined.sst"
 
+assar_dirs[hpc_d2_sst]=${assar_dirs[hpc_mrms]}"mrms_combined.sst"
 
 ## for testing
 assar_dirs[hpc_b_SST_in_subset]=${assar_dirs[sst]}"norfolk/norfolk_mrms_subset_rivanna.sst"
