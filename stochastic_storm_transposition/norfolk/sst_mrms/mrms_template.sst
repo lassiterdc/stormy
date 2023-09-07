@@ -8,7 +8,7 @@
 "NYEARS" : 1 , "NSTORMS" : 20, "NREALIZATIONS" : 1,
 "TIMESEPARATION" : 12, "DOMAINTYPE" : "irregular",
 "DOMAINSHP" : "/project/quinnlab/dcl3nd/norfolk/stormy/stochastic_storm_transposition/norfolk/transposition_domain/norfolk_trans_dom_4326_test2.shp",
-"DIAGNOSTICPLOTS" : "TRUE", "FREQANALYSIS" : "false", 
+"DIAGNOSTICPLOTS" : "false", "FREQANALYSIS" : "false", 
 "EXCLUDESTORMS" : [], "EXCLUDEMONTHS": [],
 "INCLUDEYEARS" : [$YEAR], 
 "DURATIONCORRECTION" : "false", "TRANSPOSITION" : "uniform", "RESAMPLING" : "empirical", "RETURNLEVELS": [1,2,5,10,25,50,100,200,500], "RETURNTHRESHOLD" : 1 , 
