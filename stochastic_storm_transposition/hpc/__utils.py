@@ -175,6 +175,10 @@ def da_rainyday_in():
     return dir_mrms, f_sst_mrms, dir_for_sst_files
 
 #%% functions
+import pandas as pd
+import sys
+import xarray as xr
+
 def parse_inp(f_inp):
     # format "rz{}_yr{}_strm{}.inp"
     lst_name_comp = f_inp.split("/")[-1].split("_")
