@@ -10,7 +10,7 @@ dir_home_sst = dir_home + "sst/"
 dir_scratch_sst = "/scratch/dcl3nd/stormy/"
 
 # WORK
-f_sst_nrflk_hrly_parameterfile = dir_sst_nrflk_hrly + "mrms_hourly_combined_test.sst"
+f_sst_nrflk_hrly_parameterfile = dir_sst_nrflk_hrly + "mrms_hourly_combined.sst"
 # f_sst_nrflk_hrly_parameterfile = dir_sst_nrflk_hrly + "mrms_hourly_combined_test.sst"
 # END WORK
 f_sst_nrflk_hrly_combined_catalog = dir_sst_nrflk_hrly + "strmcat_mrms_hourly_combined.nc"
@@ -84,7 +84,7 @@ export_raw_bs_samps = False
 
 
 #d4
-fldr_realizations = "/project/quinnlab/dcl3nd/norfolk/stormy/stochastic_storm_transposition/norfolk/sst_mrms/mrms_combined/Realizations/"
+fldr_realizations = "/project/quinnlab/dcl3nd/norfolk/stormy/stochastic_storm_transposition/norfolk/sst_mrms/mrms_combined_test/Realizations/"
 dir_swmm_sst_scenarios = dir_swmm_model + "swmm_scenarios_sst/"
 # dir_swmm_sst_scenarios_scratch = dir_scratch_sst + "swmm_sst_hourly/"
 # dir_swmm_sst_scenarios_hrly_home = dir_home_sst + "swmm_sst_hourly/"
