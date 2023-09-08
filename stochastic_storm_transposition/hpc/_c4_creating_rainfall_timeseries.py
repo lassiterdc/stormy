@@ -12,7 +12,7 @@ import sys
 from datetime import datetime
 # from tqdm import tqdm
 
-from __utils import c4_creating_rainfall_tseries
+from __utils import *
 
 yr = int(sys.argv[1]) # a number between 1 and 1000
 
@@ -20,14 +20,49 @@ nrealizations, f_out_realizations, f_shp_swmm_subs, dir_time_series, mm_per_inch
 
 script_start_time = datetime.now()
 #%% loading data
-ds_rlztns = xr.open_dataset(f_out_realizations)
+def define_dims(ds):
+    fpath = ds.encoding["source"]
+    lst_f = fpath.split("/")[-1].split("_")
+    rz = int(lst_f[0].split("rz")[-1])
+    year = int(lst_f[1].split("y")[-1])
+    strm = int(lst_f[2].split("stm")[-1].split(".")[0])
+    first_tstep = ds.time.values[0]
+    tseries = pd.Series(ds.time.values)
+    tsteps_unique = tseries.diff().dropna().unique()
+    if len(tsteps_unique) > 1:
+        sys.exit("variable time step encountered in file {}".format(fpath))
+    tstep_min = tsteps_unique[0] / np.timedelta64(1, "m")
+    tstep_ind = np.arange(len(tseries))
+    ds["time"] = tstep_ind
+    ds = ds.assign_attrs(timestep_min = tstep_min)
+    ds = ds.assign_coords(dict(realization=rz, year = year, storm = strm, first_tstep = first_tstep))
+    ds = ds.expand_dims(dim=dict(realization=1, year = 1, storm = 1, first_tstep = 1))
+    return ds
+
+lst_f_all_ncs = glob(fldr_realizations+"*.nc")
+lst_f_ncs = []
+for f in lst_f_all_ncs:
+    lst_f = f.split("/")[-1].split("_")
+    # rz = int(lst_f[0].split("rz")[-1])
+    year = int(lst_f[1].split("y")[-1])
+    # strm = int(lst_f[2].split("stm")[-1].split(".")[0])
+    if year == yr:
+        lst_f_ncs.append(f)
+
+lst_f_ncs.sort()
+# ds_unprcsd = xr.open_dataset(lst_f_ncs[0])
+# ds0 = define_dims(xr.open_dataset(lst_f_ncs[0]))
+# ds1 = define_dims(xr.open_dataset(lst_f_ncs[1]))
+# ds2 = define_dims(xr.open_dataset(lst_f_ncs[2]))
+
+ds_rlztns = xr.open_mfdataset(lst_f_ncs, preprocess = define_dims)
 
 # if the number of realizations defined in __utils is less than in the combined catalog, us the smaller of the two
-if nrealizations < len(ds_rlztns.realization_id.values):
-    realization_ids = np.arange(1, nrealizations+1)
-    print("Using just {} out of {} available realizations based on user inputs in __utils.py.".format(nrealizations, len(ds_rlztns.realization_id.values)))
+if nrealizations < len(ds_rlztns.realization.values):
+    realizations = np.arange(1, nrealizations+1)
+    print("Using just {} out of {} available realizations based on user inputs in __utils.py.".format(nrealizations, len(ds_rlztns.realization.values)))
 else:
-    realization_ids = ds_rlztns.realization_id.values
+    realizations = ds_rlztns.realization.values
 
 gdf_subs = gpd.read_file(f_shp_swmm_subs)
 
@@ -157,12 +192,12 @@ prnt_statement = "Part 2 joined subs to grid coordinates in {} minutes".format(t
 # except:
 #     pass
 
-num_files = len(realization_ids) * len(ds_rlztns.storm_id.values) * len(df_mrms_at_subs_unique)
+num_files = len(ds_rlztns.realization.values) * len(ds_rlztns.storm.values) * len(df_mrms_at_subs_unique)
 
 times_fwright_min = []
 
 count = 0
-for rz in realization_ids:
+for rz in ds_rlztns.realization.values:
     dir_yr = dir_time_series + "weather_realization{}/year{}/".format(rz, yr)
     # try:
     #     shutil.rmtree(dir_yr)
@@ -177,7 +212,7 @@ for rz in realization_ids:
         for row in df_mrms_at_subs_unique.iterrows():
             mrms_index, coords = row
             # extract rainfall time series from the storm catalog
-            idx = dict(realization_id = rz, year = yr, storm_id = storm_id, latitude = coords.y_lat, longitude = coords.x_lon)
+            idx = dict(realization = rz, year = yr, storm_id = storm_id, latitude = coords.y_lat, longitude = coords.x_lon)
             ds_rlztns_subset = ds_rlztns.sel(idx)
             rainrate_inperhr = ds_rlztns_subset.rainrate.values / mm_per_inch
             # replace negative values with 0 if any are present
@@ -205,7 +240,7 @@ for rz in realization_ids:
             time_start_fwrite = datetime.now()
             mrms_index, coords = row
             # extract rainfall time series from the storm catalog
-            idx = dict(realization_id = rz, year = yr, storm_id = storm_id, latitude = coords.y_lat, longitude = coords.x_lon)
+            idx = dict(realization = rz, year = yr, storm_id = storm_id, latitude = coords.y_lat, longitude = coords.x_lon)
             ds_rlztns_subset = ds_rlztns.sel(idx)
             rainrate_inperhr = ds_rlztns_subset.rainrate.values / mm_per_inch
             # replace negative values with 0 if any are present

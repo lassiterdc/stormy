@@ -82,6 +82,15 @@ f_bootstrapped_consolidated_hrly = dir_swmm_sst_scenarios_hrly_proj + "bootstrap
 f_bootstrapped_consolidated_hrly_raw = dir_swmm_sst_scenarios_hrly_proj + "bootstrapping_allsamples_consolidated.nc"
 export_raw_bs_samps = False
 
+
+#d4
+fldr_realizations = "/project/quinnlab/dcl3nd/norfolk/stormy/stochastic_storm_transposition/norfolk/sst_mrms/mrms_combined/Realizations/"
+dir_swmm_sst_scenarios = dir_swmm_model + "swmm_scenarios_sst/"
+# dir_swmm_sst_scenarios_scratch = dir_scratch_sst + "swmm_sst_hourly/"
+# dir_swmm_sst_scenarios_hrly_home = dir_home_sst + "swmm_sst_hourly/"
+dir_time_series = dir_swmm_sst_scenarios + "time_series/"
+f_key_subnames_gridind = dir_time_series + "_key_subnames_and_grid-indices.csv"
+seed_mrms_hourly = 22901
 #%% hard coded variables
 # name_out_realizations = "_combined_realizations.nc"
 f_realizations_hourly = dir_swmm_model + "swmm_scenarios_sst_hourly/_combined_realizations.nc"
