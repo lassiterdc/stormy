@@ -6,7 +6,7 @@
 "CATALOGNAME" : "strmcat_mrms_combined.nc",
 "CREATECATALOG" : "false", "DURATION" : 72,
 "STORMLIST_DIRECTORY" : "/project/quinnlab/dcl3nd/norfolk/stormy/stochastic_storm_transposition/norfolk/sst_mrms/mrms*/StormCatalog/*.nc",
-"NYEARS" : 20 , "NSTORMS" : 5, "NREALIZATIONS" : 10,
+"NYEARS" : 5 , "NSTORMS" : 100, "NREALIZATIONS" : 2,
 "SCENARIOS" : "TRUE",
 "TIMESEPARATION" : 12, "DOMAINTYPE" : "irregular",
 "DOMAINSHP" : "/project/quinnlab/dcl3nd/norfolk/stormy/stochastic_storm_transposition/norfolk/transposition_domain/norfolk_trans_dom_4326_test2.shp",
