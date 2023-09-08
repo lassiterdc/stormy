@@ -186,6 +186,40 @@ def parse_inp(f_inp):
         freebndry = True
     return int(rz), int(yr), int(storm_id), str(freebndry)
 
+# for loading RainyDay realizations
+def define_dims(ds):
+    fpath = ds.encoding["source"]
+    lst_f = fpath.split("/")[-1].split("_")
+    rz = int(lst_f[0].split("rz")[-1])
+    year = int(lst_f[1].split("y")[-1])
+    strm = int(lst_f[2].split("stm")[-1].split(".")[0])
+    first_tstep = ds.time.values[0]
+    tseries = pd.Series(ds.time.values)
+    tsteps_unique = tseries.diff().dropna().unique()
+    if len(tsteps_unique) > 1:
+        sys.exit("variable time step encountered in file {}".format(fpath))
+    tstep_min = tsteps_unique[0] / np.timedelta64(1, "m")
+    tstep_ind = np.arange(len(tseries))
+    ds["time"] = tstep_ind
+    ds = ds.assign_attrs(timestep_min = tstep_min)
+    ds = ds.assign_coords(dict(realization=rz, year = year, storm_id = strm, first_tstep = first_tstep))
+    ds = ds.expand_dims(dim=dict(realization=1, year = 1, storm_id = 1))
+    return ds
+
+# for loading RainyDay realizations for a specific year only
+def return_rzs_for_yr(fldr_realizations, yr):
+    lst_f_all_ncs = glob(fldr_realizations+"*.nc")
+    lst_f_ncs = []
+    for f in lst_f_all_ncs:
+        lst_f = f.split("/")[-1].split("_")
+        # rz = int(lst_f[0].split("rz")[-1])
+        year = int(lst_f[1].split("y")[-1])
+        # strm = int(lst_f[2].split("stm")[-1].split(".")[0])
+        if year == yr:
+            lst_f_ncs.append(f)
+    lst_f_ncs.sort()
+    return lst_f_ncs
+
 
 
 
