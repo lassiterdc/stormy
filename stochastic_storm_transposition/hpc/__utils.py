@@ -10,7 +10,7 @@ dir_home_sst = dir_home + "sst/"
 dir_scratch_sst = "/scratch/dcl3nd/stormy/"
 
 # WORK
-f_sst_nrflk_hrly_parameterfile = dir_sst_nrflk_hrly + "mrms_hourly_combined.sst"
+f_sst_nrflk_hrly_parameterfile = dir_sst_nrflk_hrly + "mrms_hourly_combined_test.sst"
 # f_sst_nrflk_hrly_parameterfile = dir_sst_nrflk_hrly + "mrms_hourly_combined_test.sst"
 # END WORK
 f_sst_nrflk_hrly_combined_catalog = dir_sst_nrflk_hrly + "strmcat_mrms_hourly_combined.nc"
@@ -116,67 +116,67 @@ nrealizations = 1
 # END WORK
 
 #%% script specific functions
-def c8b_bootstrapping():
-    return f_bootstrapped_consolidated_hrly, f_bootstrapped_consolidated_hrly_raw, dir_swmm_sst_models_hrly, f_bootstrapped_quant_estimates, sst_recurrence_intervals, export_raw_bs_samps
+# def c8b_bootstrapping():
+#     return f_bootstrapped_consolidated_hrly, f_bootstrapped_consolidated_hrly_raw, dir_swmm_sst_models_hrly, f_bootstrapped_quant_estimates, sst_recurrence_intervals, export_raw_bs_samps
 
-def c8_bootstrapping():
-    return f_model_outputs_consolidated_hrly, dir_swmm_sst_models_hrly, f_bootstrapped_quant_estimates, sst_recurrence_intervals, export_raw_bs_samps
+# def c8_bootstrapping():
+#     return f_model_outputs_consolidated_hrly, dir_swmm_sst_models_hrly, f_bootstrapped_quant_estimates, sst_recurrence_intervals, export_raw_bs_samps
 
-def c7b_consolidating_outputs():
-    return f_model_outputs_consolidated_hrly, dir_swmm_sst_models_hrly
+# def c7b_consolidating_outputs():
+#     return f_model_outputs_consolidated_hrly, dir_swmm_sst_models_hrly
 
-def c7_consolidating_outputs():
-    return f_model_perf_summary_hrly, dir_swmm_sst_models_hrly, cubic_meters_per_cubic_foot, nperyear
+# def c7_consolidating_outputs():
+#     return f_model_perf_summary_hrly, dir_swmm_sst_models_hrly, cubic_meters_per_cubic_foot, nperyear
 
-def c6b_analyzing_swmm_runs():
-    return dir_swmm_sst_models_hrly, f_model_perf_summary_hrly, dir_time_series_hrly, f_events_summary
+# def c6b_analyzing_swmm_runs():
+#     return dir_swmm_sst_models_hrly, f_model_perf_summary_hrly, dir_time_series_hrly, f_events_summary
 
 
-def c6_running_swmm():
-    return f_swmm_scenarios_catalog, dir_swmm_sst_models_hrly, max_runtime_min_hrly
+# def c6_running_swmm():
+#     return f_swmm_scenarios_catalog, dir_swmm_sst_models_hrly, max_runtime_min_hrly
 
-def c5_creating_inps():
-    f_out_realizations = f_realizations_hourly
-    return nyears, nperyear, nrealizations, dir_swmm_sst_models_hrly, f_inp_base_hrly, f_out_realizations, seed_mrms_hourly, dir_time_series_hrly, f_key_subnames_gridind, lst_template_keys, f_swmm_scenarios_catalog, norain_gage_name
+# def c5_creating_inps():
+#     f_out_realizations = f_realizations_hourly
+#     return nyears, nperyear, nrealizations, dir_swmm_sst_models_hrly, f_inp_base_hrly, f_out_realizations, seed_mrms_hourly, dir_time_series_hrly, f_key_subnames_gridind, lst_template_keys, f_swmm_scenarios_catalog, norain_gage_name
 
-# def c4b_creating_wlevel_tseries():
-#     return f_mrms_event_summaries, f_mrms_event_timeseries, f_water_level_storm_surge, f_realizations_hourly, f_key_subnames_gridind, nrealizations, sst_hrly_tstep_min, start_date, time_buffer, dir_time_series_hrly, c4b_gen_plots, wlevel_threshold, n_attempts, n_clusters, resampling_inteval
+# # def c4b_creating_wlevel_tseries():
+# #     return f_mrms_event_summaries, f_mrms_event_timeseries, f_water_level_storm_surge, f_realizations_hourly, f_key_subnames_gridind, nrealizations, sst_hrly_tstep_min, start_date, time_buffer, dir_time_series_hrly, c4b_gen_plots, wlevel_threshold, n_attempts, n_clusters, resampling_inteval
 
-def c4_creating_rainfall_tseries():
-    freq = "H"
-    f_out_realizations = f_realizations_hourly
-    return nrealizations, f_out_realizations, f_shp_swmm_subs, dir_time_series_hrly, mm_per_inch, grid_spacing, start_date, freq, f_key_subnames_gridind, dir_sst_realizations_hrly
+# def c4_creating_rainfall_tseries():
+#     freq = "H"
+#     f_out_realizations = f_realizations_hourly
+#     return nrealizations, f_out_realizations, f_shp_swmm_subs, dir_time_series_hrly, mm_per_inch, grid_spacing, start_date, freq, f_key_subnames_gridind, dir_sst_realizations_hrly
 
-def c3_reformat_hrly_cats():
-    f_in = f_sst_nrflk_hrly_combined_catalog
-    f_out = f_sst_nrflk_hrly_combined_catalog_reformatted
-    f_out_realizations = f_realizations_hourly
-    return f_in, f_out, dir_sst_realizations_hrly, f_out_realizations
+# def c3_reformat_hrly_cats():
+#     f_in = f_sst_nrflk_hrly_combined_catalog
+#     f_out = f_sst_nrflk_hrly_combined_catalog_reformatted
+#     f_out_realizations = f_realizations_hourly
+#     return f_in, f_out, dir_sst_realizations_hrly, f_out_realizations
 
-def c1_combine_hrly_cats():
-    parameterfile = f_sst_nrflk_hrly_parameterfile
-    f_out = f_sst_nrflk_hrly_combined_catalog
-    fs = glob(dir_sst_nrflk_hrly + "*_20*.nc")
-    fs.sort() # sort alphabetically 
-    return dir_sst_nrflk_hrly, parameterfile, f_out, fs
+# def c1_combine_hrly_cats():
+#     parameterfile = f_sst_nrflk_hrly_parameterfile
+#     f_out = f_sst_nrflk_hrly_combined_catalog
+#     fs = glob(dir_sst_nrflk_hrly + "*_20*.nc")
+#     fs.sort() # sort alphabetically 
+#     return dir_sst_nrflk_hrly, parameterfile, f_out, fs
 
-def c_rainyday_in():
-    dir_mrms_hrly = dir_sst_nrflk + "sst_mrms_hourly/"
-    f_sst_mrms_hrly = dir_mrms_hrly + "mrms_hourly_template.sst"
-    dir_for_sst_files = dir_mrms_hrly + "_inputs/"
-    return dir_mrms_hrly, f_sst_mrms_hrly, dir_for_sst_files
+# def c_rainyday_in():
+#     dir_mrms_hrly = dir_sst_nrflk + "sst_mrms_hourly/"
+#     f_sst_mrms_hrly = dir_mrms_hrly + "mrms_hourly_template.sst"
+#     dir_for_sst_files = dir_mrms_hrly + "_inputs/"
+#     return dir_mrms_hrly, f_sst_mrms_hrly, dir_for_sst_files
 
-def d_rainyday_in():
-    dir_mrms = dir_sst_nrflk + "sst_mrms/"
-    f_sst_mrms = dir_mrms + "mrms_template.sst"
-    dir_for_sst_files = dir_mrms + "_inputs/"
-    return dir_mrms, f_sst_mrms, dir_for_sst_files
+# def d_rainyday_in():
+#     dir_mrms = dir_sst_nrflk + "sst_mrms/"
+#     f_sst_mrms = dir_mrms + "mrms_template.sst"
+#     dir_for_sst_files = dir_mrms + "_inputs/"
+#     return dir_mrms, f_sst_mrms, dir_for_sst_files
 
-def da_rainyday_in():
-    dir_mrms = dir_sst_nrflk + "sst_mrms_subdivided/"
-    f_sst_mrms = dir_mrms + "mrms_template_{}.sst"
-    dir_for_sst_files = dir_mrms + "_inputs/"
-    return dir_mrms, f_sst_mrms, dir_for_sst_files
+# def da_rainyday_in():
+#     dir_mrms = dir_sst_nrflk + "sst_mrms_subdivided/"
+#     f_sst_mrms = dir_mrms + "mrms_template_{}.sst"
+#     dir_for_sst_files = dir_mrms + "_inputs/"
+#     return dir_mrms, f_sst_mrms, dir_for_sst_files
 
 #%% functions
 import pandas as pd
