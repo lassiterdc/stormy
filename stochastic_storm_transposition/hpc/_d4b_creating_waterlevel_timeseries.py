@@ -21,7 +21,9 @@ yr = int(sys.argv[1]) # a number between 1 and 1000
 
 script_start_time = datetime.now()
 #%% load data
-ds_rlztns = xr.open_dataset(f_realizations)
+lst_f_ncs = return_rzs_for_yr(fldr_realizations, yr)
+ds_rlztns = xr.open_mfdataset(lst_f_ncs, preprocess = define_dims)
+
 df_key = pd.read_csv(f_key_subnames_gridind)
 
 df_mrms_event_summaries = pd.read_csv(f_mrms_event_summaries, parse_dates=["start", "end", "max_intensity_tstep"])
@@ -30,11 +32,11 @@ df_mrms_event_tseries = pd.read_csv(f_mrms_event_timeseries, parse_dates=True, i
 df_water_levels = pd.read_csv(f_water_level_storm_surge, parse_dates=True, index_col="date_time")
 
 #%% extracting sst realization data
-if nrealizations < len(ds_rlztns.realization_id.values):
-    realization_ids = np.arange(1, nrealizations+1)
-    print("Using just {} out of {} available realizations based on user inputs in __utils.py.".format(nrealizations, len(ds_rlztns.realization_id.values)))
-else:
-    realization_ids = ds_rlztns.realization_id.values
+# if nrealizations < len(ds_rlztns.realization.values):
+#     realizations = np.arange(1, nrealizations+1)
+#     print("Using just {} out of {} available realizations based on user inputs in __utils.py.".format(nrealizations, len(ds_rlztns.realization.values)))
+# else:
+#     realizations = ds_rlztns.realization.values
 
 x,y = np.meshgrid(ds_rlztns.longitude.values, ds_rlztns.latitude.values, indexing="ij")
 grid_length = x.shape[0] * x.shape[1]
@@ -54,16 +56,16 @@ strm = 1
 
 lst_storm_mean_tseries = []
 keys = []
-for rz in realization_ids:
+for rz in ds_rlztns.realization.values:
     for strm in ds_rlztns.storm_id.values:
-        idx = dict(realization_id = rz, year = yr, storm_id = strm)
+        idx = dict(realization = rz, year = yr, storm_id = strm)
         ds_subset = ds_rlztns.sel(idx)
         strm_tseries = dict()
         for row in df_coords.iterrows():
             mrms_index, coords = row
             loc_idx = dict(latitude = coords.y_lat, longitude = coords.x_lon)
             ds_subset_1loc = ds_subset.sel(loc_idx)
-            strm_tseries["grid_ind{}".format(mrms_index)] = ds_subset_1loc.rainrate.values
+            strm_tseries["grid_ind{}".format(mrms_index)] = ds_subset_1loc.rain.values
         df_strm_tseries = pd.DataFrame(strm_tseries)
         # convert negative rain rates to 0
         df_strm_tseries[df_strm_tseries<0] = 0
@@ -76,31 +78,10 @@ df_sst_storms = pd.concat(lst_storm_mean_tseries, keys = keys, names = ["rz_yr_s
 df_sst_storms = df_sst_storms.reset_index()
 # df_sst_storms.rz_yr_strm.str.split("_")
 df_idx = df_sst_storms.rz_yr_strm.str.split("_", expand=True)
-df_idx.columns = ["realization_id", "year", "storm_id"]
+df_idx.columns = ["realization", "year", "storm_id"]
 # df_sst_storms = df_sst_storms.drop(columns=["rz_yr_strm"])
 df_sst_storms = pd.concat([df_idx, df_sst_storms], axis = 1)
 
-#%% trying alternative configuration to speed thigns up
-# for row in df_coords.iterrows():
-#     mrms_index, coords = row
-#     loc_idx = dict(latitude = coords.y_lat, longitude = coords.x_lon)
-#     ds_subset_1loc = ds_rlztns.sel(loc_idx)
-
-#%% extract storm surge time series at each event and compute features (e.g., peak time, lag time)
-# convert rain time series to same timestep as water levels
-## compute timestep of water level data
-# s_wl_dates = pd.Series(df_water_levels.index)
-# tdif = s_wl_dates.diff().dropna().unique()
-# tdif_min = tdif[0].astype('timedelta64[m]').astype(int)
-# tstep = "{}min".format(tdif_min)
-
-# if len(tdif) > 1:
-#     sys.exit("Script failed. Water level does not have consistent timestep.")
-
-# convert first to 1 min then to the desired timestep
-# s_rainfall = df_mrms_event_tseries.mrms_mm_per_hour
-# s_rainfall_1min = s_rainfall.resample('1min').mean().fillna(method = 'ffill')
-# s_rainfall_trgt_tstep = s_rainfall_1min.resample(tstep).mean()
 #%% join water level and time series data
 df_water_rain_tseries = df_water_levels.join(df_mrms_event_tseries, how="inner")
 
@@ -165,13 +146,15 @@ def scatter_3d(data, fig=None, title=None, position=None):
         ax.title.set_position([.5, 1.05])
     return ax
 
-def plot_snth_vs_real(df_real, df_synth, col_names_for3d):
+def plot_snth_vs_real(df_real, df_synth, col_names_for3d, plt_fldr_weather_gen):
     for cols in col_names_for3d:
         columns = list(cols)
         fig = plt.figure(figsize=(10,4))
         ax = scatter_3d(df_real[columns], fig=fig, title='Real Data', position=121)
         ax = scatter_3d(df_synth[columns], fig=fig, title='Synthetic Data', position=122)
         plt.tight_layout()
+        plt.savefig(plt_fldr_weather_gen + "synthetic_vs_real.png")
+        plt.clf()
     # compare_3d(df_vars_all, df_synth_hydro, columns = list(cols))
 
 def gen_conditioned_samples(cop, df_cond, n_samples):
@@ -192,7 +175,7 @@ def plot_hist_of_each_var(df_real, df_synth):
     # for col in df_real.columns:
     return
 
-def comp_hists(var, df_obs, df_synth):
+def comp_hists(var, df_obs, df_synth, plt_fldr_weather_gen):
     fig, axes = plt.subplots(1, 2, figsize = (10,4))
     (n, bins, patches) = axes[0].hist(df_obs.loc[:, var], bins = 20, label="Observed")
     axes[0].set_title("Observed")
@@ -210,12 +193,10 @@ def comp_hists(var, df_obs, df_synth):
         ax.set_ylabel('count')
         ax.set_title(ax.get_label(), fontfamily='serif', loc='left', fontsize='medium')
     plt.tight_layout()
+    plt.savefig(plt_fldr_weather_gen + "{}_hist.png".format(var))
+    plt.clf()
     return
 #%% defining df_cond using the sst data
-# vars_cond
-# df_sst_storms
-# df_sst_storms_grp = df_sst_storms.groupby("rz_yr_strm")
-
 durations = []
 depths = []
 mean_int = []
@@ -257,13 +238,13 @@ for rz_yr_strm in df_sst_storms.rz_yr_strm.unique():
     max_int.append(df_subset.precip_mm_per_hour.max())
     # compute timing of peak
     tstep_max_ind = df_subset.precip_mm_per_hour.idxmax()
-    tstep_max = pd.to_datetime(start_date) + pd.Timedelta(tstep_max_ind*sst_tstep_min, "minutes")
+    tstep_max = pd.to_datetime(start_date) + pd.Timedelta(tstep_max_ind*ds_rlztns.timestep_min, "minutes")
     lst_tstep_max.append(tstep_max)
     # compute last tstep
-    lst_tstep_last.append(pd.to_datetime(start_date) + pd.Timedelta(len(df_subset)*sst_tstep_min, "minutes"))
+    lst_tstep_last.append(pd.to_datetime(start_date) + pd.Timedelta(len(df_subset)*ds_rlztns.timestep_min, "minutes"))
 
 df_sst_storm_summaries = pd.DataFrame(dict(rz_yr_strm = df_sst_storms.rz_yr_strm.unique(), 
-                              duration_hr = durations, depth_mm = depths, 
+                              n_tsteps = durations, depth_mm = depths, 
                               mean_mm_per_hr = mean_int, max_mm_per_hour = max_int, rain_in_sst_tseries = lst_no_rain,
                               tstep_of_max_intensity = lst_tstep_max, last_timestep_w_rainfall = lst_tstep_last))
 
@@ -304,8 +285,11 @@ except:
 #     if idx_of_excessive_high_lag[ind] or idx_of_excessive_low_lag[ind]:
 #         df_synth_hydro_cond.loc[ind, "surge_peak_after_rain_peak_min"] = np.random.uniform(0,lag_limit_hr*60)
 #%% plot synthetically generated data
-# define columns names
-if gen_plots:
+# create plot folder if it doesn't already exist
+p = Path(plt_fldr_weather_gen)
+p.mkdir(parents=True, exist_ok=True)
+
+if plot_weather_gen_stuff:
     col_names_for3d = []
     for cols in list(itertools.combinations(vars_all,3)):
         sim_var_in_combo = False
@@ -314,11 +298,9 @@ if gen_plots:
                 sim_var_in_combo = True
         if sim_var_in_combo:
             col_names_for3d.append(cols)
-
-    plot_snth_vs_real(df_vars_all, df_synth_hydro_cond, col_names_for3d)
-
+    plot_snth_vs_real(df_vars_all, df_synth_hydro_cond, col_names_for3d, plt_fldr_weather_gen)
     for var in vars_sim:
-        comp_hists(var, df_vars_all, df_synth_hydro_cond)
+        comp_hists(var, df_vars_all, df_synth_hydro_cond, plt_fldr_weather_gen)
 
 
 #%% generate water level time series from synthetic values
@@ -340,10 +322,9 @@ df_vars_stormclass = df_compound_summary.loc[:, vars_k]
 df_vars_stormclass_scaler = preprocessing.StandardScaler().fit(df_vars_stormclass)
 df_vars_stormclass_scaled = df_vars_stormclass_scaler.transform(df_vars_stormclass)
 
-if gen_plots:
+if plot_weather_gen_stuff:
     inertias = []
     ks_to_try = 20
-
     for i in range(1,ks_to_try):
         kmeans = KMeans(n_clusters=i)
         kmeans.fit(df_vars_stormclass_scaled)
@@ -352,13 +333,10 @@ if gen_plots:
     plt.title('Elbow method')
     plt.xlabel('Number of clusters')
     plt.ylabel('Inertia')
-    plt.show()
+    plt.savefig(plt_fldr_weather_gen + "kmeans.png")
+    plt.clf()
+    # plt.show()
 
-# try:
-#     kmeans = KMeans(n_clusters=n_clusters)
-#     kmeans.fit(df_vars_stormclass_scaled)
-# except:
-#     sys.exit("SCRIPT FAILED FOR YEAR {}:  TO FIT THE K-MEANS MODEL.".format(yr))
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -367,7 +345,7 @@ with warnings.catch_warnings():
 #%%
 # plt.scatter(x = df_vars_all.max_surge_ft, y= df_vars_all.duration_hr, c=kmeans.labels_)
 # plt.show()
-if gen_plots:
+if plot_weather_gen_stuff:
     for v_sim in vars_sim:
         fig, axes = plt.subplots(2, 2, figsize = (10,8))
         row = 0
@@ -380,6 +358,8 @@ if gen_plots:
             if col > 1:
                 row += 1
                 col = 0
+        plt.savefig(plt_fldr_weather_gen + "{}_sims.png".format(v_sim))
+        plt.clf()
 
 #%% predict k label of synthetic data
 # df_synth_hydro_cond_scaled = df_vars_stormclass_scaler.transform(df_synth_hydro_cond.loc[:, vars_k])
@@ -435,7 +415,6 @@ for i, cond in df_cond.iterrows():
                 df_new_sim = gen_conditioned_samples(cop_hydro, cond.to_frame().T.reset_index(drop=True), n_samples=1)
                 s_sim_event_summary = df_new_sim.loc[0,:]
                 generate_new_sim = False
-
             s_sim_event_summary_scaled = df_vars_stormclass_scaler.transform(pd.DataFrame(s_sim_event_summary.loc[vars_k]).T)
             pred_k = kmeans.predict(s_sim_event_summary_scaled)
             obs_event_id = get_storm_to_rescale(pred_k)
@@ -448,8 +427,6 @@ for i, cond in df_cond.iterrows():
             # print(df_compound_summary)
             # print("df_obs_event_summary")
             # print(df_obs_event_summary)
-            
-
             # compute timestep of peak storm surge
             sim_tstep_max_int = df_sst_storm_summaries.tstep_of_max_intensity[i]
             sim_tstep_max_surge = sim_tstep_max_int + pd.Timedelta(s_sim_event_summary["surge_peak_after_rain_peak_min"], "minutes")
@@ -460,19 +437,14 @@ for i, cond in df_cond.iterrows():
             # end time is the max of the last rainfall or the peak surge tstep plus the time buffer
             sim_tstep_lastrain = df_sst_storm_summaries.last_timestep_w_rainfall[i]
             event_endtime = max(sim_tstep_lastrain, sim_tstep_max_surge)+pd.Timedelta(time_buffer, "hours")
-
             # duration is start minus end
             duration = event_endtime - event_starttime
-            
             # if duration is greater than allowable, generate new sim
             if duration > max_allowable_duration:
                 generate_new_sim = True
                 continue
-
             sim_wlevel_times = pd.date_range(event_starttime, event_endtime, freq=wlevel_freq)
-
             time_to_peak_surge = sim_tstep_max_surge - min(sim_wlevel_times)
-
             # extract observed surge data
             obs_tstep_max_surge = df_obs_event_tseries.surge_ft.idxmax()
             obs_start_time = obs_tstep_max_surge - time_to_peak_surge
@@ -481,40 +453,31 @@ for i, cond in df_cond.iterrows():
             obs_surges = df_water_levels.surge_ft.loc[obs_surge_times]
             # obs_peak_tstep = obs_surges.index[0]+time_to_peak_surge
             obs_peak = obs_surges[obs_tstep_max_surge]
-
-
             # add predicted water level with a random shift of plus or minus 12 hours
             tide_shift = pd.Timedelta(np.random.choice(np.arange(-12, 12+1)), "hr")
             s_tides_times = pd.date_range(obs_start_time+tide_shift, obs_end_time+tide_shift, freq=wlevel_freq)
             s_tides = df_water_levels.predicted_wl.loc[s_tides_times]
             # set index to align with timesteps of sim_wlevel_times to add later
             s_tides.index = sim_wlevel_times
-
             # s_obs_wlevel = 
-
             # rescaling
             ## compute multiplier
             obs_frac_of_max_tseries = obs_surges / obs_peak # unit surge as fraction of the maximum
             # rescaling
             s_sim_surge_tseries = (s_sim_event_summary["max_surge_ft"] * obs_frac_of_max_tseries).reset_index(drop=True)
             s_sim_surge_tseries.index = sim_wlevel_times
-
             # adding tide
             s_sim_wlevel = s_sim_surge_tseries + s_tides
             s_sim_wlevel.name = "water_level_ft"
-
             min_sim_wlevel = s_sim_wlevel.min()
             max_sim_wlevel = s_sim_wlevel.max()
-
             # if the the simulated water levels exceed user defined thresholds, generate new sim
             if (max_sim_wlevel >= (1+wlevel_threshold)*max_obs_wlevel) or (min_sim_wlevel <= (1+wlevel_threshold)*min_obs_wlevel):
                 # if these are exceeded and there have been at least some number of attempts to select and rescale a historical event
                 if ((attempts % resampling_inteval) == 0) and (attempts > 1):
                     generate_new_sim = True
                 continue
-
             reasonable_sample = True
-
         except:
             # if there is an error, generate a new sim
             if ((attempts % resampling_inteval) == 0) and (attempts > 1):
@@ -530,20 +493,15 @@ for i, cond in df_cond.iterrows():
     lst_peak_surge_tsteps.append(sim_tstep_max_surge)
     # lst_obs_peak.append(obs_peak)
     # lst_obs_min.append(obs_peak)
-
     # writing to a file
     ## id the realization, and storm
     rz, yr, strm = df_sst_storm_summaries.rz_yr_strm.loc[i].split("_")
-
     f_out = dir_time_series + "weather_realization{}/year{}/_waterlevel_rz{}_yr{}_strm{}.dat".format(rz, yr, rz, yr, strm)
-
     # create data frame with proper formatting to be read in SWMM
     df = pd.DataFrame(dict(date = s_sim_wlevel.index.strftime('%m/%d/%Y'),
-                 time = s_sim_wlevel.index.time,
-                 water_level = s_sim_wlevel.values))
-
+                    time = s_sim_wlevel.index.time,
+                    water_level = s_sim_wlevel.values))
     Path(f_out).parent.mkdir(parents=True, exist_ok=True)
-
     with open(f_out, "w+") as file:
         file.write(";;synthetic water level\n")
         file.write(";;Water Level (ft)\n")
@@ -551,7 +509,7 @@ for i, cond in df_cond.iterrows():
 
 #%% export event summaries
 df_idx = df_sst_storm_summaries.rz_yr_strm.str.split("_", expand=True)
-df_idx.columns = ["realization_id", "year", "storm_id"]
+df_idx.columns = ["realization", "year", "storm_id"]
 
 df_simulated_event_summaries = pd.DataFrame(dict(min_sim_wlevel = min_sim_wlevels,max_sim_wlevel = max_sim_wlevels, obs_event_id_for_rescaling = lst_event_ids,
                                                  event_start = lst_event_starts, event_end = lst_event_ends,

@@ -91,6 +91,10 @@ dir_swmm_sst_scenarios = dir_swmm_model + "swmm_scenarios_sst/"
 dir_time_series = dir_swmm_sst_scenarios + "time_series/"
 f_key_subnames_gridind = dir_time_series + "_key_subnames_and_grid-indices.csv"
 seed_mrms_hourly = 22901
+
+# d4b
+plot_weather_gen_stuff = False
+plt_fldr_weather_gen = dir_time_series + "_plots/"
 #%% hard coded variables
 # name_out_realizations = "_combined_realizations.nc"
 f_realizations_hourly = dir_swmm_model + "swmm_scenarios_sst_hourly/_combined_realizations.nc"
@@ -135,8 +139,8 @@ def c5_creating_inps():
     f_out_realizations = f_realizations_hourly
     return nyears, nperyear, nrealizations, dir_swmm_sst_models_hrly, f_inp_base_hrly, f_out_realizations, seed_mrms_hourly, dir_time_series_hrly, f_key_subnames_gridind, lst_template_keys, f_swmm_scenarios_catalog, norain_gage_name
 
-def c4b_creating_wlevel_tseries():
-    return f_mrms_event_summaries, f_mrms_event_timeseries, f_water_level_storm_surge, f_realizations_hourly, f_key_subnames_gridind, nrealizations, sst_hrly_tstep_min, start_date, time_buffer, dir_time_series_hrly, c4b_gen_plots, wlevel_threshold, n_attempts, n_clusters, resampling_inteval
+# def c4b_creating_wlevel_tseries():
+#     return f_mrms_event_summaries, f_mrms_event_timeseries, f_water_level_storm_surge, f_realizations_hourly, f_key_subnames_gridind, nrealizations, sst_hrly_tstep_min, start_date, time_buffer, dir_time_series_hrly, c4b_gen_plots, wlevel_threshold, n_attempts, n_clusters, resampling_inteval
 
 def c4_creating_rainfall_tseries():
     freq = "H"
