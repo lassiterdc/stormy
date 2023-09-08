@@ -27,4 +27,4 @@ export PYTHONPATH=$DIR/lib/python3.11/site-packages:$PATH
 # echo "Creating rainfall time series for year ${SLURM_ARRAY_TASK_ID}..."
 
 # running script
-python ${assar_dirs[hpc_c4_py]} ${SLURM_ARRAY_TASK_ID}
+python ${assar_dirs[hpc_d4_py]} ${SLURM_ARRAY_TASK_ID}
