@@ -20,4 +20,4 @@ source __directories.sh
 # echo "Creating SWMM models for year ${SLURM_ARRAY_TASK_ID}..."
 
 # running script
-python ${assar_dirs[hpc_c5_py]} ${SLURM_ARRAY_TASK_ID}
+python ${assar_dirs[hpc_d5_py]} ${SLURM_ARRAY_TASK_ID}

@@ -11,9 +11,9 @@ import sys
 from datetime import datetime
 import swmmio
 
-from __utils import c5_creating_inps
+from __utils import *
 
-nyears, nperyear, nrealizations, dir_swmm_sst_models_hrly, f_inp_base, f_out_realizations, seed_mrms_hourly, dir_time_series, f_key_subnames_gridind, lst_template_keys, f_swmm_scenarios_catalog, norain_gage_name = c5_creating_inps()
+# nyears, nperyear, nrealizations, dir_swmm_sst_models_hrly, f_inp_base, f_out_realizations, seed_mrms_hourly, dir_time_series, f_key_subnames_gridind, lst_template_keys, f_swmm_scenarios_catalog, norain_gage_name = c5_creating_inps()
 
 yr = int(sys.argv[1]) # a number between 1 and 1000
 
@@ -21,7 +21,9 @@ script_start_time = datetime.now()
 #%% data
 f_summary = dir_time_series + "_event_summary_year{}.csv".format(yr) # must match formatting in script _c4b
 df_event_summaries = pd.read_csv(f_summary, parse_dates=["event_start", "event_end", "tstep_peak_surge","tstep_max_rain_intensity"])
-ds_rlztns = xr.open_dataset(f_out_realizations)
+
+lst_f_ncs = return_rzs_for_yr(fldr_realizations, yr)
+ds_rlztns = xr.open_mfdataset(lst_f_ncs, preprocess = define_dims)
 #%% define functions
 def get_rainfiles(rz, yr, storm_id, df_key):
     # format: dir_time_series + "weather_realization{}/year{}/".format(rz, yr) + "rz{}yr{}_strm{}_grid-ind{}.dat".format(rz, yr, storm_id, mrms_index)
