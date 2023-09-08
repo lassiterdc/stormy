@@ -177,6 +177,7 @@ def da_rainyday_in():
 #%% functions
 import pandas as pd
 import sys
+import numpy as np
 import xarray as xr
 
 def parse_inp(f_inp):
