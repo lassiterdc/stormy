@@ -14,6 +14,7 @@
 # ijob -c 1 -A quinnlab_paid -p standard --time=0-06:00:00 --mem-per-cpu=64000
 
 source __directories.sh
+source __utils.sh
 module purge
 module load anaconda
 DIR=~/.conda/envs/rainyday
@@ -26,3 +27,5 @@ echo "Running SST file: ${assar_dirs[hpc_d2_sst]}"
 
 # running RainyDay
 python ${assar_dirs[hpc_rainyday_py]} ${assar_dirs[hpc_d2_sst]}
+
+echo "Script completed in $(format_time $SECONDS)"
