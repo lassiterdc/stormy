@@ -97,7 +97,9 @@ plot_weather_gen_stuff = False
 plt_fldr_weather_gen = dir_time_series + "_plots/"
 
 # d5
+dir_swmm_sst_scenarios_scratch = dir_scratch_sst + "swmm_sst/"
 f_inp_base = dir_swmm_sst_scenarios + "hague_sst_model_template.inp"
+dir_swmm_sst_models = dir_swmm_sst_scenarios_scratch + "models/"
 #%% hard coded variables
 # name_out_realizations = "_combined_realizations.nc"
 f_realizations_hourly = dir_swmm_model + "swmm_scenarios_sst_hourly/_combined_realizations.nc"

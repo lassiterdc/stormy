@@ -73,7 +73,7 @@ ind = []
 count = -1
 for scen in lst_scens:
     for rz in ds_rlztns.realization.values:
-        for storm_id in df_event_summaries.storm_id.values:
+        for storm_id in ds_rlztns.storm_id.values:
             count += 1
             ind.append(count)
 
@@ -85,7 +85,7 @@ for outfall_type in lst_outfall_types:
         # loading template
         template = Template(T.read())
         for rz in ds_rlztns.realization.values:
-            dir_r = dir_swmm_sst_models_hrly + "weather_realization{}/".format(rz)
+            dir_r = dir_swmm_sst_models + "weather_realization{}/".format(rz)
             dir_yr = dir_r + "year{}/".format(yr)
             # clear folder of any other swmm files from previous runs in case I update the naming convention
             # try:
@@ -93,7 +93,7 @@ for outfall_type in lst_outfall_types:
             # except:
             #     pass
             Path(dir_yr).mkdir(parents=True, exist_ok=True)
-            for storm_id in df_event_summaries.storm_id.values: # this eliminates SST time series with 0 rainfall
+            for storm_id in ds_rlztns.storm_id.values: # consider modifying this to eliminate events with no rainfall
                 count += 1
                 d_fields = {}
                 df_strms.loc[count, "realization"] = rz
@@ -106,7 +106,7 @@ for outfall_type in lst_outfall_types:
                 # define suffix based on downstream boundary condition
                 if "TIMESERIES" in outfall_type:
                     sfx = ""
-                elif "FREE" in outfall_type:
+                if "FREE" in outfall_type:
                     sfx = "_freebndry"
                 f_inp_scen = dir_yr + "rz{}_yr{}_strm{}{}.inp".format(rz, yr, storm_id, sfx)
                 df_strms.loc[count, "swmm_inp"] = f_inp_scen
