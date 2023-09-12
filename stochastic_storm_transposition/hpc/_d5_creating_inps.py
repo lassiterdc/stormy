@@ -19,7 +19,7 @@ yr = int(sys.argv[1]) # a number between 1 and 1000
 
 script_start_time = datetime.now()
 #%% data
-f_summary = dir_time_series + "_event_summary_year{}.csv".format(yr) # must match formatting in script _c4b
+f_summary = dir_time_series + "_event_summary_year{}.csv".format(yr) # must match formatting in script _d4b
 df_event_summaries = pd.read_csv(f_summary, parse_dates=["event_start", "event_end", "tstep_peak_surge","tstep_max_rain_intensity"])
 
 lst_f_ncs = return_rzs_for_yr(fldr_realizations, yr)
@@ -45,11 +45,11 @@ def get_water_level_series(rz, yr, strm):
         return fpath_waterlevel
 
 # if the number of realizations defined in __utils is less than in the combined catalog, us the smaller of the two
-if nrealizations < len(ds_rlztns.realization_id.values):
-    realization_ids = np.arange(1, nrealizations+1)
-    print("Using just {} out of {} available realizations based on user inputs in __utils.py.".format(nrealizations, len(ds_rlztns.realization_id.values)))
-else:
-    realization_ids = ds_rlztns.realization_id.values
+# if nrealizations < len(ds_rlztns.realization_id.values):
+#     realization_ids = np.arange(1, nrealizations+1)
+#     print("Using just {} out of {} available realizations based on user inputs in __utils.py.".format(nrealizations, len(ds_rlztns.realization_id.values)))
+# else:
+#     realization_ids = ds_rlztns.realization_id.values
 
 # num_storms = len(realization_ids) * len(ds_rlztns.year.values) * len(ds_rlztns.storm_id.values)
 
@@ -72,7 +72,7 @@ lst_scens = ["surge_and_rain", "surge_no_rain", "rain_no_surge"]
 ind = []
 count = -1
 for scen in lst_scens:
-    for rz in realization_ids:
+    for rz in ds_rlztns.realization.values:
         for storm_id in df_event_summaries.storm_id.values:
             count += 1
             ind.append(count)
@@ -84,7 +84,7 @@ for outfall_type in lst_outfall_types:
     with open(f_inp_base, 'r') as T:
         # loading template
         template = Template(T.read())
-        for rz in realization_ids:
+        for rz in ds_rlztns.realization.values:
             dir_r = dir_swmm_sst_models_hrly + "weather_realization{}/".format(rz)
             dir_yr = dir_r + "year{}/".format(yr)
             # clear folder of any other swmm files from previous runs in case I update the naming convention
@@ -113,7 +113,7 @@ for outfall_type in lst_outfall_types:
                 ## shutil.copy(f_inp_base, f_inp_scen)
                 df_rain_paths = get_rainfiles(rz, yr, storm_id, df_key)
                 # fill in template stuff
-                df_single_event = df_event_summaries[df_event_summaries.realization_id==rz][df_event_summaries.storm_id==storm_id]
+                df_single_event = df_event_summaries[(df_event_summaries.realization==rz) & (df_event_summaries.storm_id==storm_id)]
                 df_single_event.reset_index(drop=True, inplace = True)
                 for key in lst_template_keys:
                     # check if the key is for one of the rainfall time series
