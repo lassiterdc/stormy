@@ -1,10 +1,10 @@
 #%% Import libraries and load directories
 import pandas as pd
 import sys
-from _inputs import def_inputs_for_b2
+from _inputs import *
 # from tqdm import tqdm
 
-f_mrms_rainfall, f_water_level_storm_surge, min_interevent_time, max_event_length, min_event_threshold, mm_per_inch, f_mrms_event_summaries, f_mrms_event_timeseries = def_inputs_for_b2()
+# f_mrms_rainfall, f_water_level_storm_surge, min_interevent_time, max_event_length, min_event_threshold, mm_per_inch, f_mrms_event_summaries, f_mrms_event_timeseries = def_inputs_for_b2()
 min_event_threshold = min_event_threshold * mm_per_inch
 
 #%% load data
