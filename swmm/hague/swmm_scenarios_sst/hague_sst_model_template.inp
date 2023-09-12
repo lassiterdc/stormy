@@ -6228,17 +6228,17 @@ tide_08_16_18               23         -0.584
 [TIMESERIES]
 ;;Name           Date       Time       Value     
 ;;-------------- ---------- ---------- ----------
-0                FILE "{rainfall_0}"
+0                FILE "${rainfall_0}"
 
-1                FILE "{rainfall_1}"
+1                FILE "${rainfall_1}"
 
-2                FILE "{rainfall_2}"
+2                FILE "${rainfall_2}"
 
-3                FILE "{rainfall_3}"
+3                FILE "${rainfall_3}"
 
-4                FILE "{rainfall_4}"
+4                FILE "${rainfall_4}"
 
-5                FILE "{rainfall_5}"
+5                FILE "${rainfall_5}"
 
 ;Rainfall (in/hr)
 no_rain          07/27/2023 13:29:14   0         
@@ -6482,7 +6482,7 @@ no_rain          07/28/2023 13:11:14   0
 no_rain          07/28/2023 13:17:14   0         
 no_rain          07/28/2023 13:23:14   0         
 
-water_level      FILE "{water_level}"
+water_level      FILE "${water_level}"
 
 [REPORT]
 ;;Reporting Options
