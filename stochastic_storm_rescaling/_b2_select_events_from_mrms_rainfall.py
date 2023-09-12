@@ -4,7 +4,7 @@ import sys
 from _inputs import *
 # from tqdm import tqdm
 
-# f_mrms_rainfall, f_water_level_storm_surge, min_interevent_time, max_event_length, min_event_threshold, mm_per_inch, f_mrms_event_summaries, f_mrms_event_timeseries = def_inputs_for_b2()
+# f_mrms_rainfall, f_water_level_storm_surge, min_interevent_time, max_event_length, min_event_threshold, mm_per_inch, f_mrms_event_summaries, f_mrms_event_timeseries = def_inputs_for_b()
 min_event_threshold = min_event_threshold * mm_per_inch
 
 #%% load data
@@ -16,19 +16,19 @@ df_sea = pd.read_csv(f_water_level_storm_surge, parse_dates=True, index_col = "d
 # replace missing values with zeros
 s_mean_rainfall = df_rainfall.mrms_mean.fillna(0)
 
-# convert data to the same 2-minute timestep
+# convert data to the same -minute timestep
 ## first convert to 1 minute, using fill forward (assuming a FOLLOWING time interval)
 s_mean_rainfall_1min = s_mean_rainfall.resample('1min').mean().fillna(method = 'ffill')
-## convert to 2 min
-s_mean_rainfall_2min = s_mean_rainfall_1min.resample('2min').mean()
+## convert to 5 min
+s_mean_rainfall_5min = s_mean_rainfall_1min.resample('5min').mean()
 
 # create a timeseries with depths in mm (converting from mm/hr to mm)
-s_mean_rainfall_2min_mm = s_mean_rainfall_2min / 30 # mm / hour / (timesteps per hour) = mm/timestep
+s_mean_rainfall_5min_mm = s_mean_rainfall_5min / 30 # mm / hour / (timesteps per hour) = mm/timestep
 
 # compute a rolling sum of rainfall depth at a time interval equal to the min. interevent time
-s_rain_rollingsum_mm = s_mean_rainfall_2min_mm.rolling('{}h'.format(min_interevent_time), min_periods = 1).sum()
+s_rain_rollingsum_mm = s_mean_rainfall_5min_mm.rolling('{}h'.format(min_interevent_time), min_periods = 1).sum()
 
-# s_rain_rollingsum_eventlen_mm = s_mean_rainfall_2min_mm.rolling('{}h'.format(max_event_length), min_periods = 1).sum()
+# s_rain_rollingsum_eventlen_mm = s_mean_rainfall_5min_mm.rolling('{}h'.format(max_event_length), min_periods = 1).sum()
 
 # identify possible event starts (all timesteps where min event threshold was reached in the rolling sum)
 possible_starts = s_rain_rollingsum_mm[s_rain_rollingsum_mm > min_event_threshold]
@@ -64,7 +64,7 @@ for t in possible_starts.index.values:
         continue
     # compute max event end time
     max_end_time = t + max_strm_len
-    # max_storm_tseries = pd.date_range(t, end = max_end_time, freq = '2min')
+    # max_storm_tseries = pd.date_range(t, end = max_end_time, freq = '5min')
     sr_max_storm = possible_starts[t:max_end_time]
 
     # determine whether there there are periods with 0 rain equal in length to min interevent time
@@ -78,10 +78,10 @@ for t in possible_starts.index.values:
         prev_event_endtime = sr_max_storm.index.max()
 
         # compute total depth
-        tot_depth = s_mean_rainfall_2min_mm[event_start:event_end].sum()
+        tot_depth = s_mean_rainfall_5min_mm[event_start:event_end].sum()
 
         # extract the intensities time seriies, removing preceding and trailing zeros)
-        intensities = s_mean_rainfall_2min[event_start:event_end]
+        intensities = s_mean_rainfall_5min[event_start:event_end]
         intensity_cumsum = intensities.cumsum()
         first_tstep_with_rain = (intensity_cumsum > 0).idxmax()
         last_tstep_with_rain = intensity_cumsum.idxmax()
