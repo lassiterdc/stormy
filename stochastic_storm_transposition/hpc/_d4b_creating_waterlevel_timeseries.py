@@ -28,7 +28,7 @@ df_key = pd.read_csv(f_key_subnames_gridind)
 
 df_mrms_event_summaries = pd.read_csv(f_mrms_event_summaries, parse_dates=["start", "end", "max_intensity_tstep"])
 df_mrms_event_summaries["duration"] = pd.to_timedelta(df_mrms_event_summaries["duration"])
-df_mrms_event_tseries = pd.read_csv(f_mrms_event_timeseries, parse_dates=True, index_col="date_time")
+df_mrms_event_tseries = pd.read_csv(f_mrms_event_timeseries, parse_dates=True, index_col="time")
 df_water_levels = pd.read_csv(f_water_level_storm_surge, parse_dates=True, index_col="date_time")
 
 #%% extracting sst realization data
