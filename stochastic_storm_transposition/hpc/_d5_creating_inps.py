@@ -200,4 +200,4 @@ time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
 
 num_files = len(df_strms)
 
-print("Wrote {} .inp files for each realization and storm in year {}. Script runtime: {} (min)".format(num_files, yr, time_script_min))
+print("Wrote {} .inp files for each realization and storm in year {}. Script runtime: {} (min). File written to {}".format(num_files, yr, time_script_min, dir_swmm_sst_models))
