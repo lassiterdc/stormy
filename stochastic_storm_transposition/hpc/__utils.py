@@ -59,6 +59,7 @@ resampling_inteval = 10 # after a number of attempts equal to a multiple of this
 dir_swmm_sst_models_hrly = dir_swmm_sst_scenarios_hrly_scratch + "models/"
 
 f_inp_base_hrly = dir_swmm_sst_scenarios_hrly_proj + "hague_sst_model_template.inp"
+
 # dir_time_series_hrly = dir_swmm_sst_scenarios_hrly + "time_series/"
 f_swmm_scenarios_catalog = dir_swmm_sst_scenarios_hrly_proj + "swmm_scenario_catalogs/" + "_swmm_scenarios_catalog_yr{}.csv"
 
@@ -94,6 +95,9 @@ seed_mrms_hourly = 22901
 # d4b
 plot_weather_gen_stuff = False
 plt_fldr_weather_gen = dir_time_series + "_plots/"
+
+# d5
+f_inp_base = dir_swmm_sst_scenarios + "hague_sst_model_template.inp"
 #%% hard coded variables
 # name_out_realizations = "_combined_realizations.nc"
 f_realizations_hourly = dir_swmm_model + "swmm_scenarios_sst_hourly/_combined_realizations.nc"
