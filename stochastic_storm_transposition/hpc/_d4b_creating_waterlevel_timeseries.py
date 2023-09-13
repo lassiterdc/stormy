@@ -516,10 +516,10 @@ for i, cond in df_cond.iterrows():
     df["yr"] = rz
     df["strm"] = rz
     df["datetime"] = pd.to_datetime(df['date'].astype(str) + ' ' + df['time'].astype(str))
-    print(df)
-    print("######################################")
+    # print(df)
+    # print("######################################")
     df = df.drop(["date", "time"], axis = 1)
-    print(df)
+    # print(df)
     ds = df.to_xarray()
     ds_loaded = ds.load()
     Path(dir_waterlevel_ncs_scratch).mkdir(parents=True, exist_ok=True)
