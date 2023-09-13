@@ -1,16 +1,8 @@
 #%% import libraries
 from pathlib import Path
-import os
 import xarray as xr
-os.environ['USE_PYGEOS'] = '0'
-import geopandas as gpd
-import numpy as np
 import pandas as pd
-import shutil
 from glob import glob
-import sys
-from datetime import datetime
-# from tqdm import tqdm
 
 from __utils import *
 
