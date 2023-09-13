@@ -51,8 +51,8 @@ grid_ids.sort()
 
 df_coords = df_coords.loc[grid_ids, :]
 
-rz = 1
-strm = 1
+rz = ds_rlztns.storm_id.values[0]
+strm = ds_rlztns.realization.values[0]
 
 lst_storm_mean_tseries = []
 keys = []
@@ -397,6 +397,7 @@ lst_event_ends = []
 lst_event_durations = []
 lst_peak_surge_tsteps = []
 lst_event_ids = []
+lst_successful_sim = []
 count = 0
 lag_reset = False
 for i, cond in df_cond.iterrows():
@@ -407,7 +408,10 @@ for i, cond in df_cond.iterrows():
     reasonable_sample = False
     generate_new_sim = True
     while reasonable_sample == False:
+        success = True
         if attempts >= n_attempts:
+            success = False
+            break
             sys.exit("SCRIPT FAILED FOR YEAR {}: FAILED AFTER {} ATTEMPTS TO GENERATE A SYNTHETIC WATER LEVEL TIME SERIES FOR {}".format(yr, attempts, s_sim_event_summary))
         attempts += 1
         try:           
@@ -491,6 +495,7 @@ for i, cond in df_cond.iterrows():
     lst_event_ends.append(event_endtime)
     lst_event_durations.append(duration)
     lst_peak_surge_tsteps.append(sim_tstep_max_surge)
+    lst_successful_sim.append(success)
     # lst_obs_peak.append(obs_peak)
     # lst_obs_min.append(obs_peak)
     # writing to a file
@@ -506,12 +511,18 @@ for i, cond in df_cond.iterrows():
         file.write(";;synthetic water level\n")
         file.write(";;Water Level (ft)\n")
     df.to_csv(f_out, sep = '\t', index = False, header = False, mode="a")
-
+    # export to a netcdf
+    df["realization"] = rz
+    df["yr"] = rz
+    df["strm"] = rz
+    ds = df.to_xarray()
+    ds_loaded = ds.load()
+    ds_loaded.to_netcdf(dir_waterlevel_ncs_scratch + "wlevel_rz{}_yr{}_strm{}.nc".format(rz, yr, strm))
 #%% export event summaries
 df_idx = df_sst_storm_summaries.rz_yr_strm.str.split("_", expand=True)
 df_idx.columns = ["realization", "year", "storm_id"]
 
-df_simulated_event_summaries = pd.DataFrame(dict(min_sim_wlevel = min_sim_wlevels,max_sim_wlevel = max_sim_wlevels, obs_event_id_for_rescaling = lst_event_ids,
+df_simulated_event_summaries = pd.DataFrame(dict(success = lst_successful_sim, min_sim_wlevel = min_sim_wlevels,max_sim_wlevel = max_sim_wlevels, obs_event_id_for_rescaling = lst_event_ids,
                                                  event_start = lst_event_starts, event_end = lst_event_ends,
                                                  event_duration_hr = lst_event_durations, tstep_peak_surge = lst_peak_surge_tsteps))
 

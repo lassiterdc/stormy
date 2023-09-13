@@ -50,7 +50,7 @@ time_buffer = 6 # hours; this is the amount of time before either the start of r
 c4b_gen_plots = False
 wlevel_threshold = 0.5 # i don't want simulated time series that are 50% above or below the min and max observed waterlevel since 2000
 
-n_attempts = 200
+n_attempts = 500
 n_clusters = 5
 resampling_inteval = 10 # after a number of attempts equal to a multiple of this value, the copula will be used to resample storm surge and peak lag  
 
@@ -93,11 +93,16 @@ f_key_subnames_gridind = dir_time_series + "_key_subnames_and_grid-indices.csv"
 seed_mrms_hourly = 22901
 
 # d4b
+dir_swmm_sst_scenarios_scratch = dir_scratch_sst + "swmm_sst/"
+dir_waterlevel_ncs_scratch = dir_swmm_sst_scenarios_scratch + "water_level_ncs/"
 plot_weather_gen_stuff = False
 plt_fldr_weather_gen = dir_time_series + "_plots/"
 
+# d4c
+dir_scenario_weather = dir_swmm_sst_scenarios + "weather/"
+f_rain_realizations = dir_scenario_weather + "rainfall.nc"
+
 # d5
-dir_swmm_sst_scenarios_scratch = dir_scratch_sst + "swmm_sst/"
 f_inp_base = dir_swmm_sst_scenarios + "hague_sst_model_template.inp"
 dir_swmm_sst_models = dir_swmm_sst_scenarios_scratch + "models/"
 #%% hard coded variables
