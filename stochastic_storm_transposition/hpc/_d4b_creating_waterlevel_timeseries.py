@@ -515,7 +515,7 @@ for i, cond in df_cond.iterrows():
     df["realization"] = rz
     df["yr"] = rz
     df["strm"] = rz
-    df["datetime"] = pd.to_datetime(df['date'] + ' ' + df['time'])
+    df["datetime"] = pd.to_datetime(df['date'].astype(str) + ' ' + df['time'].astype(str))
     print(df)
     print("######################################")
     df.drop(["date", "time"], axis = 1)
