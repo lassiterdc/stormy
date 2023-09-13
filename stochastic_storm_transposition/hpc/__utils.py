@@ -101,6 +101,8 @@ plt_fldr_weather_gen = dir_time_series + "_plots/"
 # d4c
 dir_scenario_weather = dir_swmm_sst_scenarios + "weather/"
 f_rain_realizations = dir_scenario_weather + "rainfall.nc"
+f_w_level_sims = dir_scenario_weather + "water_levels.nc"
+f_sims_summary = dir_scenario_weather + "compound_event_summaries.csv"
 
 # d5
 f_inp_base = dir_swmm_sst_scenarios + "hague_sst_model_template.inp"
