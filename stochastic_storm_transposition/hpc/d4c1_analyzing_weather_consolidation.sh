@@ -7,6 +7,7 @@
 #SBATCH -t 12:00:00				# Run time per serial job (hh:mm:ss) [24:00:00]
 #SBATCH --mail-user=dcl3nd@virginia.edu          # address for email notification
 #SBATCH --mail-type=ALL   
+#SBATCH --mem-per-cpu=64000
 
 # ijob -c 1 -A quinnlab_paid -p standard --time=0-06:00:00 --mem-per-cpu=64000
 
