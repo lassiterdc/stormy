@@ -512,9 +512,9 @@ for i, cond in df_cond.iterrows():
         file.write(";;Water Level (ft)\n")
     df.to_csv(f_out, sep = '\t', index = False, header = False, mode="a")
     # export to a netcdf
-    df["realization"] = rz
-    df["year"] = yr
-    df["storm_id"] = strm
+    df["realization"] = int(rz)
+    df["year"] = int(yr)
+    df["storm_id"] = int(strm)
     df["datetime"] = pd.to_datetime(df['date'].astype(str) + ' ' + df['time'].astype(str))
     # print(df)
     # print("######################################")
