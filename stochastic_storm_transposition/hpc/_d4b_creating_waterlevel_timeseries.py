@@ -515,6 +515,10 @@ for i, cond in df_cond.iterrows():
     df["realization"] = rz
     df["yr"] = rz
     df["strm"] = rz
+    df["datetime"] = pd.to_datetime(df['date'] + ' ' + df['time'])
+    print(df)
+    print("######################################")
+    df.drop(["date", "time"], axis = 1)
     print(df)
     ds = df.to_xarray()
     ds_loaded = ds.load()
