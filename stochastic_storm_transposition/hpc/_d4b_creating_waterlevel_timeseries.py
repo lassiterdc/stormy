@@ -518,7 +518,7 @@ for i, cond in df_cond.iterrows():
     df["datetime"] = pd.to_datetime(df['date'].astype(str) + ' ' + df['time'].astype(str))
     print(df)
     print("######################################")
-    df.drop(["date", "time"], axis = 1)
+    df = df.drop(["date", "time"], axis = 1)
     print(df)
     ds = df.to_xarray()
     ds_loaded = ds.load()
