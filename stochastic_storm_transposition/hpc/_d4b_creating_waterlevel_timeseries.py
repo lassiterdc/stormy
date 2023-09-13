@@ -517,6 +517,7 @@ for i, cond in df_cond.iterrows():
     df["strm"] = rz
     ds = df.to_xarray()
     ds_loaded = ds.load()
+    Path(dir_waterlevel_ncs_scratch).mkdir(parents=True, exist_ok=True)
     ds_loaded.to_netcdf(dir_waterlevel_ncs_scratch + "wlevel_rz{}_yr{}_strm{}.nc".format(rz, yr, strm))
 #%% export event summaries
 df_idx = df_sst_storm_summaries.rz_yr_strm.str.split("_", expand=True)
