@@ -4,7 +4,8 @@
 #SBATCH --ntasks=1				# Number of tasks per serial job (must be 1)
 #SBATCH -p standard				# Queue name "standard" (serial) [standard]
 #SBATCH -A quinnlab_paid				# allocation name
-#SBATCH -t 12:00:00				# Run time per serial job (hh:mm:ss) [24:00:00]
+#SBATCH -t 12:00:00
+# SBATCH --mem-per-cpu=200000				# Run time per serial job (hh:mm:ss) [24:00:00]
 #SBATCH --array=1  # these are the jobs with errors; normally run 1-1000 unless re-running failed scripts        # Array of jobs, 1 for each of 1000 years  
 #SBATCH --mail-user=dcl3nd@virginia.edu          # address for email notification
 #SBATCH --mail-type=ALL   
@@ -23,4 +24,4 @@ export PYTHONPATH=$DIR/lib/python3.11/site-packages:$PATH
 # echo "Creating rainfall time series for year ${SLURM_ARRAY_TASK_ID}..."
 
 # running script
-python ${assar_dirs[hpc_d4c_py]} ${SLURM_ARRAY_TASK_ID}
+python ${assar_dirs[hpc_d4c1_py]}
