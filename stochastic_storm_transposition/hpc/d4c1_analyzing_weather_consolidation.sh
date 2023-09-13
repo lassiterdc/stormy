@@ -12,14 +12,11 @@
 
 # ijob -c 1 -A quinnlab_paid -p standard --time=0-06:00:00 --mem-per-cpu=64000
 
-source __directories.sh
+
 module purge
 module load anaconda # the stuff other than anaconda was to ensure eccodes loaded correctly
-# DIR=~/.conda/envs/rainyday
 source activate rainyday
-# export PATH=$DIR/bin:$PATH
-# export LD_LIBRARY_PATH=$DIR/lib:$PATH
-# export PYTHONPATH=$DIR/lib/python3.11/site-packages:$PATH
+source __directories.sh
 
 # echo "Creating rainfall time series for year ${SLURM_ARRAY_TASK_ID}..."
 
