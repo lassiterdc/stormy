@@ -515,6 +515,7 @@ for i, cond in df_cond.iterrows():
     df["realization"] = rz
     df["yr"] = rz
     df["strm"] = rz
+    print(df)
     ds = df.to_xarray()
     ds_loaded = ds.load()
     Path(dir_waterlevel_ncs_scratch).mkdir(parents=True, exist_ok=True)
