@@ -513,14 +513,16 @@ for i, cond in df_cond.iterrows():
     df.to_csv(f_out, sep = '\t', index = False, header = False, mode="a")
     # export to a netcdf
     df["realization"] = rz
-    df["yr"] = rz
-    df["strm"] = rz
+    df["year"] = rz
+    df["storm_id"] = rz
     df["datetime"] = pd.to_datetime(df['date'].astype(str) + ' ' + df['time'].astype(str))
     # print(df)
     # print("######################################")
     df = df.drop(["date", "time"], axis = 1)
+    df = df.set_index(["realization", "year","storm_id", "datetime"])
     # print(df)
     ds = df.to_xarray()
+    # ds = ds.assign_coords(["realization", "year","storm_id", "datetime"])
     ds_loaded = ds.load()
     Path(dir_waterlevel_ncs_scratch).mkdir(parents=True, exist_ok=True)
     ds_loaded.to_netcdf(dir_waterlevel_ncs_scratch + "wlevel_rz{}_yr{}_strm{}.nc".format(rz, yr, strm))
