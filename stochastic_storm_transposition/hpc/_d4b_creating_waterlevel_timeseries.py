@@ -389,7 +389,7 @@ max_obs_wlevel = df_water_levels.water_level.max()
 i = -1
 lst_s_wlevel_tseries = []
 lst_keys = []
-source_event_id = []
+# source_event_id = []
 min_sim_wlevels = []
 max_sim_wlevels = []
 lst_event_starts = []
@@ -422,7 +422,7 @@ for i, cond in df_cond.iterrows():
             s_sim_event_summary_scaled = df_vars_stormclass_scaler.transform(pd.DataFrame(s_sim_event_summary.loc[vars_k]).T)
             pred_k = kmeans.predict(s_sim_event_summary_scaled)
             obs_event_id = get_storm_to_rescale(pred_k)
-            source_event_id.append(obs_event_id)
+            # source_event_id.append(obs_event_id)
             df_obs_event_tseries = df_water_rain_tseries[df_water_rain_tseries.event_id == obs_event_id]
             df_obs_event_summary = df_compound_summary.loc[df_compound_summary.event_id == obs_event_id, vars_all]
             # print("obs_event_id")
@@ -488,13 +488,22 @@ for i, cond in df_cond.iterrows():
                 print("After {} unsuccesful attempts to generate a reasonable water level time series, the peak surge and time lag were resampled using the copula.".format(attempts))
                 generate_new_sim = True
             continue
-    lst_event_ids.append(obs_event_id)
-    min_sim_wlevels.append(min_sim_wlevel)
-    max_sim_wlevels.append(max_sim_wlevel)
-    lst_event_starts.append(event_starttime)
-    lst_event_ends.append(event_endtime)
-    lst_event_durations.append(duration)
-    lst_peak_surge_tsteps.append(sim_tstep_max_surge)
+    if success: # if successful, append lists of simulated values
+        lst_event_ids.append(obs_event_id)
+        min_sim_wlevels.append(min_sim_wlevel)
+        max_sim_wlevels.append(max_sim_wlevel)
+        lst_event_starts.append(event_starttime)
+        lst_event_ends.append(event_endtime)
+        lst_event_durations.append(duration)
+        lst_peak_surge_tsteps.append(sim_tstep_max_surge)
+    else: # if not successful, append with NA's
+        lst_event_ids.append(np.nan)
+        min_sim_wlevels.append(np.nan)
+        max_sim_wlevels.append(np.nan)
+        lst_event_starts.append(np.nan)
+        lst_event_ends.append(np.nan)
+        lst_event_durations.append(np.nan)
+        lst_peak_surge_tsteps.append(np.nan)
     lst_successful_sim.append(success)
     # lst_obs_peak.append(obs_peak)
     # lst_obs_min.append(obs_peak)
