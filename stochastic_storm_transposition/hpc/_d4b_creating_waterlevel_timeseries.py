@@ -515,12 +515,12 @@ for i, cond in df_cond.iterrows():
     df["realization"] = rz
     df["year"] = yr
     df["storm_id"] = strm
-    # df["datetime"] = pd.to_datetime(df['date'].astype(str) + ' ' + df['time'].astype(str))
+    df["datetime"] = pd.to_datetime(df['date'].astype(str) + ' ' + df['time'].astype(str))
     # print(df)
     # print("######################################")
     df = df.drop(["date", "time"], axis = 1)
-    df = df.reset_index(names = "tstep")
-    df = df.set_index(["realization", "year","storm_id"])
+    # df = df.reset_index(names = "tstep")
+    df = df.set_index(["realization", "year","storm_id", "datetime"])
     # print(df)
     ds = df.to_xarray()
     # ds = ds.assign_coords(["realization", "year","storm_id", "datetime"])
