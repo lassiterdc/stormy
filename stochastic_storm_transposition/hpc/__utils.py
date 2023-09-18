@@ -95,6 +95,7 @@ seed_mrms_hourly = 22901
 # d4b
 dir_swmm_sst_scenarios_scratch = dir_scratch_sst + "swmm_sst/"
 dir_waterlevel_ncs_scratch = dir_swmm_sst_scenarios_scratch + "water_level_ncs/"
+dir_zarr_weather_scratch = dir_swmm_sst_scenarios_scratch + "weather/"
 plot_weather_gen_stuff = False
 plt_fldr_weather_gen = dir_time_series + "_plots/"
 
@@ -225,6 +226,11 @@ def define_dims(ds):
     ds = ds.assign_attrs(timestep_min = tstep_min)
     ds = ds.assign_coords(dict(realization=rz, year = year, storm_id = strm, first_tstep = first_tstep))
     ds = ds.expand_dims(dim=dict(realization=1, year = 1, storm_id = 1))
+    # drop unnecessary variables
+    try:
+        ds = ds.drop_vars(["xlocation","ylocation", "scalar_dim"]) # these were causing problems when trying to combine all weather realizations into a single netcdf
+    except:
+        pass
     return ds
 
 # for loading RainyDay realizations for a specific year only
