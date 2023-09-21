@@ -11,11 +11,21 @@ import shutil
 from __utils import *
 
 start_time = time.time()
-
-#%% water levels
+#%% water level summaries
 f_summary = dir_time_series + "_event_summary_year{}.csv".format('*') # must match format in script d4b
 lst_f_summaries = glob(f_summary)
+bm_time = time.time()
+lst_df = []
 
+for filename in lst_f_summaries:
+    df = pd.read_csv(filename, index_col=None, header=0)
+    lst_df.append(df)
+
+df_summaries = pd.concat(lst_df, axis=0, ignore_index=True)
+
+df_summaries.to_csv(f_sims_summary)
+print("Total time elapsed: {}; time load and combine to single csv event summaries: {}".format(time.time() - start_time, time.time() - bm_time))
+#%% water levels
 lst_f_netcdfs = glob(dir_waterlevel_ncs_scratch + "*.nc")
 
 bm_time = time.time()
@@ -45,15 +55,3 @@ print("Total time elapsed: {}; time to export combined water level realizations 
 # bm_time = time.time()
 # ds_w_loaded.to_netcdf(f_w_level_sims, encoding= {"water_level":{"zlib":True}})
 # print("Total time elapsed: {}; time to export combined water levels to netcdf: {}".format(time.time() - start_time, time.time() - bm_time))
-#%% water level summaries
-bm_time = time.time()
-lst_df = []
-
-for filename in lst_f_summaries:
-    df = pd.read_csv(filename, index_col=None, header=0)
-    lst_df.append(df)
-
-df_summaries = pd.concat(lst_df, axis=0, ignore_index=True)
-
-df_summaries.to_csv(f_sims_summary)
-print("Total time elapsed: {}; time load and combine to single csv event summaries: {}".format(time.time() - start_time, time.time() - bm_time))
