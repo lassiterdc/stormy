@@ -11,15 +11,15 @@
 
 # ijob -c 1 -A quinnlab_paid -p standard --time=0-06:00:00 --mem-per-cpu=64000
 
-# module purge
-# source __directories.sh
-# module load gcc openmpi eccodes anaconda # the stuff other than anaconda was to ensure eccodes loaded correctly
-# DIR=~/.conda/envs/rainyday
-# source activate rainyday
-# export PATH=$DIR/bin:$PATH
-# export LD_LIBRARY_PATH=$DIR/lib:$PATH
-# export PYTHONPATH=$DIR/lib/python3.11/site-packages:$PATH
+module purge
+source __directories.sh
+module load gcc openmpi eccodes anaconda # the stuff other than anaconda was to ensure eccodes loaded correctly
+DIR=~/.conda/envs/rainyday
+source activate rainyday
+export PATH=$DIR/bin:$PATH
+export LD_LIBRARY_PATH=$DIR/lib:$PATH
+export PYTHONPATH=$DIR/lib/python3.11/site-packages:$PATH
 
 # running script
 echo "running script ${assar_dirs[hpc_d4c1b_py]}"
-# python ${assar_dirs[hpc_d4c1b_py]}
+python ${assar_dirs[hpc_d4c1b_py]}
