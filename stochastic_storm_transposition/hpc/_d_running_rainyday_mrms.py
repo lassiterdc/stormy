@@ -30,7 +30,7 @@ with open(f_sst_mrms, 'r') as T:
     template = Template(T.read())
     d = {"YEAR":year}
     new_in = template.safe_substitute(d)
-    new_file = '{}{}.sst'.format(dir_for_sst_files, slurm_input)
+    new_file = '{}{}.sst'.format(dir_for_sst_files, year)
     new_file_path = pathlib.Path(new_file)
     # create _inputs folder if it doesn't already exist
     new_file_path.parent.mkdir(parents=True, exist_ok=True)
