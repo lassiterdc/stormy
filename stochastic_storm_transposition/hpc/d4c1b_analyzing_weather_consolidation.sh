@@ -9,7 +9,7 @@
 #SBATCH --mail-type=ALL   
 #SBATCH --mem-per-cpu=16000
 
-# ijob -c 1 -A quinnlab_paid -p standard --time=0-06:00:00 --mem-per-cpu=64000
+# ijob -c 1 -A quinnlab_paid -p standard --time=0-06:00:00 --mem-per-cpu=16000
 
 module purge
 source __directories.sh
