@@ -5,6 +5,7 @@ dir_repo = "/project/quinnlab/dcl3nd/norfolk/stormy/"
 dir_sst = dir_repo + "stochastic_storm_transposition/"
 dir_sst_nrflk = dir_sst + "norfolk/"
 dir_sst_nrflk_hrly = dir_sst_nrflk + "sst_mrms_hourly/"
+dir_mrms = dir_sst_nrflk + "sst_mrms/"
 dir_home = "/home/dcl3nd/stormy/"
 dir_home_sst = dir_home + "sst/"
 dir_scratch_sst = "/scratch/dcl3nd/stormy/"
@@ -83,8 +84,13 @@ f_bootstrapped_consolidated_hrly = dir_swmm_sst_scenarios_hrly_proj + "bootstrap
 f_bootstrapped_consolidated_hrly_raw = dir_swmm_sst_scenarios_hrly_proj + "bootstrapping_allsamples_consolidated.nc"
 export_raw_bs_samps = False
 
+#d
+# dir_mrms = dir_sst_nrflk + "sst_mrms/"
+f_sst_mrms = dir_mrms + "mrms_template.sst"
+dir_for_sst_files = dir_mrms + "_inputs/"
+
 #d4
-fldr_realizations = "/project/quinnlab/dcl3nd/norfolk/stormy/stochastic_storm_transposition/norfolk/sst_mrms/mrms_combined/Realizations/"
+fldr_realizations = dir_mrms + "mrms_combined/Realizations/"
 dir_swmm_sst_scenarios = dir_swmm_model + "swmm_scenarios_sst/"
 # dir_swmm_sst_scenarios_scratch = dir_scratch_sst + "swmm_sst_hourly/"
 # dir_swmm_sst_scenarios_hrly_home = dir_home_sst + "swmm_sst_hourly/"
@@ -180,16 +186,16 @@ nrealizations = 1
 #     return dir_mrms_hrly, f_sst_mrms_hrly, dir_for_sst_files
 
 # def d_rainyday_in():
-#     dir_mrms = dir_sst_nrflk + "sst_mrms/"
-#     f_sst_mrms = dir_mrms + "mrms_template.sst"
-#     dir_for_sst_files = dir_mrms + "_inputs/"
-#     return dir_mrms, f_sst_mrms, dir_for_sst_files
+    # dir_mrms = dir_sst_nrflk + "sst_mrms/"
+    # f_sst_mrms = dir_mrms + "mrms_template.sst"
+    # dir_for_sst_files = dir_mrms + "_inputs/"
+    # return dir_mrms, f_sst_mrms, dir_for_sst_files
 
 # def da_rainyday_in():
-#     dir_mrms = dir_sst_nrflk + "sst_mrms_subdivided/"
-#     f_sst_mrms = dir_mrms + "mrms_template_{}.sst"
-#     dir_for_sst_files = dir_mrms + "_inputs/"
-#     return dir_mrms, f_sst_mrms, dir_for_sst_files
+    # dir_mrms = dir_sst_nrflk + "sst_mrms_subdivided/"
+    # f_sst_mrms = dir_mrms + "mrms_template_{}.sst"
+    # dir_for_sst_files = dir_mrms + "_inputs/"
+    # return dir_mrms, f_sst_mrms, dir_for_sst_files
 
 #%% functions
 import pandas as pd
