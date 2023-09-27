@@ -398,6 +398,7 @@ lst_event_durations = []
 lst_peak_surge_tsteps = []
 lst_event_ids = []
 lst_successful_sim = []
+lst_ds = []
 count = 0
 lag_reset = False
 for i, cond in df_cond.iterrows():
@@ -532,10 +533,14 @@ for i, cond in df_cond.iterrows():
     df = df.set_index(["realization", "year","storm_id", "datetime"])
     # print(df)
     ds = df.to_xarray()
+    lst_ds.append(ds)
     # ds = ds.assign_coords(["realization", "year","storm_id", "datetime"])
-    ds_loaded = ds.load()
-    Path(dir_waterlevel_ncs_scratch).mkdir(parents=True, exist_ok=True)
-    ds_loaded.to_netcdf(dir_waterlevel_ncs_scratch + "wlevel_rz{}_yr{}_strm{}.nc".format(rz, yr, strm))
+
+# combine netcdfs into one and export
+ds_combined = xr.combine_nested(lst_ds)
+ds_combined_loaded = ds.load()
+Path(dir_waterlevel_ncs_scratch).mkdir(parents=True, exist_ok=True)
+ds_combined_loaded.to_netcdf(dir_waterlevel_ncs_scratch + "wlevel_yr{}.nc".format(rz, yr, strm))
 #%% export event summaries
 df_idx = df_sst_storm_summaries.rz_yr_strm.str.split("_", expand=True)
 df_idx.columns = ["realization", "year", "storm_id"]
