@@ -131,6 +131,53 @@ for rtrn in sst_recurrence_intervals:
     plt.tight_layout()
     plt.savefig(scratch_file.format(title_fld_attribution.format(rtrn)),
                 transparent=False, bbox_inches='tight')
+    
+
+#%% creating gridded visualization
+# x axis are return periods, y axis are nodes
+# process dataset to assign an index that orders the nodes in a sensible way
+df_mean_fld_vol = gdf_node_flding.rename(columns = dict(node_id = "node")).groupby(["node", "flood_return_yrs"]).mean("node_flooding_cubic_meters")
+
+df_node_flding_attrs = gdf_node_attribution.set_index(["node", "flood_return_yrs"]).join(df_mean_fld_vol, how = 'inner', on = ["node", "flood_return_yrs"]).reset_index()
+
+sorting_vars = ["node_flooding_cubic_meters"]
+ascending = True
+
+df_node_flding_attrs_srted = df_node_flding_attrs[df_node_flding_attrs["flood_return_yrs"] == 100].sort_values(sorting_vars, ascending = ascending)
+
+df_node_flding_attrs_srted = df_node_flding_attrs_srted.reset_index(drop=True).reset_index(names = "node_index")
+
+df_node_order = df_node_flding_attrs_srted.set_index("node").loc[:, "node_index"]
+
+df_node_flding_attrs = df_node_flding_attrs.join(df_node_order, how = "left", on ="node").set_index(["node_index", "flood_return_yrs"])
+# gdf_node_attribution_subset = gdf_node_attribution[gdf_node_attribution.flood_return_yrs >= 1]
+
+# gdf_node_attribution_sorted = gdf_node_attribution_subset.set_index(["node", "flood_return_yrs"]).join(df_node_order, how = "left", rsuffix = "joined").reset_index().set_index(["node_index", "flood_return_yrs"])
+
+# gdf_node_attribution_sorted = gdf_node_attribution_sorted.join(df_node_flding_attrs.set_index(["node", "flood_return_yrs"])["node_flooding_cubic_meters"])
+
+ds = df_node_flding_attrs.loc[:,["frac_wlevel_mean", "upper_CI", "lower_CI", "node_flooding_cubic_meters", "node_trns_flooding_cubic_meters"]].to_xarray()
+
+tick_labels = ds["flood_return_yrs"].values
+ds["flood_return_yrs"] = np.arange(1, len(ds["flood_return_yrs"])+1)
+
+fig, ax = plt.subplots(figsize = [width, height*10], dpi=300)
+ds["frac_wlevel_mean"].plot(levels = np.linspace(0,1.000000000001,5), ax = ax, cmap = 'coolwarm')
+ax.set_ylim(int(ds.node_index.min())-1, int(ds.node_index.max())+1)
+
+
+fig, ax = plt.subplots(figsize = [width, height*10], dpi=300)
+ds["node_flooding_cubic_meters"].plot(robust = True, ax = ax, cmap = 'cividis')
+ax.set_ylim(int(ds.node_index.min())-1, int(ds.node_index.max())+1)
+
+fig, ax = plt.subplots(figsize = [width, height*10], dpi=300)
+ds["node_trns_flooding_cubic_meters"].plot(robust = True, ax = ax, cmap = 'cividis')
+ax.set_ylim(int(ds.node_index.min())-1, int(ds.node_index.max())+1)
+# plt.tight_layout()
+
+# fig, ax = plt.subplots(figsize = [height, width], dpi=300)
+# ds.plot.scatter(x="flood_return_yrs", y="node_index", hue="frac_wlevel_mean", ax = ax)
+
 # making an animation
 # https://towardsdatascience.com/how-to-create-a-gif-from-matplotlib-plots-in-python-6bec6c0c952c
 
@@ -166,4 +213,6 @@ create_gif(files, gif_filepath)
 
 files = glob(scratch_file.format(title_fld_attribution.format("*")))
 gif_filepath = fldr_swmm_analysis_plots + "flood_attribution.gif"
+# %%
+
 create_gif(files, gif_filepath)
