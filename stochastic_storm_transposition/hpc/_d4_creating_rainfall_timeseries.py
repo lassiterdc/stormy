@@ -18,9 +18,10 @@ yr = int(sys.argv[1]) # a number between 1 and 1000
 
 script_start_time = datetime.now()
 #%% loading data
-lst_f_ncs = return_rzs_for_yr(fldr_realizations, yr)
-ds_rlztns = xr.open_mfdataset(lst_f_ncs, preprocess = define_dims)
+# lst_f_ncs = return_rzs_for_yr(fldr_realizations, yr)
+# ds_rlztns = xr.open_mfdataset(lst_f_ncs, preprocess = define_dims)
 
+ds_rlztns = xr.open_dataset(f_rain_realizations)
 
 gdf_subs = gpd.read_file(f_shp_swmm_subs)
 
