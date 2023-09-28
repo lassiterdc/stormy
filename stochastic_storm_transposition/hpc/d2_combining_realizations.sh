@@ -21,5 +21,5 @@ export LD_LIBRARY_PATH=$DIR/lib:$PATH
 export PYTHONPATH=$DIR/lib/python3.11/site-packages:$PATH
 
 # running script
-echo "running script ${assar_dirs[hpc_d4c1a_py]}"
-python ${assar_dirs[hpc_d4c1a_py]}
+echo "running script ${assar_dirs[hpc_d2_py]}"
+python ${assar_dirs[hpc_d2_py]}
