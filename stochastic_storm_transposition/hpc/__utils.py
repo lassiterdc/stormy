@@ -1,7 +1,8 @@
 #%% import libraries
 from glob import glob
 # filenames, paths, and directories
-dir_repo = "/project/quinnlab/dcl3nd/norfolk/stormy/"
+# dir_repo = "/project/quinnlab/dcl3nd/norfolk/stormy/" 
+dir_repo = "/scratch/dcl3nd/stormy/" # MODIFICATION TO RUN ON SCRATCH
 dir_sst = dir_repo + "stochastic_storm_transposition/"
 dir_sst_nrflk = dir_sst + "norfolk/"
 dir_sst_nrflk_hrly = dir_sst_nrflk + "sst_mrms_hourly/"
