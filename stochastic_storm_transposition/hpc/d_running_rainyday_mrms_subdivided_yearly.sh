@@ -13,6 +13,9 @@
 
 # ijob -c 1 -A quinnlab_paid -p standard --time=0-06:00:00 --mem-per-cpu=64000
 
+# testing with stageiv
+# sst_in="/scratch/dcl3nd/stormy/stochastic_storm_transposition/norfolk/_sst_hpc_testing_stageiv/stageiv_testing_rivanna.sst"
+
 source __directories.sh
 module purge
 module load anaconda

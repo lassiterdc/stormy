@@ -16,5 +16,5 @@
 "POINTAREA" : "basin",
 "CALCTYPE" : "PDS",
 "WATERSHEDSHP" : "/scratch/dcl3nd/stormy/stochastic_storm_transposition/norfolk/watershed/norfolk_wshed_4326.shp",
-"VARIABLES" : {"rainname": "rainrate","latname":"latitude","longname":"longitude"}
+"VARIABLES" : {"rainname": "rainrate","latname":"outlat","longname":"outlon"}
 }
