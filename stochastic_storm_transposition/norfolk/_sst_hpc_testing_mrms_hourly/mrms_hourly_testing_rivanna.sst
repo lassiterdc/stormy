@@ -1,5 +1,5 @@
 {
-"MAINPATH" : "/scratch/dcl3nd/stormy/stochastic_storm_transposition/norfolk/_sst_mrms_hourly_test/" ,
+"MAINPATH" : "/scratch/dcl3nd/stormy/stochastic_storm_transposition/norfolk/_sst_hpc_testing_mrms_hourly/" ,
 "SCENARIONAME" : "stageiv_testing",
 "RAINPATH" : "/scratch/dcl3nd/highres-radar-rainfall-processing/data/mrms_nc_preciprate_hourly_dailyfiles/*.nc",
 "ISLASSITER" : "false",
