@@ -87,8 +87,10 @@ export_raw_bs_samps = False
 
 #d
 # dir_mrms = dir_sst_nrflk + "sst_mrms/"
-f_sst_mrms = dir_mrms + "mrms_template.sst"
-dir_for_sst_files = dir_mrms + "_inputs/"
+f_sst_mrms_coarse = dir_mrms + "hourly/mrms__hourly_template.sst"
+dir_for_sst_files = dir_mrms + "hourly/_inputs/"
+# f_sst_mrms = dir_mrms + "mrms_template.sst"
+
 
 #d4
 fldr_realizations = dir_mrms + "mrms_combined/Realizations/"
