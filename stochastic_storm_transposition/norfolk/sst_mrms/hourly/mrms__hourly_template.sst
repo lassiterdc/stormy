@@ -1,0 +1,20 @@
+{
+"MAINPATH" : "/scratch/dcl3nd/stormy/stochastic_storm_transposition/norfolk/sst_mrms/" ,
+"SCENARIONAME" : "mrms_$YEAR",
+"RAINPATH" : "/scratch/dcl3nd/highres-radar-rainfall-processing/data/mrms_nc_preciprate_hourly_dailyfiles/*.nc",
+"ISLASSITER" : "true",
+"CATALOGNAME" : "strmcat_mrms_$YEAR.nc",
+"CREATECATALOG" : "true", "DURATION" : 72,
+"SCENARIOS" : "FALSE",
+"NYEARS" : 1 , "NSTORMS" : 20, "NREALIZATIONS" : 1,
+"TIMESEPARATION" : 12, "DOMAINTYPE" : "irregular",
+"DOMAINSHP" : "/scratch/dcl3nd/stormy/stochastic_storm_transposition/norfolk/transposition_domain/norfolk_trans_dom_4326.shp",
+"DIAGNOSTICPLOTS" : "false", "FREQANALYSIS" : "false", 
+"EXCLUDESTORMS" : [], "EXCLUDEMONTHS": [],
+"INCLUDEYEARS" : [$YEAR], 
+"DURATIONCORRECTION" : "false", "TRANSPOSITION" : "uniform", "RESAMPLING" : "poisson", "RETURNLEVELS": [1,2,5,10,25,50,100,200,500], "RETURNTHRESHOLD" : 1 , 
+"POINTAREA" : "basin",
+"CALCTYPE" : "PDS",
+"WATERSHEDSHP" : "/scratch/dcl3nd/stormy/stochastic_storm_transposition/norfolk/watershed/norfolk_wshed_4326.shp",
+"VARIABLES" : {"rainname": "rainrate","latname":"latitude","longname":"longitude"}
+}
