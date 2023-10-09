@@ -26,18 +26,5 @@ export PATH=$DIR/bin:$PATH
 export LD_LIBRARY_PATH=$DIR/lib:$PATH
 export PYTHONPATH=$DIR/lib/python3.11/site-packages:$PATH
 
-# assign year variable
-if [ ${SLURM_ARRAY_TASK_ID} -lt 10 ]
-then
-	year=200${SLURM_ARRAY_TASK_ID}
-else
-	year=20${SLURM_ARRAY_TASK_ID}
-fi
-
-# generate SST script for the year
-sst_in=$(python ${assar_dirs[hpc_d_py]} ${year})
-
-echo "Running sst for year $year using file $sst_in"
-
 # running RainyDay
-python ${assar_dirs[hpc_rainyday_py]} ${sst_in}
+python ${assar_dirs[hpc_d1b_py]}
