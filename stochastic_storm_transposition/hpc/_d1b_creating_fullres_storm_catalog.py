@@ -13,19 +13,85 @@ import shutil
 from __utils import *
 import time
 
-start_time = time.time()
+script_start_time = time.time()
 year = str(sys.argv[1])
 #%% define directories
 fpath_strm_cats = dir_mrms_coarse + "mrms_{}/StormCatalog/*.nc".format(year)
-
 f_ncs_coarse_catalog = glob(fpath_strm_cats)
 f_ncs_fullres = glob(dir_fullres_rain + "/{}*.nc".format(year))
 
 d_perf = {}
 d_perf['success'] = False
+
+#%% troubleshooting issues with 2008 (this shouldn't )
+lst_ds = []
+lst_lons = []
+lst_lons_shape = []
+for f in f_ncs_fullres:
+    ds = xr.open_dataset(f, engine = "h5netcdf")
+    lst_ds.append(ds)
+    lst_lons.append(ds.longitude.values)
+    lst_lons_shape.append(len(ds.longitude.values))
+
+idx_smallest_spatial_dims = pd.Series(lst_lons_shape).idxmin()
+smallest_ds = lst_ds[idx_smallest_spatial_dims]
+
+def preprocess_ds(ds):
+    ds =  lst_ds[idx_smallest_spatial_dims+1]
+    ds_subset = ds.sel(dict(latitude = smallest_ds.latitude.values, longitude = smallest_ds.longitude.values))
+    return ds_subset
+
+#%% testing
+# lst_ds_processed = []
+# lst_lons = []
+# lst_lons_shape = []
+# count = -1
+# for f in f_ncs_fullres:
+#     count += 1
+#     ds = xr.open_dataset(f, engine = "h5netcdf")
+#     ds_processed = preprocess_ds(ds)
+#     if count == 0:
+#         prev_lat = ds_processed.latitude.values
+#         prev_lon = ds_processed.longitude.values
+#         prev_time = ds_processed.time.values
+#         pass
+#     else:
+#         diff_lat = ds_processed.latitude.values - prev_lat
+#         diff_lon = ds_processed.longitude.values - prev_lon
+#         diff_time = ds_processed.time.values - prev_time
+#         allsum = abs(diff_lat.sum()) + abs(diff_lon.sum()) + abs(int(diff_time.sum()))
+#         if allsum > 0:
+#             print(lst_ds_processed[-1])
+#             print(ds_processed)
+#             print("diff_lat.sum(): {}".format(diff_lat.sum()))
+#             print("diff_lon.sum(): {}".format(diff_lon.sum()))
+#             print("diff_time.sum(): {}".format(diff_time.sum()))
+#             print("##########################")
+#     lst_ds_processed.append(ds_processed)
+#     lst_lons.append(ds_processed.longitude.values)
+#     lst_lons_shape.append(len(ds_processed.longitude.values))
+
+# idx_smallest_spatial_dims_processed = pd.Series(lst_lons_shape).idxmin()
+# smallest_ds_processed = lst_ds_processed[idx_smallest_spatial_dims_processed]
+
+# if len(pd.Series(lst_lons_shape).unique()) == 1:
+#     print('all good')
+
+# ds_fullres = xr.combine_by_coords(lst_ds_processed, coords = "all")
+
+# ds_fullres = xr.combine_nested(lst_ds_processed, concat_dim = "time")
+
+# ds_tst = lst_ds[idx_smallest_spatial_dims+1]
+# ds_tst_processed = preprocess_ds(ds_tst)
+
+
+
 #%% load year of fullres data
 try:
-    ds_fullres = xr.open_mfdataset(f_ncs_fullres, engine = "h5netcdf", chunks = {"longitude":700, "latitude":800})
+    try:
+        ds_fullres = xr.open_mfdataset(f_ncs_fullres, engine = "h5netcdf", chunks = {"longitude":100, "latitude":100})
+    except:
+        ds_fullres = xr.open_mfdataset(f_ncs_fullres, engine = "h5netcdf", chunks = {"longitude":100, "latitude":100}, preprocess = preprocess_ds, combine = "nested", concat_dim = "time")
     if (max(ds_fullres["longitude"].values) > 180) and (max(ds_fullres["longitude"].values) <= 360): # convert from positive degrees west to negative degrees west
         ds_fullres["longitude"] = ds_fullres["longitude"] - 360
     d_perf["success_loading_fullres_data"] = True
@@ -73,7 +139,7 @@ if d_perf["success_loading_fullres_data"]:
         d_perf["success_generate_fullres_catalog"] = False
         d_perf["error_generating_fullres_catalog"] = e
 d_perf['success'] = True
-tot_elapsed = round((time.time()-start_time)/60, 2)
+tot_elapsed = round((time.time()-script_start_time)/60, 2)
 d_perf['total_runtime_min'] = tot_elapsed
 d_perf['average_time_to_generate_each_strmcat_min'] = np.mean(lst_times_to_export)
 
