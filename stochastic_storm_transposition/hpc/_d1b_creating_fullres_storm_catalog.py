@@ -55,4 +55,4 @@ for f in f_ncs_coarse_catalog:
 
     bm_time = time.time()
     ds_strm_crs.to_netcdf(fname_out, encoding= {"rain":{"zlib":True}})
-    print("it took {} minutes to run to_netcdf on the full resolution storm catalog".format(round((time.time()-bm_time)/60), 2))
+    print("it took {} minutes to run to_netcdf on the full resolution storm catalog {}".format(round((time.time()-bm_time)/60, 2), fname_out))
