@@ -17,7 +17,7 @@ year = str(sys.argv[1])
 fpath_strm_cats = dir_mrms_coarse + "mrms_{}/StormCatalog/*.nc".format(year)
 
 f_ncs_coarse_catalog = glob(fpath_strm_cats)
-f_ncs_fullres = glob(dir_fullres_rain + "/*.nc".format(year))
+f_ncs_fullres = glob(dir_fullres_rain + "/{}*.nc".format(year))
 
 #%% load year of fullres data
 ds_fullres = xr.open_mfdataset(f_ncs_fullres, engine = "h5netcdf", chunks = {"longitude":700, "latitude":800})
