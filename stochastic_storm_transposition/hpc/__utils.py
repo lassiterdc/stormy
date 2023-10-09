@@ -10,6 +10,8 @@ dir_mrms = dir_sst_nrflk + "sst_mrms/"
 dir_home = "/home/dcl3nd/stormy/"
 dir_home_sst = dir_home + "sst/"
 dir_scratch_sst = "/scratch/dcl3nd/stormy/"
+dir_highres_repo = "/scratch/dcl3nd/highres-radar-rainfall-processing/"
+
 
 # WORK
 f_sst_nrflk_hrly_parameterfile = dir_sst_nrflk_hrly + "mrms_hourly_combined.sst"
@@ -87,8 +89,10 @@ export_raw_bs_samps = False
 
 #d
 # dir_mrms = dir_sst_nrflk + "sst_mrms/"
-f_sst_mrms_coarse = dir_mrms + "hourly/mrms_hourly_template.sst"
-dir_for_sst_files = dir_mrms + "hourly/_inputs/"
+dir_mrms_coarse = dir_mrms + "hourly/"
+f_sst_mrms_coarse =  dir_mrms_coarse + "mrms_hourly_template.sst"
+dir_for_sst_files = dir_mrms_coarse + "_inputs/"
+dir_fullres_rain = dir_highres_repo + "data/mrms_nc_preciprate_fullres_dailyfiles_constant_tstep/"
 # f_sst_mrms = dir_mrms + "mrms_template.sst"
 
 
