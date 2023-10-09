@@ -9,102 +9,50 @@ from glob import glob
 import time
 import shutil
 from __utils import *
+import time
 
 start_time = time.time()
+year = str(sys.argv[1])
+#%% define directories
+fpath_strm_cats = dir_mrms_coarse + "mrms_{}/StormCatalog/*.nc".format(year)
 
-#%% working
-# key directories
-dir_mrms
-dir_mrms_coarse
-dir_fullres_rain
-fpath_strm_cats = dir_mrms_coarse + "mrms_*/StormCatalog/*.nc"
-#%% testing
-fpath_strm_cats = "/scratch/dcl3nd/stormy/stochastic_storm_transposition/norfolk/sst_mrms_test/mrms_*/StormCatalog/*.nc"
-#%%
-f_ncs_fullres = glob(dir_fullres_rain + "*.nc")
 f_ncs_coarse_catalog = glob(fpath_strm_cats)
+f_ncs_fullres = glob(dir_fullres_rain + "/*.nc".format(year))
 
-ds_fullres = xr.open_mfdataset(f_ncs_fullres, engine = "h5netcdf")
+#%% load year of fullres data
+ds_fullres = xr.open_mfdataset(f_ncs_fullres, engine = "h5netcdf", chunks = {"longitude":700, "latitude":800})
+if (max(ds_fullres["longitude"].values) > 180) and (max(ds_fullres["longitude"].values) <= 360): # convert from positive degrees west to negative degrees west
+    ds_fullres["longitude"] = ds_fullres["longitude"] - 360
 
+#%% write a new full resolution storm catalog
+# create path for full res storm catalogs if it does not exist
+Path(dir_mrms_fullres).mkdir(parents=True, exist_ok=True)
 
+# loop through the coarse storm catalogs and create a new, higher resolution version
+for f in f_ncs_coarse_catalog:
+    fname = f.split("/")[-1]
+    fname_out = dir_mrms_fullres + fname
+    ds_strm_crs = xr.open_dataset(f)
 
-#%% testing
-ds_t = xr.open_dataset(f_ncs_coarse_catalog[0])
+    start_time = ds_strm_crs.time.values.min()
+    end_time = ds_strm_crs.time.values.max()
+    lats = ds_strm_crs.latitude.values
+    lons = ds_strm_crs.longitude.values
 
-s_time = pd.Series(ds_t.time.values)
+    ds_subset = ds_fullres.sel(time = slice(start_time, end_time), latitude = slice(min(lats), max(lats)), longitude = slice(min(lons), max(lons)))
 
-min_date = min(s_time.dt.date)
-max_date = max(s_time.dt.date)
+    # first upsample the storm catalog and then replace the data with the full resolution data
+    ds_strm_crs = ds_strm_crs.resample(time = "5T").asfreq()
 
-f_ncs_fullres = glob(dir_fullres_rain + "{}*.nc".format(min_date.year))
-ds_fullres = xr.open_mfdataset(f_ncs_fullres, engine = "h5netcdf")
+    # overwrite coarse rainfall with high resolution rainfall
+    ds_strm_crs["rain"] = ds_subset["rainrate"]
 
-attributes = ds_t.attrs
-start_time = ds_t.time.values.min()
-end_time = ds_t.time.values.max()
-lats = ds_t.latitude.values
-lons = ds_t.longitude.values + 360
+    # test
+    da_diffs = ds_strm_crs["rain"] - ds_subset["rainrate"]
+    diff = da_diffs.sum().values
+    if diff != 0:
+        sys.exit("Problem exporting full resolution storm catalog.")
 
-ds_subset = ds_fullres.sel(time = slice(start_time, end_time), latitude = slice(min(lats), max(lats)), longitude = slice(min(lons), max(lons)))
-#%%
-
-#%% old stuff is below
-#%%
-lst_f_ncs = glob(fldr_realizations+"*.nc")
-bm_time = time.time()
-ds_rlztns = xr.open_mfdataset(lst_f_ncs, preprocess = define_dims, engine='h5netcdf')
-ds_rlztns.attrs["rain_units"] = "mm_per_hour"
-print("Total time elapsed: {}; time to run open_mfdataset on realizations: {}".format(time.time() - start_time, time.time() - bm_time))
-
-# subset to the top 5 largest rain events per year
-# compute mean rainfall in mm/hr for each event
-ds_mean = ds_rlztns.mean(dim = ["latitude", "longitude", "time"])
-
-# convert from mm/hr to mm
-event_duration_hr = (len(ds_rlztns.time)*sst_tstep_min)/60
-ds_tot = ds_mean * event_duration_hr # mm / hr * hr
-
-import numpy as np
-
-def find_largest_n_storms_per_year(ds_yr, ds_rlztns = ds_rlztns, nstormsperyear = nstormsperyear):
-    lst_ds = []
-    year = ds_yr["year"].values
-    for rz in ds_yr.realization.values:
-        ds_rz = ds_yr.sel(dict(realization = rz))
-        top_storm_indices = ds_rz.rain.to_dataframe()["rain"].nlargest(n=nstormsperyear).index.values
-        ds_rz_out = ds_rlztns.sel(dict(storm_id = top_storm_indices, year = year, realization = rz))
-        # ds_rz_out = ds_rz.sel(dict(storm_id = top_storm_indices, year = year))
-        # ds_rz_out = ds_rz_out.assign_coords(dict(realization = rz))
-        # ds_rz_out = ds_rz_out.expand_dims("realization")
-        # re-define storm_id 
-        ds_rz_out['storm_id'] = np.arange(1, nstormsperyear+1)
-        # append to list
-        lst_ds.append(ds_rz_out)
-    ds_out = xr.combine_by_coords(lst_ds)
-    return ds_out
-
-ds_tot = ds_tot.groupby("year").map(find_largest_n_storms_per_year)
-#%% writing to zarr
-bm_time = time.time()
-fl_out_zar = dir_zarr_weather_scratch+"weather_combined.zarr"
-ds_rlztns = ds_rlztns.chunk(chunks={"realization": 1, "year": 1, "storm_id": 1, "time": 864, "latitude": 2, "longitude": 3})
-ds_rlztns.to_zarr(fl_out_zar, mode="w")
-print("Total time elapsed: {}; time to export combined rainfall realizations to zarr: {}".format(time.time() - start_time, time.time() - bm_time))
-
-# Load zarr and export to netcdf file
-bm_time = time.time()
-ds_from_zarr = xr.open_zarr(store=fl_out_zar, chunks={'year':"5000MB"})
-ds_from_zarr.to_netcdf(f_rain_realizations, encoding= {"rain":{"zlib":True}})
-# delete zarr file
-shutil.rmtree(fl_out_zar)
-print("Total time elapsed: {}; time to export combined rainfall realizations to netcdf and delete Zarr: {}".format(time.time() - start_time, time.time() - bm_time))
-
-#%% write all rainfall realizations directly to a new netcdf file
-# bm_time = time.time()
-# ds_rlztns_loaded = ds_rlztns.load()
-# print("Total time elapsed: {}; time to load dataset into memory: {}".format(time.time() - start_time, time.time() - bm_time))
-# # create path if non-existant
-# Path(f_rain_realizations).parent.mkdir(parents=True, exist_ok=True)
-# bm_time = time.time()
-# ds_rlztns_loaded.to_netcdf(f_rain_realizations, encoding= {"rain":{"zlib":True}})
-# print("Total time elapsed: {}; time to export combined realizations to netcdf: {}".format(time.time() - start_time, time.time() - bm_time))
+    bm_time = time.time()
+    ds_strm_crs.to_netcdf(fname_out, encoding= {"rain":{"zlib":True}})
+    print("it took {} minutes to run to_netcdf on the full resolution storm catalog".format(round((time.time()-bm_time)/60), 2))

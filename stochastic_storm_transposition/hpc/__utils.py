@@ -90,6 +90,7 @@ export_raw_bs_samps = False
 #d
 # dir_mrms = dir_sst_nrflk + "sst_mrms/"
 dir_mrms_coarse = dir_mrms + "hourly/"
+dir_mrms_fullres = dir_mrms + "fullres_strmcat/"
 f_sst_mrms_coarse =  dir_mrms_coarse + "mrms_hourly_template.sst"
 dir_for_sst_files = dir_mrms_coarse + "_inputs/"
 dir_fullres_rain = dir_highres_repo + "data/mrms_nc_preciprate_fullres_dailyfiles_constant_tstep/"

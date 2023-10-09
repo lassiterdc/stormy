@@ -4,8 +4,8 @@
 #SBATCH --ntasks=1				# Number of tasks per serial job (must be 1)
 #SBATCH -p standard				# Queue name "standard" (serial)
 #SBATCH -A quinnlab_paid				# allocation name
-#SBATCH -t 84:00:00				# Run time per serial job (hh:mm:ss)
-#SBATCH --array=1-11,15-22	        # Array of jobs to loop through 22 years (1-11,15-22)
+#SBATCH -t 6:00:00				# Run time per serial job (hh:mm:ss)
+#SBATCH --array=8,9	        # Array of jobs to loop through 22 years (1-11,15-22)
 #SBATCH --mem-per-cpu=64000
 #SBATCH --mail-user=dcl3nd@virginia.edu          # address for email notification
 #SBATCH --mail-type=ALL
@@ -26,5 +26,12 @@ export PATH=$DIR/bin:$PATH
 export LD_LIBRARY_PATH=$DIR/lib:$PATH
 export PYTHONPATH=$DIR/lib/python3.11/site-packages:$PATH
 
+# assign year variable
+if [ ${SLURM_ARRAY_TASK_ID} -lt 10 ]
+then
+	year=200${SLURM_ARRAY_TASK_ID}
+else
+	year=20${SLURM_ARRAY_TASK_ID}
+fi
 # running RainyDay
-python ${assar_dirs[hpc_d1b_py]}
+python ${assar_dirs[hpc_d1b_py]} $year
