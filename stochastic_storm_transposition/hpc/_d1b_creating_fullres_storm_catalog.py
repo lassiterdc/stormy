@@ -135,10 +135,10 @@ if d_perf["success_loading_fullres_data"]:
             print("it took {} minutes to generate the full resolution storm catalog {}".format(elapsed, fname_out))
             lst_times_to_export.append(elapsed)
         d_perf["success_generate_fullres_catalog"] = True
+        d_perf['success'] = True
     except Exception as e:
         d_perf["success_generate_fullres_catalog"] = False
         d_perf["error_generating_fullres_catalog"] = e
-d_perf['success'] = True
 tot_elapsed = round((time.time()-script_start_time)/60, 2)
 d_perf['total_runtime_min'] = tot_elapsed
 d_perf['average_time_to_generate_each_strmcat_min'] = np.mean(lst_times_to_export)
