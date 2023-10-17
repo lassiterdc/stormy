@@ -19,7 +19,7 @@ _temp
 *.zip
 *work*
 # *_test*
-*_inputs*
+# *_inputs*.sst*
 *~$*
 # PCSWMM generated files
 *.chi*
@@ -167,3 +167,5 @@ swmm/hague/swmm_scenarios_sst_hourly/hague_sst_model_design_storms.thm
 swmm/hague/swmm_scenarios_sst_hourly/hague_sst_model_design_storms.~inp
 swmm/hague/swmm_scenarios_sst_hourly/models/year*
 stochastic_storm_transposition/sst_validation/*
+stochastic_storm_transposition/norfolk/sst_mrms_hourly/_inputs/20*.sst
+stochastic_storm_transposition/norfolk/sst_mrms_subdivided/_inputs/20*.sst
