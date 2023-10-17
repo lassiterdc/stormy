@@ -167,3 +167,5 @@ create_gif(files, gif_filepath)
 files = glob(scratch_file.format(title_fld_attribution.format("*")))
 gif_filepath = fldr_swmm_analysis_plots + "flood_attribution.gif"
 create_gif(files, gif_filepath)
+
+#%% creating box and whiskers of attribution
