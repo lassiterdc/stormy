@@ -11,7 +11,9 @@ _temp
 # data/raw_data/*
 *.out
 *_backup*
-*parameterization*
+*conduit_parameterization*
+*node_parameterization*
+*sub_parameterization*
 *.tsb
 *.dat
 *.zip
