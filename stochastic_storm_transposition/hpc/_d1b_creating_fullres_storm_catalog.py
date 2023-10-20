@@ -102,16 +102,17 @@ try:
             ds = ds.sel(time = slice(start_time, end_time), latitude = slice(min(lats), max(lats)), longitude = slice(min(lons), max(lons)))
             lst_ds_processed.append(ds)
         ds_subset = xr.combine_nested(lst_ds_processed, concat_dim = 'time')
+        ds_subset_loaded = ds_subset.load()
         # ds_subset = ds_fullres.sel(time = slice(start_time, end_time), latitude = slice(min(lats), max(lats)), longitude = slice(min(lons), max(lons)))
 
         # first upsample the storm catalog and then replace the data with the full resolution data
         ds_strm_crs = ds_strm_crs.resample(time = "5T").asfreq()
 
         # overwrite coarse rainfall with high resolution rainfall
-        ds_strm_crs["rain"] = ds_subset["rainrate"]
+        ds_strm_crs["rain"] = ds_subset_loaded["rainrate"]
 
         # test
-        da_diffs = ds_strm_crs["rain"] - ds_subset["rainrate"]
+        da_diffs = ds_strm_crs["rain"] - ds_subset_loaded["rainrate"]
         diff = da_diffs.sum().values
         if diff != 0:
             sys.exit("Problem exporting full resolution storm catalog.")
