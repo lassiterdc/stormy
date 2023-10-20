@@ -24,43 +24,43 @@ d_perf = {}
 d_perf['success'] = False
 
 #%% troubleshooting issues with 2008 (this shouldn't )
-lst_ds = []
-lst_lons = []
-lst_lons_shape = []
-lst_dates = []
-for f in f_ncs_fullres:
-    ds = xr.open_dataset(f, engine = "h5netcdf")
-    lst_ds.append(ds)
-    lst_lons.append(ds.longitude.values)
-    lst_lons_shape.append(len(ds.longitude.values))
-    lst_dates.append(pd.Series(ds.time.values).dt.date[0])
+# lst_ds = []
+# lst_lons = []
+# lst_lons_shape = []
+# lst_dates = []
+# for f in f_ncs_fullres:
+#     ds = xr.open_dataset(f, engine = "h5netcdf")
+#     lst_ds.append(ds)
+#     lst_lons.append(ds.longitude.values)
+#     lst_lons_shape.append(len(ds.longitude.values))
+#     lst_dates.append(pd.Series(ds.time.values).dt.date[0])
 
-idx_smallest_spatial_dims = pd.Series(lst_lons_shape).idxmin()
-smallest_ds = lst_ds[idx_smallest_spatial_dims]
+# idx_smallest_spatial_dims = pd.Series(lst_lons_shape).idxmin()
+# smallest_ds = lst_ds[idx_smallest_spatial_dims]
 
-def preprocess_ds(ds):
-    ds =  lst_ds[idx_smallest_spatial_dims+1]
-    ds_subset = ds.sel(dict(latitude = smallest_ds.latitude.values, longitude = smallest_ds.longitude.values))
-    return ds_subset
+# def preprocess_ds(ds):
+#     ds =  lst_ds[idx_smallest_spatial_dims+1]
+#     ds_subset = ds.sel(dict(latitude = smallest_ds.latitude.values, longitude = smallest_ds.longitude.values))
+#     return ds_subset
 
-##% load full res data
-try:
-    if len(np.unique(lst_lons_shape)) > 1: # this means that the extent of the dataset varies from timestep to timestep
-        lst_ds_processed = []
-        for f in f_ncs_fullres:
-            # print(f)
-            ds = xr.open_dataset(f, engine = "h5netcdf")
-            lst_ds_processed.append(preprocess_ds(ds))
-        ds_fullres = xr.combine_nested(lst_ds_processed, concat_dim = 'time')
-    else:
-        ds_fullres = xr.open_mfdataset(f_ncs_fullres, engine = "h5netcdf", chunks = {"longitude":100, "latitude":100})
+# ##% load full res data
+# try:
+#     if len(np.unique(lst_lons_shape)) > 1: # this means that the extent of the dataset varies from timestep to timestep
+#         lst_ds_processed = []
+#         for f in f_ncs_fullres:
+#             # print(f)
+#             ds = xr.open_dataset(f, engine = "h5netcdf")
+#             lst_ds_processed.append(preprocess_ds(ds))
+#         ds_fullres = xr.combine_nested(lst_ds_processed, concat_dim = 'time')
+#     else:
+#         ds_fullres = xr.open_mfdataset(f_ncs_fullres, engine = "h5netcdf", chunks = {"longitude":100, "latitude":100})
 
-    if (max(ds_fullres["longitude"].values) > 180) and (max(ds_fullres["longitude"].values) <= 360): # convert from positive degrees west to negative degrees west
-        ds_fullres["longitude"] = ds_fullres["longitude"] - 360
-    d_perf["success_loading_fullres_data"] = True
-except Exception as e:
-    d_perf["success_loading_fullres_data"] = False
-    d_perf["error_loading_fullres_data"] = e
+#     if (max(ds_fullres["longitude"].values) > 180) and (max(ds_fullres["longitude"].values) <= 360): # convert from positive degrees west to negative degrees west
+#         ds_fullres["longitude"] = ds_fullres["longitude"] - 360
+#     d_perf["success_loading_fullres_data"] = True
+# except Exception as e:
+#     d_perf["success_loading_fullres_data"] = False
+#     d_perf["error_loading_fullres_data"] = e
 #%% write a new full resolution storm catalog
 # create path for full res storm catalogs if it does not exist
 Path(dir_mrms_fullres).mkdir(parents=True, exist_ok=True)
