@@ -27,11 +27,13 @@ d_perf['success'] = False
 lst_ds = []
 lst_lons = []
 lst_lons_shape = []
+lst_dates = []
 for f in f_ncs_fullres:
     ds = xr.open_dataset(f, engine = "h5netcdf")
     lst_ds.append(ds)
     lst_lons.append(ds.longitude.values)
     lst_lons_shape.append(len(ds.longitude.values))
+    lst_dates.append(pd.Series(ds.time.values).dt.date[0])
 
 idx_smallest_spatial_dims = pd.Series(lst_lons_shape).idxmin()
 smallest_ds = lst_ds[idx_smallest_spatial_dims]
@@ -41,57 +43,18 @@ def preprocess_ds(ds):
     ds_subset = ds.sel(dict(latitude = smallest_ds.latitude.values, longitude = smallest_ds.longitude.values))
     return ds_subset
 
-#%% testing
-# lst_ds_processed = []
-# lst_lons = []
-# lst_lons_shape = []
-# count = -1
-# for f in f_ncs_fullres:
-#     count += 1
-#     ds = xr.open_dataset(f, engine = "h5netcdf")
-#     ds_processed = preprocess_ds(ds)
-#     if count == 0:
-#         prev_lat = ds_processed.latitude.values
-#         prev_lon = ds_processed.longitude.values
-#         prev_time = ds_processed.time.values
-#         pass
-#     else:
-#         diff_lat = ds_processed.latitude.values - prev_lat
-#         diff_lon = ds_processed.longitude.values - prev_lon
-#         diff_time = ds_processed.time.values - prev_time
-#         allsum = abs(diff_lat.sum()) + abs(diff_lon.sum()) + abs(int(diff_time.sum()))
-#         if allsum > 0:
-#             print(lst_ds_processed[-1])
-#             print(ds_processed)
-#             print("diff_lat.sum(): {}".format(diff_lat.sum()))
-#             print("diff_lon.sum(): {}".format(diff_lon.sum()))
-#             print("diff_time.sum(): {}".format(diff_time.sum()))
-#             print("##########################")
-#     lst_ds_processed.append(ds_processed)
-#     lst_lons.append(ds_processed.longitude.values)
-#     lst_lons_shape.append(len(ds_processed.longitude.values))
-
-# idx_smallest_spatial_dims_processed = pd.Series(lst_lons_shape).idxmin()
-# smallest_ds_processed = lst_ds_processed[idx_smallest_spatial_dims_processed]
-
-# if len(pd.Series(lst_lons_shape).unique()) == 1:
-#     print('all good')
-
-# ds_fullres = xr.combine_by_coords(lst_ds_processed, coords = "all")
-
-# ds_fullres = xr.combine_nested(lst_ds_processed, concat_dim = "time")
-
-# ds_tst = lst_ds[idx_smallest_spatial_dims+1]
-# ds_tst_processed = preprocess_ds(ds_tst)
-
-
-
-#%% load year of fullres data
+##% load full res data
 try:
-    try:
+    if len(np.unique(lst_lons_shape)) > 1: # this means that the extent of the dataset varies from timestep to timestep
+        lst_ds_processed = []
+        for f in f_ncs_fullres:
+            # print(f)
+            ds = xr.open_dataset(f, engine = "h5netcdf")
+            lst_ds_processed.append(preprocess_ds(ds))
+        ds_fullres = xr.combine_nested(lst_ds_processed, concat_dim = 'time')
+    else:
         ds_fullres = xr.open_mfdataset(f_ncs_fullres, engine = "h5netcdf", chunks = {"longitude":100, "latitude":100})
-    except:
-        ds_fullres = xr.open_mfdataset(f_ncs_fullres, engine = "h5netcdf", chunks = {"longitude":100, "latitude":100}, preprocess = preprocess_ds, combine = "nested", concat_dim = "time")
+
     if (max(ds_fullres["longitude"].values) > 180) and (max(ds_fullres["longitude"].values) <= 360): # convert from positive degrees west to negative degrees west
         ds_fullres["longitude"] = ds_fullres["longitude"] - 360
     d_perf["success_loading_fullres_data"] = True
@@ -110,13 +73,36 @@ if d_perf["success_loading_fullres_data"]:
             fname = f.split("/")[-1]
             fname_out = dir_mrms_fullres + fname
             ds_strm_crs = xr.open_dataset(f)
+            # subset fullres storm catalog
+            ## storm catalog dates
+            strm_cat_dates = pd.Series(ds_strm_crs.time.values).dt.date.unique()
+            f_ncs_fullres_subset = []
+            for date in strm_cat_dates:
+                lst_date_str = str(date).split("-")
+                date_str = lst_date_str[0] + lst_date_str[1] + lst_date_str[2]
+                f_ncs_fullres_subset += glob(dir_fullres_rain + "/{}*.nc".format(date_str))
+            if len(f_ncs_fullres_subset) != len(strm_cat_dates):
+                print("f_ncs_fullres_subset")
+                print(f_ncs_fullres_subset)
+                print("strm_cat_dates")
+                print(strm_cat_dates)
+                raise Exception("Storm catalog was truncated.")
+                # identify netcdf filepaths with these dates
 
             start_time = ds_strm_crs.time.values.min()
             end_time = ds_strm_crs.time.values.max()
             lats = ds_strm_crs.latitude.values
             lons = ds_strm_crs.longitude.values
 
-            ds_subset = ds_fullres.sel(time = slice(start_time, end_time), latitude = slice(min(lats), max(lats)), longitude = slice(min(lons), max(lons)))
+            lst_ds_processed = []
+            for f_fullres in f_ncs_fullres_subset:
+                ds = xr.open_dataset(f_fullres, engine = "h5netcdf", chunks = {"longitude":100, "latitude":100})
+                if (max(ds["longitude"].values) > 180) and (max(ds["longitude"].values) <= 360): # convert from positive degrees west to negative degrees west
+                    ds["longitude"] = ds["longitude"] - 360
+                ds = ds.sel(time = slice(start_time, end_time), latitude = slice(min(lats), max(lats)), longitude = slice(min(lons), max(lons)))
+                lst_ds_processed.append(ds)
+            ds_subset = xr.combine_nested(lst_ds_processed, concat_dim = 'time')
+            # ds_subset = ds_fullres.sel(time = slice(start_time, end_time), latitude = slice(min(lats), max(lats)), longitude = slice(min(lons), max(lons)))
 
             # first upsample the storm catalog and then replace the data with the full resolution data
             ds_strm_crs = ds_strm_crs.resample(time = "5T").asfreq()
