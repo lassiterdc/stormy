@@ -65,66 +65,66 @@ d_perf['success'] = False
 # create path for full res storm catalogs if it does not exist
 Path(dir_mrms_fullres).mkdir(parents=True, exist_ok=True)
 lst_times_to_export = []
-if d_perf["success_loading_fullres_data"]:
-    try:
-        # loop through the coarse storm catalogs and create a new, higher resolution version
-        for f in f_ncs_coarse_catalog:
-            bm_time = time.time()
-            fname = f.split("/")[-1]
-            fname_out = dir_mrms_fullres + fname
-            ds_strm_crs = xr.open_dataset(f)
-            # subset fullres storm catalog
-            ## storm catalog dates
-            strm_cat_dates = pd.Series(ds_strm_crs.time.values).dt.date.unique()
-            f_ncs_fullres_subset = []
-            for date in strm_cat_dates:
-                lst_date_str = str(date).split("-")
-                date_str = lst_date_str[0] + lst_date_str[1] + lst_date_str[2]
-                f_ncs_fullres_subset += glob(dir_fullres_rain + "/{}*.nc".format(date_str))
-            if len(f_ncs_fullres_subset) != len(strm_cat_dates):
-                print("f_ncs_fullres_subset")
-                print(f_ncs_fullres_subset)
-                print("strm_cat_dates")
-                print(strm_cat_dates)
-                raise Exception("Storm catalog was truncated.")
-                # identify netcdf filepaths with these dates
+# if d_perf["success_loading_fullres_data"]:
+try:
+    # loop through the coarse storm catalogs and create a new, higher resolution version
+    for f in f_ncs_coarse_catalog:
+        bm_time = time.time()
+        fname = f.split("/")[-1]
+        fname_out = dir_mrms_fullres + fname
+        ds_strm_crs = xr.open_dataset(f)
+        # subset fullres storm catalog
+        ## storm catalog dates
+        strm_cat_dates = pd.Series(ds_strm_crs.time.values).dt.date.unique()
+        f_ncs_fullres_subset = []
+        for date in strm_cat_dates:
+            lst_date_str = str(date).split("-")
+            date_str = lst_date_str[0] + lst_date_str[1] + lst_date_str[2]
+            f_ncs_fullres_subset += glob(dir_fullres_rain + "/{}*.nc".format(date_str))
+        if len(f_ncs_fullres_subset) != len(strm_cat_dates):
+            print("f_ncs_fullres_subset")
+            print(f_ncs_fullres_subset)
+            print("strm_cat_dates")
+            print(strm_cat_dates)
+            raise Exception("Storm catalog was truncated.")
+            # identify netcdf filepaths with these dates
 
-            start_time = ds_strm_crs.time.values.min()
-            end_time = ds_strm_crs.time.values.max()
-            lats = ds_strm_crs.latitude.values
-            lons = ds_strm_crs.longitude.values
+        start_time = ds_strm_crs.time.values.min()
+        end_time = ds_strm_crs.time.values.max()
+        lats = ds_strm_crs.latitude.values
+        lons = ds_strm_crs.longitude.values
 
-            lst_ds_processed = []
-            for f_fullres in f_ncs_fullres_subset:
-                ds = xr.open_dataset(f_fullres, engine = "h5netcdf", chunks = {"longitude":100, "latitude":100})
-                if (max(ds["longitude"].values) > 180) and (max(ds["longitude"].values) <= 360): # convert from positive degrees west to negative degrees west
-                    ds["longitude"] = ds["longitude"] - 360
-                ds = ds.sel(time = slice(start_time, end_time), latitude = slice(min(lats), max(lats)), longitude = slice(min(lons), max(lons)))
-                lst_ds_processed.append(ds)
-            ds_subset = xr.combine_nested(lst_ds_processed, concat_dim = 'time')
-            # ds_subset = ds_fullres.sel(time = slice(start_time, end_time), latitude = slice(min(lats), max(lats)), longitude = slice(min(lons), max(lons)))
+        lst_ds_processed = []
+        for f_fullres in f_ncs_fullres_subset:
+            ds = xr.open_dataset(f_fullres, engine = "h5netcdf", chunks = {"longitude":100, "latitude":100})
+            if (max(ds["longitude"].values) > 180) and (max(ds["longitude"].values) <= 360): # convert from positive degrees west to negative degrees west
+                ds["longitude"] = ds["longitude"] - 360
+            ds = ds.sel(time = slice(start_time, end_time), latitude = slice(min(lats), max(lats)), longitude = slice(min(lons), max(lons)))
+            lst_ds_processed.append(ds)
+        ds_subset = xr.combine_nested(lst_ds_processed, concat_dim = 'time')
+        # ds_subset = ds_fullres.sel(time = slice(start_time, end_time), latitude = slice(min(lats), max(lats)), longitude = slice(min(lons), max(lons)))
 
-            # first upsample the storm catalog and then replace the data with the full resolution data
-            ds_strm_crs = ds_strm_crs.resample(time = "5T").asfreq()
+        # first upsample the storm catalog and then replace the data with the full resolution data
+        ds_strm_crs = ds_strm_crs.resample(time = "5T").asfreq()
 
-            # overwrite coarse rainfall with high resolution rainfall
-            ds_strm_crs["rain"] = ds_subset["rainrate"]
+        # overwrite coarse rainfall with high resolution rainfall
+        ds_strm_crs["rain"] = ds_subset["rainrate"]
 
-            # test
-            da_diffs = ds_strm_crs["rain"] - ds_subset["rainrate"]
-            diff = da_diffs.sum().values
-            if diff != 0:
-                sys.exit("Problem exporting full resolution storm catalog.")
+        # test
+        da_diffs = ds_strm_crs["rain"] - ds_subset["rainrate"]
+        diff = da_diffs.sum().values
+        if diff != 0:
+            sys.exit("Problem exporting full resolution storm catalog.")
 
-            ds_strm_crs.to_netcdf(fname_out, encoding= {"rain":{"zlib":True}})
-            elapsed = round((time.time()-bm_time)/60, 2)
-            print("it took {} minutes to generate the full resolution storm catalog {}".format(elapsed, fname_out))
-            lst_times_to_export.append(elapsed)
-        d_perf["success_generate_fullres_catalog"] = True
-        d_perf['success'] = True
-    except Exception as e:
-        d_perf["success_generate_fullres_catalog"] = False
-        d_perf["error_generating_fullres_catalog"] = e
+        ds_strm_crs.to_netcdf(fname_out, encoding= {"rain":{"zlib":True}})
+        elapsed = round((time.time()-bm_time)/60, 2)
+        print("it took {} minutes to generate the full resolution storm catalog {}".format(elapsed, fname_out))
+        lst_times_to_export.append(elapsed)
+    d_perf["success_generate_fullres_catalog"] = True
+    d_perf['success'] = True
+except Exception as e:
+    d_perf["success_generate_fullres_catalog"] = False
+    d_perf["error_generating_fullres_catalog"] = e
 tot_elapsed = round((time.time()-script_start_time)/60, 2)
 d_perf['total_runtime_min'] = tot_elapsed
 d_perf['average_time_to_generate_each_strmcat_min'] = np.mean(lst_times_to_export)
