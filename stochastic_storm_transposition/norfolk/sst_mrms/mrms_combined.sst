@@ -1,11 +1,11 @@
 {
 "MAINPATH" : "/scratch/dcl3nd/stormy/stochastic_storm_transposition/norfolk/sst_mrms/" ,
 "SCENARIONAME" : "mrms_combined",
-"RAINPATH" : "/scratch/dcl3nd/stormy/stochastic_storm_transposition/norfolk/sst_mrms/hourly/mrms_*/StormCatalog/*.nc",
+"RAINPATH" : "/scratch/dcl3nd/highres-radar-rainfall-processing/data/mrms_nc_preciprate_fullres_dailyfiles_constant_tstep/*.nc",
 "ISLASSITER" : "true",
 "CATALOGNAME" : "strmcat_mrms_combined.nc",
 "CREATECATALOG" : "false", "DURATION" : 72,
-"STORMLIST_DIRECTORY" : "/scratch/dcl3nd/stormy/stochastic_storm_transposition/norfolk/sst_mrms/fullres_strmcat/*.nc",
+"STORMLIST_DIRECTORY" : "/scratch/dcl3nd/stormy/stochastic_storm_transposition/norfolk/sst_mrms/hourly/mrms_*/StormCatalog/*.nc",
 "NYEARS" : 1000 , "NSTORMS" : 380, "NREALIZATIONS" : 2,
 "NPERYEAR" : 20,
 "SCENARIOS" : "TRUE",
