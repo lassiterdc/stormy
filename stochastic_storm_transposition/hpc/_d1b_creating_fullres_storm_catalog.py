@@ -93,13 +93,16 @@ try:
         end_time = ds_strm_crs.time.values.max()
         lats = ds_strm_crs.latitude.values
         lons = ds_strm_crs.longitude.values
+        crs_tstep = pd.Series(ds_strm_crs.time.values).diff().value_counts().idxmax()
 
         lst_ds_processed = []
         for f_fullres in f_ncs_fullres_subset:
             ds = xr.open_dataset(f_fullres, engine = "h5netcdf", chunks = {"longitude":100, "latitude":100})
+            fine_tstep = pd.Series(ds.time.values).diff().value_counts().idxmax()
             if (max(ds["longitude"].values) > 180) and (max(ds["longitude"].values) <= 360): # convert from positive degrees west to negative degrees west
                 ds["longitude"] = ds["longitude"] - 360
-            ds = ds.sel(time = slice(start_time, end_time), latitude = slice(min(lats), max(lats)), longitude = slice(min(lons), max(lons)))
+            # must add crs_tstep and subtract fine_tstep to end_time to ensure the durations are actually the same
+            ds = ds.sel(time = slice(start_time, end_time+crs_tstep-fine_tstep), latitude = slice(min(lats), max(lats)), longitude = slice(min(lons), max(lons)))
             lst_ds_processed.append(ds)
         ds_subset = xr.combine_nested(lst_ds_processed, concat_dim = 'time')
         ds_subset_loaded = ds_subset.load()
