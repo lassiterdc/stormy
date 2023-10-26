@@ -105,7 +105,7 @@ try:
             ds = ds.sel(time = slice(start_time, end_time+crs_tstep-fine_tstep), latitude = slice(min(lats), max(lats)), longitude = slice(min(lons), max(lons)))
             lst_ds_processed.append(ds)
         ds_subset = xr.combine_nested(lst_ds_processed, concat_dim = 'time')
-        ds_subset_loaded = ds_subset.load()
+        # ds_subset_loaded = ds_subset.load()
         # ds_subset = ds_fullres.sel(time = slice(start_time, end_time), latitude = slice(min(lats), max(lats)), longitude = slice(min(lons), max(lons)))
 
         # create new cattime variable
@@ -113,7 +113,7 @@ try:
         for storm_id in ds_strm_crs.cattime.storm_dim.values:
             # define fullresolution time steps
             values = ds_strm_crs.cattime.sel(storm_dim=storm_id).values
-            values_fullres = pd.date_range(start = min(values), end = max(values), freq = "5T").values
+            values_fullres = pd.date_range(start = min(values), end = max(values)+crs_tstep-fine_tstep, freq = "5T").values
             # coords = 
             # coords_fullres = 
             # matching cattime structure, create new data array and append to list
@@ -121,26 +121,45 @@ try:
             lst_da_cattimes.append(da)
         # combine into a single data array with same structure as original cattime data variable
         da_cattime = xr.concat(lst_da_cattimes, "storm_dim")
+        
+        # DCL WORK
+        # create new dataset with everything
+        dic_data_vars = {}
+        dic_data_vars['rain'] = ds_subset["rainrate"]
+        dic_data_vars['cattime'] = da_cattime
+        timeres = ds_strm_crs.timeresolution.values.copy()
+        timeres.fill(5) # 5 minutes
+        dic_data_vars['timeresolution'] = timeres
+        for var in ds_strm_crs.data_vars:
+            if var in ['rain', 'cattime', "timeresolution"]: # skip variables previously added
+                continue
+            dic_data_vars[var] = ds_strm_crs[var]
+
+        ds_strm_full = xr.Dataset(data_vars = dict(dic_data_vars),
+                                  attrs = ds_strm_crs.attrs)
+        # END DCL WORK
 
         # upsample the storm catalog and then replace the data with the full resolution data
-        ds_strm_crs = ds_strm_crs.resample(time = "5T").asfreq()
+        # ds_strm_crs = ds_strm_crs.resample(time = "5T").asfreq()
+
+        # ds_strm_crs["time"] = ds_subset.time
 
         # overwrite coarse rainfall with high resolution rainfall
-        ds_strm_crs["rain"] = ds_subset_loaded["rainrate"]
+        # ds_strm_crs["rain"] = ds_subset_loaded["rainrate"]
 
         # test
-        da_diffs = ds_strm_crs["rain"] - ds_subset_loaded["rainrate"]
-        diff = da_diffs.sum().values
-        if diff != 0:
-            sys.exit("Problem exporting full resolution storm catalog.")
+        # da_diffs = ds_strm_full["rain"] - ds_subset_loaded["rainrate"]
+        # diff = da_diffs.sum().values
+        # if diff != 0:
+        #     sys.exit("Problem exporting full resolution storm catalog.")
 
         # update timeresolution and cattime data variables with new resolution
-        ds_strm_crs["timeresolution"] = np.asarray(5)
+        # ds_strm_crs["timeresolution"] = np.asarray(5) 
 
         # update cattime
-        ds_strm_crs["cattime"] = da_cattime
-
-        ds_strm_crs.to_netcdf(fname_out, encoding= {"rain":{"zlib":True}})
+        # ds_strm_crs["cattime"] = da_cattime
+        ds_strm_full_loaded = ds_strm_full.load()
+        ds_strm_full_loaded.to_netcdf(fname_out, encoding= {"rain":{"zlib":True}})
         elapsed = round((time.time()-bm_time)/60, 2)
         print("it took {} minutes to generate the full resolution storm catalog {}".format(elapsed, fname_out))
         lst_times_to_export.append(elapsed)
