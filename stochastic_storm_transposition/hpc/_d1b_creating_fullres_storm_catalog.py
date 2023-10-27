@@ -66,6 +66,53 @@ d_perf['success'] = False
 Path(dir_mrms_fullres).mkdir(parents=True, exist_ok=True)
 lst_times_to_export = []
 # if d_perf["success_loading_fullres_data"]:
+
+#%% loop through entire coarse resolution storm catalogs and create data arrays for everything with a storm_dim dimension
+fpath_strm_cats_all = dir_mrms_coarse + "mrms_{}/StormCatalog/*.nc".format("*")
+f_ncs_coarse_catalog_all = glob(fpath_strm_cats_all)
+
+ds_strm_crs = xr.open_dataset(f_ncs_coarse_catalog_all[0])
+lst_vars_with_storm_dim = []
+for var in ds_strm_crs.data_vars:
+    da = ds_strm_crs[var]
+    if "storm_dim" in list(da.dims):
+        lst_vars_with_storm_dim.append(var)
+
+
+d_lst_das = {}
+for var in lst_vars_with_storm_dim:
+    d_lst_das[var] = []
+
+lst_cattime_das = []
+years_collected_for_cattimes = []
+for f in f_ncs_coarse_catalog_all:
+    ds_strm_crs = xr.open_dataset(f)
+    year = pd.to_datetime(ds_strm_crs.time.values[-1]).year
+    if year not in years_collected_for_cattimes:
+        for var in lst_vars_with_storm_dim:
+            if var == "cattime": # this one has a messed up format so I am fixing it to make sense. Hopefully it doesn't break anything
+                for storm_id in ds_strm_crs.cattime.storm_dim.values:
+                    values = ds_strm_crs.cattime.sel(storm_dim=storm_id).values
+                    values_fullres = pd.date_range(start = min(values), end = max(values)+np.timedelta64(1,'h')-np.timedelta64(5,'m'), freq = "5T").values
+                    tstep = np.arange(len(values_fullres))
+                    da = xr.DataArray(data = values_fullres, dims = ["tstep"], coords = dict(tstep = (["tstep"], tstep))) # coords = dict(time = times_fullres))
+                    lst_cattime_das.append(da)
+                    years_collected_for_cattimes.append(year)
+            else:
+                d_lst_das[var].append(ds_strm_crs[var])
+
+# da_cattime = xr.concat(lst_cattime_das, dim = "storm_dim")
+
+d_das = {}
+for var in d_lst_das:
+    if var == "cattime": # skip this variable because 
+        d_das[var] = xr.concat(lst_cattime_das, dim = "storm_dim")
+    else:
+        d_das[var] = xr.concat(d_lst_das[var], dim = "storm_dim")
+
+
+
+#%%
 try:
     # loop through the coarse storm catalogs and create a new, higher resolution version
     for f in f_ncs_coarse_catalog:
@@ -108,56 +155,34 @@ try:
         # ds_subset_loaded = ds_subset.load()
         # ds_subset = ds_fullres.sel(time = slice(start_time, end_time), latitude = slice(min(lats), max(lats)), longitude = slice(min(lons), max(lons)))
 
-        # create new cattime variable
-        lst_da_cattimes = []
-        for storm_id in ds_strm_crs.cattime.storm_dim.values:
-            # define fullresolution time steps
-            values = ds_strm_crs.cattime.sel(storm_dim=storm_id).values
-            values_fullres = pd.date_range(start = min(values), end = max(values)+crs_tstep-fine_tstep, freq = "5T").values
-            # coords = 
-            # coords_fullres = 
-            # matching cattime structure, create new data array and append to list
-            da = xr.DataArray(data = values_fullres, dims = ["time"])# coords = dict(time = times_fullres))
-            lst_da_cattimes.append(da)
-        # combine into a single data array with same structure as original cattime data variable
-        da_cattime = xr.concat(lst_da_cattimes, "storm_dim")
-        
-        # DCL WORK
+        # # create new cattime variable
+        # lst_da_cattimes = []
+        # for storm_id in ds_strm_crs.cattime.storm_dim.values:
+        #     # define fullresolution time steps
+        #     values = ds_strm_crs.cattime.sel(storm_dim=storm_id).values
+        #     values_fullres = pd.date_range(start = min(values), end = max(values)+crs_tstep-fine_tstep, freq = "5T").values
+        #     # coords = 
+        #     # coords_fullres = 
+        #     # matching cattime structure, create new data array and append to list
+        #     da = xr.DataArray(data = values_fullres, dims = ["time"])# coords = dict(time = times_fullres))
+        #     lst_da_cattimes.append(da)
+        # # combine into a single data array with same structure as original cattime data variable
+        # da_cattime = xr.concat(lst_da_cattimes, "storm_dim")
         # create new dataset with everything
         dic_data_vars = {}
         dic_data_vars['rain'] = ds_subset["rainrate"]
-        dic_data_vars['cattime'] = da_cattime
+        for var in d_das:
+            dic_data_vars[var] = d_das[var]
         timeres = ds_strm_crs.timeresolution.values.copy()
         timeres.fill(5) # 5 minutes
         dic_data_vars['timeresolution'] = timeres
         for var in ds_strm_crs.data_vars:
-            if var in ['rain', 'cattime', "timeresolution"]: # skip variables previously added
+            if var in list(dic_data_vars.keys()): # skip variables previously added
                 continue
             dic_data_vars[var] = ds_strm_crs[var]
-
         ds_strm_full = xr.Dataset(data_vars = dict(dic_data_vars),
-                                  attrs = ds_strm_crs.attrs)
-        # END DCL WORK
-
-        # upsample the storm catalog and then replace the data with the full resolution data
-        # ds_strm_crs = ds_strm_crs.resample(time = "5T").asfreq()
-
-        # ds_strm_crs["time"] = ds_subset.time
-
-        # overwrite coarse rainfall with high resolution rainfall
-        # ds_strm_crs["rain"] = ds_subset_loaded["rainrate"]
-
-        # test
-        # da_diffs = ds_strm_full["rain"] - ds_subset_loaded["rainrate"]
-        # diff = da_diffs.sum().values
-        # if diff != 0:
-        #     sys.exit("Problem exporting full resolution storm catalog.")
-
-        # update timeresolution and cattime data variables with new resolution
-        # ds_strm_crs["timeresolution"] = np.asarray(5) 
-
-        # update cattime
-        # ds_strm_crs["cattime"] = da_cattime
+                                    attrs = ds_strm_crs.attrs)
+        # load data into memory and export
         ds_strm_full_loaded = ds_strm_full.load()
         ds_strm_full_loaded.to_netcdf(fname_out, encoding= {"rain":{"zlib":True}})
         elapsed = round((time.time()-bm_time)/60, 2)
