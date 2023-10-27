@@ -3,7 +3,7 @@
 "SCENARIONAME" : "mrms_$YEAR",
 "RAINPATH" : "/scratch/dcl3nd/highres-radar-rainfall-processing/data/mrms_nc_preciprate_hourly_dailyfiles/*.nc",
 "ISLASSITER" : "true",
-"CATALOGNAME" : "strmcat_hrly",
+"CATALOGNAME" : "strmcat_",
 "CREATECATALOG" : "true", "DURATION" : 72,
 "SCENARIOS" : "FALSE",
 "NYEARS" : 1 , "NSTORMS" : 20, "NREALIZATIONS" : 1,
