@@ -96,6 +96,9 @@ dir_for_sst_files = dir_mrms_coarse + "_inputs/"
 dir_fullres_rain = dir_highres_repo + "data/mrms_nc_preciprate_fullres_dailyfiles_constant_tstep/"
 # f_sst_mrms = dir_mrms + "mrms_template.sst"
 
+# d1b
+sst_tstep_min = 5
+nstormsperyear = 5 # want to choose the 5 largest storms per year
 
 #d4
 fldr_realizations = dir_mrms + "mrms_combined/Realizations/"
@@ -238,7 +241,7 @@ def define_dims(ds):
     tstep_ind = np.arange(len(tseries))
     ds["time"] = tstep_ind
     ds = ds.assign_attrs(timestep_min = tstep_min)
-    ds = ds.assign_coords(dict(realization=rz, year = year, storm_id = strm, first_tstep = first_tstep))
+    ds = ds.assign_coords(dict(realization=rz, year = year, storm_id = strm))
     ds = ds.expand_dims(dim=dict(realization=1, year = 1, storm_id = 1))
     # drop unnecessary variables
     try:

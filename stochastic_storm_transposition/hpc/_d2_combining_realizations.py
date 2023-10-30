@@ -13,6 +13,7 @@ from __utils import *
 start_time = time.time()
 #%%
 lst_f_ncs = glob(fldr_realizations+"*.nc")
+lst_f_ncs.sort()
 bm_time = time.time()
 ds_rlztns = xr.open_mfdataset(lst_f_ncs, preprocess = define_dims, engine='h5netcdf')
 ds_rlztns.attrs["rain_units"] = "mm_per_hour"
@@ -26,26 +27,22 @@ ds_mean = ds_rlztns.mean(dim = ["latitude", "longitude", "time"])
 event_duration_hr = (len(ds_rlztns.time)*sst_tstep_min)/60
 ds_tot = ds_mean * event_duration_hr # mm / hr * hr
 
-import numpy as np
-
-def find_largest_n_storms_per_year(ds_yr, ds_rlztns = ds_rlztns, nstormsperyear = nstormsperyear):
-    lst_ds = []
-    year = ds_yr["year"].values
+lst_ds = []
+for year in ds_tot.year.values:
+    ds_yr = ds_tot.sel(year = year)
     for rz in ds_yr.realization.values:
         ds_rz = ds_yr.sel(dict(realization = rz))
         top_storm_indices = ds_rz.rain.to_dataframe()["rain"].nlargest(n=nstormsperyear).index.values
         ds_rz_out = ds_rlztns.sel(dict(storm_id = top_storm_indices, year = year, realization = rz))
-        # ds_rz_out = ds_rz.sel(dict(storm_id = top_storm_indices, year = year))
-        # ds_rz_out = ds_rz_out.assign_coords(dict(realization = rz))
-        # ds_rz_out = ds_rz_out.expand_dims("realization")
+        ds_rz_out = ds_rz_out.assign_coords(dict(realization=rz, year = year))
+        ds_rz_out = ds_rz_out.expand_dims(dim=dict(realization=1, year = 1))
         # re-define storm_id 
         ds_rz_out['storm_id'] = np.arange(1, nstormsperyear+1)
         # append to list
         lst_ds.append(ds_rz_out)
-    ds_out = xr.combine_by_coords(lst_ds)
-    return ds_out
 
-ds_tot = ds_tot.groupby("year").map(find_largest_n_storms_per_year)
+ds_out = xr.combine_by_coords(lst_ds)
+
 #%% writing to zarr
 bm_time = time.time()
 fl_out_zar = dir_zarr_weather_scratch+"weather_combined.zarr"
@@ -60,13 +57,3 @@ ds_from_zarr.to_netcdf(f_rain_realizations, encoding= {"rain":{"zlib":True}})
 # delete zarr file
 shutil.rmtree(fl_out_zar)
 print("Total time elapsed: {}; time to export combined rainfall realizations to netcdf and delete Zarr: {}".format(time.time() - start_time, time.time() - bm_time))
-
-#%% write all rainfall realizations directly to a new netcdf file
-# bm_time = time.time()
-# ds_rlztns_loaded = ds_rlztns.load()
-# print("Total time elapsed: {}; time to load dataset into memory: {}".format(time.time() - start_time, time.time() - bm_time))
-# # create path if non-existant
-# Path(f_rain_realizations).parent.mkdir(parents=True, exist_ok=True)
-# bm_time = time.time()
-# ds_rlztns_loaded.to_netcdf(f_rain_realizations, encoding= {"rain":{"zlib":True}})
-# print("Total time elapsed: {}; time to export combined realizations to netcdf: {}".format(time.time() - start_time, time.time() - bm_time))
