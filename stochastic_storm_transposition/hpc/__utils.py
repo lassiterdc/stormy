@@ -110,7 +110,7 @@ f_key_subnames_gridind = dir_time_series + "_key_subnames_and_grid-indices.csv"
 seed_mrms_hourly = 22901
 
 # d4b
-dir_swmm_sst_scenarios_scratch = dir_scratch_sst + "swmm_sst/"
+dir_swmm_sst_scenarios_scratch = dir_home_sst + "_scratch/"
 dir_waterlevel_ncs_scratch = dir_swmm_sst_scenarios_scratch + "water_level_ncs/"
 dir_rain_weather_scratch = dir_swmm_sst_scenarios_scratch + "weather/"
 dir_rain_weather_scratch_ncs = dir_rain_weather_scratch + "netcdfs/"
