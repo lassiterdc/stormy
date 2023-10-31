@@ -166,10 +166,11 @@ if yr == 1:
     print("Exported time series key to the file {}".format(f_key_subnames_gridind))
 
 time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
-
+print("Wrote {} time series files for each subcatchment-overlapping-grids, storms, and realizations for year {}. Script runtime: {} (min)".format(num_files, yr, time_script_min))
 #%% write a yearly netcdf file
 f_out_nc = dir_rain_weather_scratch_ncs + "sst_yr_{}.nc".format(yr)
 Path(f_out_nc).parent.mkdir(parents=True, exist_ok=True)
 ds_rlztns_loaded = ds_rlztns.load()
 ds_rlztns_loaded.to_netcdf(f_out_nc, encoding= {"rain":{"zlib":True}})
-print("Wrote {} time series files for each subcatchment-overlapping-grids, storms, and realizations for year {}. Script runtime: {} (min)".format(num_files, yr, time_script_min))
+time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
+print("Exported netcdf file with rainfall realizations for year {}".format(yr, time_script_min))
