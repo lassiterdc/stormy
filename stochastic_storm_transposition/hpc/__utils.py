@@ -105,7 +105,7 @@ fldr_realizations = dir_mrms + "mrms_combined/Realizations/"
 dir_swmm_sst_scenarios = dir_swmm_model + "swmm_scenarios_sst/"
 # dir_swmm_sst_scenarios_scratch = dir_scratch_sst + "swmm_sst_hourly/"
 # dir_swmm_sst_scenarios_hrly_home = dir_home_sst + "swmm_sst_hourly/"
-dir_time_series = dir_swmm_sst_scenarios + "time_series/"
+dir_time_series = dir_home_sst + "swmm_time_series/"
 f_key_subnames_gridind = dir_time_series + "_key_subnames_and_grid-indices.csv"
 seed_mrms_hourly = 22901
 
