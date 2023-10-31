@@ -20,8 +20,34 @@ script_start_time = datetime.now()
 #%% loading data
 lst_f_ncs = return_rzs_for_yr(fldr_realizations, yr)
 ds_rlztns = xr.open_mfdataset(lst_f_ncs, preprocess = define_dims)
+ds_rlztns.attrs["rain_units"] = "mm_per_hour"
 
+# subset to the top 5 largest rain events per year
+# compute mean rainfall in mm/hr for each event
+ds_mean = ds_rlztns.mean(dim = ["latitude", "longitude", "time"])
 
+# convert from mm/hr to mm
+event_duration_hr = (len(ds_rlztns.time)*sst_tstep_min)/60
+ds_tot = ds_mean * event_duration_hr # mm / hr * hr
+
+lst_ds = []
+for year in ds_tot.year.values:
+    ds_yr = ds_tot.sel(year = year)
+    for rz in ds_yr.realization.values:
+        ds_rz = ds_yr.sel(dict(realization = rz))
+        top_storm_indices = ds_rz.rain.to_dataframe()["rain"].nlargest(n=nstormsperyear).index.values
+        ds_rz_out = ds_rlztns.sel(dict(storm_id = top_storm_indices, year = year, realization = rz))
+        ds_rz_out = ds_rz_out.assign_coords(dict(realization=rz, year = year))
+        ds_rz_out = ds_rz_out.expand_dims(dim=dict(realization=1, year = 1))
+        # re-define storm_id 
+        ds_rz_out['storm_id'] = np.arange(1, nstormsperyear+1)
+        # append to list
+        lst_ds.append(ds_rz_out)
+
+ds_rlztns = xr.combine_by_coords(lst_ds)
+ds_rlztns.attrs["gridcell_loc"] = "coordinates represent the center of each gridcell"
+
+#%%
 gdf_subs = gpd.read_file(f_shp_swmm_subs)
 
 # shift gridcell to center (the coordinates represent the upper left of each gridcell)
@@ -60,7 +86,7 @@ df_mrms_at_subs = df_mrms_coords.iloc[idx_mrms, :]
 df_mrms_at_subs_unique = df_mrms_at_subs.drop_duplicates()
 
 
-#%% create a swmm .date file for each of the events
+#%% create a swmm .dat file for each of the events
 num_files = len(ds_rlztns.realization.values) * len(ds_rlztns.storm_id.values) * len(df_mrms_at_subs_unique)
 
 times_fwright_min = []
@@ -141,4 +167,9 @@ if yr == 1:
 
 time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
 
+#%% write a yearly netcdf file
+f_out_nc = dir_rain_weather_scratch_ncs + "sst_yr_{}.nc".format(yr)
+Path(f_out_nc).parent.mkdir(parents=True, exist_ok=True)
+ds_rlztns_loaded = ds_rlztns.load()
+ds_rlztns_loaded.to_netcdf(f_out_nc, encoding= {"rain":{"zlib":True}})
 print("Wrote {} time series files for each subcatchment-overlapping-grids, storms, and realizations for year {}. Script runtime: {} (min)".format(num_files, yr, time_script_min))
