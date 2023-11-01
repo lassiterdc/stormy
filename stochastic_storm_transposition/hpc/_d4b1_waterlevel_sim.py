@@ -21,8 +21,7 @@ yr = int(sys.argv[1]) # a number between 1 and 1000
 
 script_start_time = datetime.now()
 #%% load data
-lst_f_ncs = return_rzs_for_yr(fldr_realizations, yr)
-ds_rlztns = xr.open_mfdataset(lst_f_ncs, preprocess = define_dims)
+ds_rlztns = xr.open_dataset(f_rain_realizations)
 
 df_key = pd.read_csv(f_key_subnames_gridind)
 
@@ -537,7 +536,8 @@ for i, cond in df_cond.iterrows():
     # ds = ds.assign_coords(["realization", "year","storm_id", "datetime"])
 
 # combine netcdfs into one and export
-ds_combined = xr.combine_nested(lst_ds)
+# ds_combined = xr.combine_nested(lst_ds)
+ds_combined = xr.combine_by_coords(lst_ds)
 ds_combined_loaded = ds.load()
 Path(dir_waterlevel_ncs_scratch).mkdir(parents=True, exist_ok=True)
 ds_combined_loaded.to_netcdf(dir_waterlevel_ncs_scratch + "wlevel_yr{}.nc".format(rz, yr, strm))

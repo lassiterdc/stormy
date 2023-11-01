@@ -11,7 +11,7 @@
 #SBATCH --mail-type=ALL   
 # SBATCH --exclude=udc-ba26-19,udc-ba27-17,udc-ba26-32c1,udc-ba26-14,udc-ba26-12,udc-ba26-10,udc-ba27-14,udc-ba26-9,udc-ba26-35c1,udc-ba27-16,udc-aw34-16c1,udc-aw34-21c0,udc-ba27-32c1,udc-aw34-7c1,udc-ba27-9,udc-ba27-20,udc-ba26-33c0,udc-aw34-17c1,udc-aw34-4c1,udc-aw34-21c1,udc-ba26-28c1,udc-ba26-29c1,udc-aw34-3c0,udc-aw34-14c1,udc-aw34-15c0,udc-ba25-12c1,udc-aw29-24b,udc-aw29-20b,udc-ba25-13c0,udc-aw29-23a,udc-ba25-13c1,udc-aw34-13c0,udc-aw34-12c1,udc-aw34-10c0
 
-# ijob -c 1 -A quinnlab_paid -p standard --time=0-06:00:00 --mem-per-cpu=64000
+# ijob -c 1 -A quinnlab_paid -p standard --time=0-09:00:00 --mem-per-cpu=64000
 
 source __directories.sh
 module purge
@@ -25,4 +25,4 @@ export PYTHONPATH=$DIR/lib/python3.11/site-packages:$PATH
 # echo "Creating rainfall time series for year ${SLURM_ARRAY_TASK_ID}..."
 
 # running script
-python ${assar_dirs[hpc_d4b_py]} ${SLURM_ARRAY_TASK_ID}
+python ${assar_dirs[hpc_d4b2_py]} ${SLURM_ARRAY_TASK_ID}
