@@ -9,6 +9,7 @@ import seaborn as sns
 from tqdm import tqdm
 import imageio
 from glob import glob
+from _inputs import *
 
 # plotting parameters
 width_to_height = 7.5 / 4
@@ -24,52 +25,11 @@ scratch_folder = "_scratch/"
 scratch_file = "_scratch/{}"
 
 cmap = "gist_rainbow"
-# load and process data
-ds_sst = xr.open_dataset(f_sst_results_hrly)
-ds_bootstrap_rtrn = xr.open_dataset(f_bootstrap_hrly)
-df_comparison = pd.read_csv(f_bootstrapping_analysis)
-# load and transform shapefile
-gdf_jxns = gpd.read_file(f_shp_jxns)
-gdf_strg = gpd.read_file(f_shp_strg)
-gdf_out = gpd.read_file(f_shp_out)
-gdf_nodes = pd.concat([gdf_jxns, gdf_strg, gdf_out]).loc[:, ["NAME", "geometry"]]
-gdf_subs = gpd.read_file(f_shp_subs)
-gdf_coast = gpd.read_file(f_shp_coast)
 
-proj = ccrs.PlateCarree()
-gdf_nodes = gdf_nodes.to_crs(proj)
-gdf_subs = gdf_subs.to_crs(proj)
-gdf_coast = gdf_coast.to_crs(proj)
+# load data
+_, _, _, _, _, gdf_node_flding, gdf_subs, gdf_nodes, df_comparison = return_attribution_data()
 
-ds_sst_compound = ds_sst.sel(freeboundary="False")
-ds_sst_freebndry = ds_sst.sel(freeboundary="True")
-ds_fld_dif = ds_sst_compound - ds_sst_freebndry
-
-def return_period_to_quantile(ds, return_pds):
-    storms_per_year = ds.storm_id.shape[0]
-    total_years = ds.year.shape[0]
-    total_events = storms_per_year * total_years
-    quants = []
-    for return_pd in return_pds:
-        expected_num_of_storms = total_years / return_pd
-        quant = 1 - expected_num_of_storms / total_events
-        quants.append(quant)
-    return quants
-
-quants = return_period_to_quantile(ds_sst_compound, sst_recurrence_intervals)
-
-
-# compute quantiles
-ds_quants = ds_sst_compound.quantile(quants, dim = ["storm_id", "realization", "year"], method="closest_observation")
-ds_quants = ds_quants.assign_coords(dict(quantile = sst_recurrence_intervals))
-ds_quants = ds_quants.rename((dict(quantile="flood_return_yrs")))
-
-ds_quants["node_trns_flooding_cubic_meters"] = np.log10(ds_quants["node_flooding_cubic_meters"]+.01)
-df_quants = ds_quants.to_dataframe()
-df_quants = df_quants.reset_index()
-gdf_node_flding = gdf_nodes.merge(df_quants, how = 'inner', left_on = "NAME", right_on = "node_id").drop("NAME", axis=1)
-
-# plotting return periods
+#%% plotting return periods
 vmax = gdf_node_flding.node_trns_flooding_cubic_meters.max()
 count = -1
 title_return_pd = "{}_yr_flood_vol_recurrence_interval.png"
@@ -169,3 +129,160 @@ gif_filepath = fldr_swmm_analysis_plots + "flood_attribution.gif"
 create_gif(files, gif_filepath)
 
 #%% creating box and whiskers of attribution
+# create xarray dataset
+df = pd.DataFrame(gdf_node_attribution)
+node_ids_sorted = df[df.flood_return_yrs == 100].sort_values("lower_CI", ascending=True)["node"].values
+
+df = df.set_index(["flood_return_yrs", "node"])
+df.frac_wlevel_mean[df.frac_wlevel_mean > 1] = 1
+df.frac_wlevel_mean[df.frac_wlevel_mean < 0] = 0
+
+ds = df["frac_wlevel_mean"].to_xarray()
+ds = ds.sel(node = node_ids_sorted)
+# sort by max flooding in 100 year storm
+
+og_node_names = ds.node.values
+ds["node"] = np.arange(len(og_node_names))
+og_returns = ds.flood_return_yrs.values
+ds["flood_return_yrs"] = np.arange(len(og_returns))
+# plotting
+vmin = -.000000000001
+vmax = 1.0000000001
+levels = 6
+fig, ax = plt.subplots()
+ds.plot.pcolormesh(cmap = "coolwarm", x = "flood_return_yrs", y = "node", vmin = vmin, vmax = vmax, ax = ax,
+                   levels = levels, extend = "neither")
+
+#%% violin plot
+import seaborn as sns
+sns.violinplot(data = df.reset_index(), x = "flood_return_yrs", y = "frac_wlevel_mean",cut = 0)
+
+#%% boxplot
+df_ge1y = df[(df["frac_wlevel_mean"].reset_index().flood_return_yrs>=1).values]
+
+df_box = df_ge1y["frac_wlevel_mean"].reset_index().pivot(index = "node", columns = "flood_return_yrs", values = "frac_wlevel_mean")
+
+boxplot = df_box.boxplot()
+boxplot.set_xlabel("Return Period")
+boxplot.set_ylabel("Frac Water Level")
+
+
+sns.boxplot(data=df_ge1y.reset_index(), x = "flood_return_yrs", y = "frac_wlevel_mean")
+#%% inspecting counts
+
+classes = pd.cut(df.frac_wlevel_mean.values, np.linspace(vmin, vmax, levels),labels = np.linspace(vmin,vmax, levels)[1:])
+df["classes"] = np.asarray(classes)
+
+df["classes"] = df["classes"].round(1)
+
+lst_dfs = []
+lst_returns = []
+
+for rtrn, group in df.reset_index().groupby("flood_return_yrs"):
+    if rtrn < 1:
+        continue
+    df_counts = group["classes"].value_counts()
+    df_counts = df_counts.reset_index().sort_values("index")
+    df_counts.columns = ["frac_wlevel_upper_range", "count"]
+    df_counts["density"] = df_counts["count"] / df_counts["count"].sum()
+    # print("Return period: {}".format(rtrn))
+    # print(df_counts)
+    # print("#################")
+    df_counts['return_period'] = rtrn
+    lst_dfs.append(df_counts)
+    lst_returns.append(rtrn)
+
+df_counts = pd.concat(lst_dfs)
+df_counts = df_counts.set_index(["return_period", "frac_wlevel_upper_range"])
+
+# plot bar chart
+sns.set_theme(style="whitegrid")
+
+# penguins = sns.load_dataset("penguins")
+
+# Draw a nested barplot by species and sex
+g = sns.catplot(
+    data=df_counts.reset_index(), kind="bar",
+    x="return_period", y="density", hue="frac_wlevel_upper_range",
+    errorbar="sd", palette="magma", alpha=.8, height=6,
+)
+g.despine(left=True)
+g.set_axis_labels("return period", "density")
+g.legend.set_title("Upper Frac")
+sns.move_legend(g, "upper left", bbox_to_anchor=(.75, .5))
+
+#
+g = sns.catplot(
+    data=df_counts.reset_index(), kind="bar",
+    x="frac_wlevel_upper_range", y="density", hue="return_period",
+    errorbar="sd", palette="magma", alpha=.8, height=6,
+)
+g.despine(left=True)
+g.set_axis_labels("frac_wlevel_upper_range", "density")
+g.legend.set_title("return_period")
+sns.move_legend(g, "upper left", bbox_to_anchor=(.85, .5))
+
+#%% inspecting water level range across nodes
+lst_ranges = []
+lst_nodes = []
+for node, group in df_ge1y.reset_index().groupby("node"):
+    frac_range = group.frac_wlevel_mean.max() - group.frac_wlevel_mean.min()
+    # df_counts = group["classes"].value_counts()
+    # df_counts = df_counts.reset_index().sort_values("index")
+    # df_counts.columns = ["frac_wlevel_upper_range", "count"]
+    # df_counts["density"] = df_counts["count"] / df_counts["count"].sum()
+    # print("Return period: {}".format(rtrn))
+    # print(df_counts)
+    # print("#################")
+    # df_counts['return_period'] = rtrn
+    # lst_dfs.append(df_counts)
+    lst_ranges.append(frac_range)
+    lst_nodes.append(node)
+
+df_node_ranges = pd.DataFrame(dict(node = lst_nodes, range = lst_ranges))
+
+df_node_ranges.hist(column = "range")
+
+sns.histplot(data=df_node_ranges, x="range")
+
+fig, ax = plt.subplots(dpi=300)
+g = sns.ecdfplot(data=df_node_ranges, x="range", ax = ax)
+plt.axhline(y = 0.8, color = 'r', linestyle = '-') 
+ax.set_xlabel("Frac Water Level Range per Node")
+ax.set_ylabel("Empirical Cumulative Probability")
+
+
+# df_counts = pd.concat(lst_dfs)
+# df_counts = df_counts.set_index(["return_period", "frac_wlevel_upper_range"])
+#%% inspecting the top 20% variable nodes
+df_variable_nodes = df_node_ranges[df_node_ranges.range >= df_node_ranges.range.quantile(quant_top_var)]
+
+
+gdf_variable_nodes = gdf_node_attribution.merge(df_variable_nodes, on = "node")
+gdf_variable_nodes = gdf_variable_nodes[gdf_variable_nodes.flood_return_yrs == 100]
+
+
+fig, ax = plt.subplots(figsize = [width, height], dpi=300) # , subplot_kw=dict(projection=proj)
+
+
+gdf_subs.plot(ax=ax, color="grey", edgecolor="none", alpha = 0.5)
+xlim = ax.get_xlim()
+ylim = ax.get_ylim()
+ax.set_xlim(xlim)
+ax.set_ylim(ylim)
+# gdf_coast.plot(ax=ax, color='black', zorder=1)
+gdf_nodes_w_flding.plot(ax = ax, color = "none", edgecolor = "black", zorder = 1, alpha = 0.7,
+                linewidths = 0.5)
+
+gdf_variable_nodes.plot(ax=ax, column="range",
+                                    vmin=0, vmax=1,
+                                #  alpha = 0.7,
+                                #  markersize = "marker_size",
+                                    cmap="plasma", edgecolor="none", legend=True,
+                                    missing_kwds=dict(color="none", edgecolor="none", label = "missing values"))
+
+
+ax.set_title("Nodes in top 20% of variability")
+plt.tight_layout()
+plt.savefig(scratch_file.format(title_fld_attribution.format(rtrn)),
+            transparent=False, bbox_inches='tight')
