@@ -16,8 +16,8 @@
 source __directories.sh
 module purge
 module load gcc openmpi eccodes anaconda # the stuff other than anaconda was to ensure eccodes loaded correctly
-DIR=~/.conda/envs/rainyday
-source activate rainyday
+DIR=~/.conda/envs/wlevel_sim
+source activate wlevel_sim
 export PATH=$DIR/bin:$PATH
 export LD_LIBRARY_PATH=$DIR/lib:$PATH
 export PYTHONPATH=$DIR/lib/python3.11/site-packages:$PATH
