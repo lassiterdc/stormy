@@ -7,17 +7,14 @@ from copulas.visualization import compare_3d
 import itertools
 import matplotlib.pyplot as plt 
 import xarray as xr
-import geopandas as gpd
+# import geopandas as gpd
 from pathlib import Path
 from datetime import datetime
 from sklearn.cluster import KMeans
 from sklearn import preprocessing
 import warnings
 from __utils import *
-
-yr = int(sys.argv[1]) # a number between 1 and 1000
-
-# f_mrms_event_summaries, f_mrms_event_timeseries, f_water_level_storm_surge, f_realizations, f_key_subnames_gridind, nrealizations, sst_tstep_min, start_date, time_buffer, dir_time_series, gen_plots, wlevel_threshold, n_attempts, n_clusters, resampling_inteval = c4b_creating_wlevel_tseries()
+import pyvinecopulib as pv
 
 script_start_time = datetime.now()
 #%% load data
@@ -37,50 +34,53 @@ df_water_levels = pd.read_csv(f_water_level_storm_surge, parse_dates=True, index
 # else:
 #     realizations = ds_rlztns.realization.values
 
-x,y = np.meshgrid(ds_rlztns.longitude.values, ds_rlztns.latitude.values, indexing="ij")
-grid_length = x.shape[0] * x.shape[1]
-x = x.reshape(grid_length)
-y = y.reshape(grid_length)
+# x,y = np.meshgrid(ds_rlztns.longitude.values, ds_rlztns.latitude.values, indexing="ij")
+# grid_length = x.shape[0] * x.shape[1]
+# x = x.reshape(grid_length)
+# y = y.reshape(grid_length)
 
-df_coords = pd.DataFrame({"x_lon":x, "y_lat":y})
+# df_coords = pd.DataFrame({"x_lon":x, "y_lat":y})
 
-# extract the grid IDs that overlap subcatchments
-grid_ids = list(df_key.grid_index.unique())
-grid_ids.sort()
+# # extract the grid IDs that overlap subcatchments
+# grid_ids = list(df_key.grid_index.unique())
+# grid_ids.sort()
 
-df_coords = df_coords.loc[grid_ids, :]
+# df_coords = df_coords.loc[grid_ids, :]
 
-rz = ds_rlztns.storm_id.values[0]
-strm = ds_rlztns.realization.values[0]
+# rz = ds_rlztns.storm_id.values[0]
+# strm = ds_rlztns.realization.values[0]
 
-lst_storm_mean_tseries = []
-keys = []
-for rz in ds_rlztns.realization.values:
-    for strm in ds_rlztns.storm_id.values:
-        idx = dict(realization = rz, year = yr, storm_id = strm)
-        ds_subset = ds_rlztns.sel(idx)
-        strm_tseries = dict()
-        for row in df_coords.iterrows():
-            mrms_index, coords = row
-            loc_idx = dict(latitude = coords.y_lat, longitude = coords.x_lon)
-            ds_subset_1loc = ds_subset.sel(loc_idx)
-            strm_tseries["grid_ind{}".format(mrms_index)] = ds_subset_1loc.rain.values
-        df_strm_tseries = pd.DataFrame(strm_tseries)
-        # convert negative rain rates to 0
-        df_strm_tseries[df_strm_tseries<0] = 0
-        s_strm_avg = df_strm_tseries.mean(axis=1)
-        s_strm_avg.name = "precip_mm_per_hour"
-        lst_storm_mean_tseries.append(s_strm_avg)
-        keys.append("{}_{}_{}".format(rz, yr, strm))
+# lst_storm_mean_tseries = []
+# keys = []
+# for rz in ds_rlztns.realization.values:
+#     for strm in ds_rlztns.storm_id.values:
+#         idx = dict(realization = rz, year = yr, storm_id = strm)
+#         ds_subset = ds_rlztns.sel(idx)
+#         strm_tseries = dict()
+#         for row in df_coords.iterrows():
+#             mrms_index, coords = row
+#             loc_idx = dict(latitude = coords.y_lat, longitude = coords.x_lon)
+#             ds_subset_1loc = ds_subset.sel(loc_idx)
+#             strm_tseries["grid_ind{}".format(mrms_index)] = ds_subset_1loc.rain.values
+#         df_strm_tseries = pd.DataFrame(strm_tseries)
+#         # convert negative rain rates to 0
+#         df_strm_tseries[df_strm_tseries<0] = 0
+#         s_strm_avg = df_strm_tseries.mean(axis=1)
+#         s_strm_avg.name = "precip_mm_per_hour"
+#         lst_storm_mean_tseries.append(s_strm_avg)
+#         keys.append("{}_{}_{}".format(rz, yr, strm))
 
-df_sst_storms = pd.concat(lst_storm_mean_tseries, keys = keys, names = ["rz_yr_strm", "tstep_ind"])
-df_sst_storms = df_sst_storms.reset_index()
-# df_sst_storms.rz_yr_strm.str.split("_")
-df_idx = df_sst_storms.rz_yr_strm.str.split("_", expand=True)
-df_idx.columns = ["realization", "year", "storm_id"]
-# df_sst_storms = df_sst_storms.drop(columns=["rz_yr_strm"])
-df_sst_storms = pd.concat([df_idx, df_sst_storms], axis = 1)
-
+# df_sst_storms = pd.concat(lst_storm_mean_tseries, keys = keys, names = ["rz_yr_strm", "tstep_ind"])
+# df_sst_storms = df_sst_storms.reset_index()
+# # df_sst_storms.rz_yr_strm.str.split("_")
+# df_idx = df_sst_storms.rz_yr_strm.str.split("_", expand=True)
+# df_idx.columns = ["realization", "year", "storm_id"]
+# # df_sst_storms = df_sst_storms.drop(columns=["rz_yr_strm"])
+# df_sst_storms = pd.concat([df_idx, df_sst_storms], axis = 1)
+#%% re-working code above
+df_sst_storms = ds_rlztns.mean(dim = ["latitude", "longitude"]).to_dataframe().reset_index()
+df_sst_storms = df_sst_storms.rename(dict(time = "tstep_ind", rain = "precip_mm_per_hour"), axis = 1)
+df_sst_storms["rz_yr_strm"] = df_sst_storms["realization"].astype(str) + "_" + df_sst_storms["year"].astype(str) + "_" + df_sst_storms["storm_id"].astype(str)
 #%% join water level and time series data
 df_water_rain_tseries = df_water_levels.join(df_mrms_event_tseries, how="inner")
 
@@ -119,6 +119,10 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     cop_hydro = GaussianMultivariate()
     cop_hydro.fit(df_vars_all)
+
+#%% using pyvinecopulib library
+x = df_vars_all
+u = pv.to_pseudo_obs(x)
 
 #%% define functions
 def scatter_3d(data, fig=None, title=None, position=None):
