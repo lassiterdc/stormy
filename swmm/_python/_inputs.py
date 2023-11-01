@@ -1,5 +1,10 @@
 #%% load libraries
 from glob import glob
+import pandas as pd
+import geopandas as gpd
+import cartopy.crs as ccrs
+import xarray as xr
+import numpy as np
 
 # define directories
 dir_stormy = "D:/Dropbox/_GradSchool/_norfolk/stormy/"
@@ -60,18 +65,107 @@ f_bootstrapping_analysis = fldr_swmm_analysis + "df_comparison_bootstrapped.csv"
 
 ## plots 
 dir_plots = dir_outputprocessing + "_plots/"
-# define functions for scripts
-# def a_analyzing_sst_results():
-#     return f_sst_results_hrly, f_model_perf_summary, f_sst_event_summaries, f_sst_annual_max_volumes, volume_units
 
-# def b_processing_design_strms():
-#     return dir_swmm_design_storms, f_design_strms, cubic_feet_per_cubic_meter, volume_units, mm_per_inch, lst_outfall_ids, sub_id_for_rain
 
-# def c_ams_with_sst():
-#     return f_sst_annual_max_volumes, ks_alpha, bootstrap_iterations, volume_units, f_sst_recurrence_intervals, sst_conf_interval, sst_recurrence_intervals
+## attribution analysis parameters
+quant_top_var = 0.8 # quantile of most variable nodes to use for deep dive into compound flood locations
 
-# def d_comparing_design_strms_and_sst():
-#     return f_sst_annual_max_volumes, f_design_strms, f_sst_recurrence_intervals, dir_plots, m_per_feet, sst_recurrence_intervals, size_scaling_factor, target_text_size_in, pts_per_inch
+## random forest model fitting
+sse_quantile = 0.9 # used to subset random forest parameter sets that performed at or better than this quantile
+    # then the parameter set with the lowset standard deviation will be chosen for that node
+num_fits_for_estimating_sse = 10
+min_rows_for_fitting = 20 # if there are fewer than this number of events with flooding, skip
+ar_trees = [2,5,10,20,50,100]
+ar_depths = [1,2,5,10,20]
+response = ["flood_attribution"]
+predictors = ["max_sim_wlevel", "rainfall_duration_hr", "depth_mm", "mean_mm_per_hr", "max_mm_per_hour", "surge_peak_after_rain_peak_min"]
 
-# def e_isolating_surge_effects():
-#     return f_sst_results_hrly, sst_conf_interval, sst_recurrence_intervals, f_bootstrap_hrly,f_bootstrap_raw_hrly, f_shp_jxns, f_shp_strg, f_shp_out, f_shp_coast, f_shp_subs
+def return_period_to_quantile(ds, return_pds):
+    total_years = len(ds_events.realization.values) * len(ds_events.year.values)
+    total_events = len(ds_events.realization.values) * len(ds_events.year.values) * len(ds_events.storm_id.values)
+    quants = []
+    for return_pd in return_pds:
+        expected_num_of_storms = total_years / return_pd
+        quant = 1 - expected_num_of_storms / total_events
+        quants.append(quant)
+    return quants
+
+def compute_return_periods(ds):
+    ds_quants = ds.quantile(quants, dim = ["storm_id", "realization", "year"], method="closest_observation")
+    ds_quants = ds_quants.assign_coords(dict(quantile = sst_recurrence_intervals))
+    ds_quants = ds_quants.rename((dict(quantile="return_period_yrs")))
+    df_quants = ds_quants.to_dataframe()
+    return ds_quants, df_quants
+
+def return_attribution_data():
+    ds_sst = xr.open_dataset(f_sst_results_hrly)
+    df_sst_events = pd.read_csv(f_sst_event_summaries)
+    proj = ccrs.PlateCarree()
+    gdf_jxns = gpd.read_file(f_shp_jxns)
+    gdf_strg = gpd.read_file(f_shp_strg)
+    gdf_out = gpd.read_file(f_shp_out)
+    gdf_nodes = pd.concat([gdf_jxns, gdf_strg, gdf_out]).loc[:, ["NAME", "geometry"]]
+    gdf_nodes = gdf_nodes.to_crs(proj)
+    df_comparison = pd.read_csv(f_bootstrapping_analysis)
+
+    gdf_node_attribution = gdf_nodes.merge(df_comparison, how = 'inner', left_on = "NAME", right_on = "node").drop("NAME", axis=1)
+
+    df_node_attribution = pd.DataFrame(gdf_node_attribution)
+    node_ids_sorted = df_node_attribution[df_node_attribution.flood_return_yrs == 100].sort_values("lower_CI", ascending=True)["node"].values
+
+    df_node_attribution = df_node_attribution.set_index(["flood_return_yrs", "node"])
+    df_node_attribution.frac_wlevel_mean[df_node_attribution.frac_wlevel_mean > 1] = 1
+    df_node_attribution.frac_wlevel_mean[df_node_attribution.frac_wlevel_mean < 0] = 0
+    df_ge1y = df_node_attribution[(df_node_attribution["frac_wlevel_mean"].reset_index().flood_return_yrs>=1).values]
+
+    lst_ranges = []
+    lst_nodes = []
+    for node, group in df_ge1y.reset_index().groupby("node"):
+        frac_range = group.frac_wlevel_mean.max() - group.frac_wlevel_mean.min()
+        lst_ranges.append(frac_range)
+        lst_nodes.append(node)
+
+    df_node_ranges = pd.DataFrame(dict(node = lst_nodes, range = lst_ranges))
+    df_variable_nodes = df_node_ranges[df_node_ranges.range >= df_node_ranges.range.quantile(quant_top_var)]
+
+    ds_sst_compound = ds_sst.sel(freeboundary="False")
+    ds_sst_freebndry = ds_sst.sel(freeboundary="True")
+
+    ds_flood_attribution = 1 - (ds_sst_freebndry + .0000000000001) / (ds_sst_compound + .0000000000001)
+    ds_flood_attribution = ds_flood_attribution.rename(dict(node_flooding_cubic_meters = "flood_attribution"))
+
+    ds_flood_attribution["flood_attribution"]  =xr.where(ds_flood_attribution.flood_attribution < 0, 0, ds_flood_attribution.flood_attribution)
+
+    ds_events =df_sst_events.set_index(["realization", "year", "storm_id"]).to_xarray()
+
+    # computing quantiles and attribution by flood return period
+    ds_bootstrap_rtrn = xr.open_dataset(f_bootstrap_hrly)
+
+    # load and transform shapefiles
+    gdf_subs = gpd.read_file(f_shp_subs)
+    gdf_coast = gpd.read_file(f_shp_coast)
+    gdf_subs = gdf_subs.to_crs(proj)
+    gdf_coast = gdf_coast.to_crs(proj)
+
+    # ds_fld_dif = ds_sst_compound - ds_sst_freebndry
+
+
+    quants = return_period_to_quantile(ds_sst_compound, sst_recurrence_intervals)
+    # compute flooding quantiles
+    ds_quants_fld, df_quants_fld = compute_return_periods(ds_sst_compound)
+
+    ds_quants_fld["node_trns_flooding_cubic_meters"] = np.log10(ds_quants_fld["node_flooding_cubic_meters"]+.01)
+    df_quants_fld = ds_quants_fld.to_dataframe()
+    df_quants_fld = df_quants_fld.reset_index()
+    gdf_node_flding = gdf_nodes.merge(df_quants_fld, how = 'inner', left_on = "NAME", right_on = "node_id").drop("NAME", axis=1)
+
+    # # compute event statistic quantiles
+    # ## rain depth
+    # da_rain_depth = ds_events.depth_mm
+    # ds_quants, df_quants = compute_return_periods(da_rain_depth)
+    # ## rain intensity
+    # da_rain_int = ds_events.max_mm_per_hour
+    # ## peak storm surge
+    # da_wlevel = ds_events.max_sim_wlevel
+
+    return df_variable_nodes, ds_flood_attribution, ds_sst_compound, ds_sst_freebndry, ds_events, gdf_node_flding, gdf_subs, gdf_nodes, df_comparison
