@@ -28,7 +28,7 @@ ds_sst = xr.open_dataset(f_sst_results_hrly)
 ds_bootstrap_rtrn = xr.open_dataset(f_bootstrap_hrly)
 # ds_bootstrap_raw = xr.open_dataset(f_bootstrap_raw_hrly, chunks=dict(node_id=1))
 # df_model_perf = pd.read_csv(f_model_perf_summary)
-# df_sst_events = pd.read_csv(f_sst_event_summaries)
+df_sst_events = pd.read_csv(f_sst_event_summaries)
 
 # load and transform shapefile
 gdf_jxns = gpd.read_file(f_shp_jxns)
@@ -42,11 +42,22 @@ proj = ccrs.PlateCarree()
 gdf_nodes = gdf_nodes.to_crs(proj)
 gdf_subs = gdf_subs.to_crs(proj)
 gdf_coast = gdf_coast.to_crs(proj)
+ 
+# also load weather statistics
+
 
 #%% preprocessing
 ds_sst_compound = ds_sst.sel(freeboundary="False")
 ds_sst_freebndry = ds_sst.sel(freeboundary="True")
 ds_fld_dif = ds_sst_compound - ds_sst_freebndry
+
+ds_flood_attribution = 1 - (ds_sst_freebndry + .0000000000001) / (ds_sst_compound + .0000000000001)
+ds_flood_attribution = ds_flood_attribution.rename(dict(node_flooding_cubic_meters = "flood_attribution"))
+
+ds_flood_attribution["flood_attribution"]  =xr.where(ds_flood_attribution.flood_attribution < 0, 0, ds_flood_attribution.flood_attribution)
+
+ds_events =df_sst_events.set_index(["realization", "year", "storm_id"]).to_xarray()
+
 
 
 #%% exploring questions
