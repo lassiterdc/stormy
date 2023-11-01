@@ -32,12 +32,12 @@ dir_sst_realizations_hrly = dir_sst_nrflk_hrly + "mrms_hourly_combined/Realizati
 # END WORK
 # c4
 # BEGIN WORK
-dir_swmm_sst_scenarios_hrly_proj = dir_swmm_model + "swmm_scenarios_sst_hourly/"
-dir_swmm_sst_scenarios_hrly_scratch = dir_scratch_sst + "swmm_sst_hourly/"
-dir_swmm_sst_scenarios_hrly_home = dir_home_sst + "swmm_sst_hourly/"
-dir_time_series_hrly = dir_swmm_sst_scenarios_hrly_home + "time_series/"
-f_key_subnames_gridind = dir_time_series_hrly + "_key_subnames_and_grid-indices.csv"
-seed_mrms_hourly = 22901
+# dir_swmm_sst_scenarios_proj = dir_swmm_model + "swmm_scenarios_sst/"
+# dir_swmm_sst_scenarios_scratch = dir_scratch_sst + "swmm_sst/"
+# dir_swmm_sst_scenarios_home = dir_home_sst + "swmm_sst/"
+# dir_time_series = dir_swmm_sst_scenarios_home + "time_series/"
+# f_key_subnames_gridind = dir_time_series + "_key_subnames_and_grid-indices.csv"
+# seed_mrms_hourly = 22901
 # END WORK
 
 # c4b 
