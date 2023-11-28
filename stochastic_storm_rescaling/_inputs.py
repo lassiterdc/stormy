@@ -13,8 +13,10 @@ in_a_begin_year = 1928
 min_record_length = 30
 
 # SST stuff
-nrealizations = 1
-
+nrealizations = 2
+sst_tstep = 5
+sst_event_duration = 72 # hours
+sst_storms_per_year = 5
 start_date = "2020-09-01" # start date for each of the time series
 #%% Directories
 fldr_nrflk = str(Path(os.getcwd()).parents[1]) + "/"
@@ -47,8 +49,8 @@ f_out_swmm_waterlevel = fldr_swmm_tseries + "a_water_levels_ft.dat"
 
 # event selection
 min_interevent_time = 12 # hour
-max_event_length = 72 # hours
-min_event_threshold = 0.5 # inches of total rainfall
+# max_event_length = 72 # hours
+min_event_threshold = 0.1 # inches of total rainfall
 dir_mrms_events = dir_ssr_outputs + "c_mrms_events/"
 f_mrms_event_summaries = dir_mrms_events + "mrms_event_summaries.csv"
 f_mrms_event_timeseries = dir_mrms_events + "mrms_event_timeseries.csv"
