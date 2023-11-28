@@ -5,7 +5,7 @@ from glob import glob
 dir_repo = "/scratch/dcl3nd/stormy/" # MODIFICATION TO RUN ON SCRATCH
 dir_sst = dir_repo + "stochastic_storm_transposition/"
 dir_sst_nrflk = dir_sst + "norfolk/"
-dir_sst_nrflk_hrly = dir_sst_nrflk + "sst_mrms_hourly/"
+# dir_sst_nrflk_hrly = dir_sst_nrflk + "sst_mrms_hourly/"
 dir_mrms = dir_sst_nrflk + "sst_mrms/"
 dir_home = "/home/dcl3nd/stormy/"
 dir_home_sst = dir_home + "sst/"
@@ -15,11 +15,11 @@ dir_highres_repo = "/scratch/dcl3nd/highres-radar-rainfall-processing/"
 
 
 # WORK
-f_sst_nrflk_hrly_parameterfile = dir_sst_nrflk_hrly + "mrms_hourly_combined.sst"
+# f_sst_nrflk_hrly_parameterfile = dir_sst_nrflk_hrly + "mrms_hourly_combined.sst"
 # f_sst_nrflk_hrly_parameterfile = dir_sst_nrflk_hrly + "mrms_hourly_combined_test.sst"
 # END WORK
-f_sst_nrflk_hrly_combined_catalog = dir_sst_nrflk_hrly + "strmcat_mrms_hourly_combined.nc"
-f_sst_nrflk_hrly_combined_catalog_reformatted = dir_sst_nrflk_hrly + "strmcat_mrms_hourly_combined_reformatted_for_xarray.nc"
+# f_sst_nrflk_hrly_combined_catalog = dir_sst_nrflk_hrly + "strmcat_mrms_hourly_combined.nc"
+# f_sst_nrflk_hrly_combined_catalog_reformatted = dir_sst_nrflk_hrly + "strmcat_mrms_hourly_combined_reformatted_for_xarray.nc"
 # swmm stuff
 dir_swmm_model = dir_repo + "swmm/hague/"
 f_shp_swmm_subs = dir_swmm_model + "swmm_model/exported_layers/subcatchments.shp"
@@ -28,7 +28,7 @@ lst_template_keys = ["START_DATE", "START_TIME", "REPORT_START_DATE", "REPORT_ST
 
 # script c3
 # WORK 
-dir_sst_realizations_hrly = dir_sst_nrflk_hrly + "mrms_hourly_combined/Realizations/"
+# dir_sst_realizations_hrly = dir_sst_nrflk_hrly + "mrms_hourly_combined/Realizations/"
 # dir_sst_realizations_hrly = dir_sst_nrflk_hrly + "mrms_hourly_combined_tst/Realizations/"
 # END WORK
 # c4
@@ -59,34 +59,7 @@ n_attempts = 500
 n_clusters = 5
 resampling_inteval = 10 # after a number of attempts equal to a multiple of this value, the copula will be used to resample storm surge and peak lag  
 
-# c5
-# dir_swmm_sst_models_hrly = dir_swmm_sst_scenarios_hrly_proj + "models/"
-dir_swmm_sst_models_hrly = dir_swmm_sst_scenarios_hrly_scratch + "models/"
 
-f_inp_base_hrly = dir_swmm_sst_scenarios_hrly_proj + "hague_sst_model_template.inp"
-
-# dir_time_series_hrly = dir_swmm_sst_scenarios_hrly + "time_series/"
-f_swmm_scenarios_catalog = dir_swmm_sst_scenarios_hrly_proj + "swmm_scenario_catalogs/" + "_swmm_scenarios_catalog_yr{}.csv"
-
-norain_gage_name = "no_rain"
-
-# c6
-max_runtime_min_hrly = 60 # maximum minutes of runtime allowable for each SWMM simulation
-
-# c6b
-f_model_perf_summary_hrly = dir_swmm_sst_scenarios_hrly_proj + "model_performance_summary.csv"
-f_events_summary = dir_swmm_sst_scenarios_hrly_proj + "event_summaries.csv"
-
-# c7
-f_model_outputs_consolidated_hrly = dir_swmm_sst_scenarios_hrly_proj + "model_outputs_consolidated.nc"
-# dir_swmm_sst_models_hrly_home = dir_swmm_sst_scenarios_hrly_home + "models/"
-
-# c8
-f_bootstrapped_quant_estimates = dir_swmm_sst_scenarios_hrly_scratch + "models/boostrapping/"
-sst_recurrence_intervals = [0.1, 0.25, 0.5, 1, 2, 5, 10, 25, 50, 100]
-f_bootstrapped_consolidated_hrly = dir_swmm_sst_scenarios_hrly_proj + "bootstrapping_consolidated.nc"
-f_bootstrapped_consolidated_hrly_raw = dir_swmm_sst_scenarios_hrly_proj + "bootstrapping_allsamples_consolidated.nc"
-export_raw_bs_samps = False
 
 #d
 # dir_mrms = dir_sst_nrflk + "sst_mrms/"
@@ -113,6 +86,7 @@ seed_mrms_hourly = 22901
 # d4b
 dir_local_outputs = dir_repo + "local/outputs/"
 f_simulated_cmpnd_event_summaries = dir_local_outputs + "c_simulated_compound_event_summary.csv"
+f_simulated_cmpnd_event_summaries = dir_local_outputs + "c_simulated_compound_event_summary.csv"
 dir_swmm_sst_scenarios_scratch = dir_home_sst + "_scratch/"
 dir_waterlevel_ncs_scratch = dir_swmm_sst_scenarios_scratch + "water_level_ncs/"
 dir_rain_weather_scratch = dir_swmm_sst_scenarios_scratch + "weather/"
@@ -129,6 +103,35 @@ f_sims_summary = dir_scenario_weather + "compound_event_summaries.csv"
 # d5
 f_inp_base = dir_swmm_sst_scenarios + "hague_sst_model_template.inp"
 dir_swmm_sst_models = dir_swmm_sst_scenarios_scratch + "models/"
+
+# c5
+# # dir_swmm_sst_models_hrly = dir_swmm_sst_scenarios_hrly_proj + "models/"
+# dir_swmm_sst_models_hrly = dir_swmm_sst_scenarios_hrly_scratch + "models/"
+
+# f_inp_base_hrly = dir_swmm_sst_scenarios_hrly_proj + "hague_sst_model_template.inp"
+
+# # dir_time_series_hrly = dir_swmm_sst_scenarios_hrly + "time_series/"
+# f_swmm_scenarios_catalog = dir_swmm_sst_scenarios_hrly_proj + "swmm_scenario_catalogs/" + "_swmm_scenarios_catalog_yr{}.csv"
+
+# norain_gage_name = "no_rain"
+
+# # c6
+# max_runtime_min_hrly = 60 # maximum minutes of runtime allowable for each SWMM simulation
+
+# # c6b
+# f_model_perf_summary_hrly = dir_swmm_sst_scenarios_hrly_proj + "model_performance_summary.csv"
+# f_events_summary = dir_swmm_sst_scenarios_hrly_proj + "event_summaries.csv"
+
+# # c7
+# f_model_outputs_consolidated_hrly = dir_swmm_sst_scenarios_hrly_proj + "model_outputs_consolidated.nc"
+# # dir_swmm_sst_models_hrly_home = dir_swmm_sst_scenarios_hrly_home + "models/"
+
+# # c8
+# f_bootstrapped_quant_estimates = dir_swmm_sst_scenarios_hrly_scratch + "models/boostrapping/"
+# sst_recurrence_intervals = [0.1, 0.25, 0.5, 1, 2, 5, 10, 25, 50, 100]
+# f_bootstrapped_consolidated_hrly = dir_swmm_sst_scenarios_hrly_proj + "bootstrapping_consolidated.nc"
+# f_bootstrapped_consolidated_hrly_raw = dir_swmm_sst_scenarios_hrly_proj + "bootstrapping_allsamples_consolidated.nc"
+export_raw_bs_samps = False
 #%% hard coded variables
 # name_out_realizations = "_combined_realizations.nc"
 f_realizations_hourly = dir_swmm_model + "swmm_scenarios_sst_hourly/_combined_realizations.nc"
