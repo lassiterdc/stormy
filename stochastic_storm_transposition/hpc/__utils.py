@@ -13,6 +13,7 @@ dir_scratch_sst = "/scratch/dcl3nd/stormy/"
 dir_highres_repo = "/scratch/dcl3nd/highres-radar-rainfall-processing/"
 
 
+
 # WORK
 f_sst_nrflk_hrly_parameterfile = dir_sst_nrflk_hrly + "mrms_hourly_combined.sst"
 # f_sst_nrflk_hrly_parameterfile = dir_sst_nrflk_hrly + "mrms_hourly_combined_test.sst"
@@ -110,6 +111,8 @@ f_key_subnames_gridind = dir_time_series + "_key_subnames_and_grid-indices.csv"
 seed_mrms_hourly = 22901
 
 # d4b
+dir_local_outputs = dir_repo + "local/outputs/"
+f_simulated_cmpnd_event_summaries = dir_local_outputs + "c_simulated_compound_event_summary.csv"
 dir_swmm_sst_scenarios_scratch = dir_home_sst + "_scratch/"
 dir_waterlevel_ncs_scratch = dir_swmm_sst_scenarios_scratch + "water_level_ncs/"
 dir_rain_weather_scratch = dir_swmm_sst_scenarios_scratch + "weather/"
