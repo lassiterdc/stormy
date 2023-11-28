@@ -1,0 +1,338 @@
+---
+title: "Figuring out how to fit multivariate copulas and perform goodness-of-fit tests in R"
+output: html_notebook
+---
+
+```{r import libraries and define filepaths}
+library(fitdistrplus)
+library(stats)
+library(copula)
+library(gofCopula)
+library(ggplot2)
+library(tidyverse)
+library(lmomco) # for plotting positions
+source("references/utils.R")
+
+# file paths
+dir_repo = "D:/Dropbox/_GradSchool/_norfolk/stormy/"
+# dir_ssr = paste0(dir_repo , "stochastic_storm_rescaling/")
+dir_sst = paste0(dir_repo , "stochastic_storm_transposition/")
+# dir_ssr_outputs = paste0(dir_ssr , "outputs/")
+# dir_mrms_events = paste0(dir_ssr_outputs , "c_mrms_events/")
+# dir_noaa_water_levels = paste0(dir_ssr_outputs , "a_NOAA_water_levels/")
+
+# f_mrms_event_summaries = paste0(dir_mrms_events , "mrms_event_summaries.csv")
+# f_mrms_event_timeseries = paste0(dir_mrms_events, "mrms_event_timeseries.csv")
+# f_water_level_storm_surge = paste0(dir_noaa_water_levels, "a_water-lev_tide_surge.csv")
+# 
+# df_mrms_event_summaries <- read_csv(f_mrms_event_summaries)
+# df_mrms_event_tseries <- read_csv(f_mrms_event_timeseries)
+# df_water_levels <- read_csv(f_water_level_storm_surge)
+
+# f_data_julie_example = "D:/Dropbox/_GradSchool/_norfolk/stormy/stochastic_storm_transposition/local/references/EasternCO_PDSI.csv"
+
+# compuate event duration in hours in R-friendly format using lubridate
+# df_mrms_event_summaries <- df_mrms_event_summaries %>% mutate(duration = end - start) %>% mutate(duration = as.duration(duration))
+
+dir_sst_py_outs <-paste0(dir_sst, "local/outputs/")
+f_obs_cdf <- paste0(dir_sst_py_outs, "b2_F_of_obs_data-cdfvals.csv")
+f_sst_cdf <- paste0(dir_sst_py_outs, "b3_F_of_sst_data-cdfvals.csv")
+
+vars_all <-  c("depth_mm", "mean_mm_per_hr", "max_mm_per_hour", "max_surge_ft", "surge_peak_after_rain_peak_min")
+vars_rain <- c("depth_mm", "mean_mm_per_hr", "max_mm_per_hour")
+
+df_obs_cdf <- read_csv(f_obs_cdf) %>% select(vars_all)
+df_sst_cdf <- read_csv(f_sst_cdf) %>% select(vars_rain)
+```
+
+```{r processing data}
+# # join water level and time series data
+# df_water_rain_tseries <- df_mrms_event_tseries %>% rename("date_time" = "time") %>% inner_join(df_water_levels, by = "date_time")
+# 
+# # compute summary statistics by event for the water levels
+# df_max_surge_tsteps <- df_water_rain_tseries %>% group_by(event_id) %>% filter(surge_ft == max(surge_ft)) %>% 
+#   filter(date_time == max(date_time)) # this line ensures that only a single timestep is used for the max water level; the choice of max was arbitrary
+# 
+# 
+# # add storm surge statistics to compound event summary table
+# ## subset surge statistics
+# s_peak_surge_time <- df_max_surge_tsteps %>% select(event_id, date_time) %>% rename("max_surge_tstep" = "date_time")
+# s_peak_surge <- df_max_surge_tsteps %>% select(event_id, surge_ft) %>% rename("max_surge_ft" = "surge_ft")
+# 
+# ## define compound summary table by adding storm surge statistics
+# df_compound_summary <- df_mrms_event_summaries %>% inner_join(s_peak_surge_time, by = "event_id") %>% inner_join(s_peak_surge, by = "event_id")
+# 
+# df_compound_summary <- df_compound_summary %>% mutate(surge_peak_after_rain_peak_min = as.duration(max_intensity_tstep-max_surge_tstep))
+```
+
+```{r subsetting data}
+# subsetting compound event summary table for variables used for copula fitting
+# vars_all <-  c("depth_mm", "mean_mm_per_hr", "max_mm_per_hour", "max_surge_ft", "surge_peak_after_rain_peak_min")
+# df_vars_all <- df_compound_summary %>% select(vars_all)
+# 
+# # converting to uniform distributions using weibull (https://search.r-project.org/CRAN/refmans/lmomco/html/pp.html)
+# df_vars_all_uniform <- df_vars_all %>% mutate(across(all_of(vars_all), ~ pp(.x, a=0))) # weibull
+```
+
+```{r testing copula fits}
+dims = 5
+
+y_obs <- as.matrix(df_obs_cdf)
+x_sst_cond <- as.matrix(df_sst_cdf)
+
+# rho_vector <-  P2p(x)
+matrix_cors <- cor(y_obs)
+rhos <-  P2p(matrix_cors)
+
+# testing t copula
+tCop <- ellipCopula(family = "t", param = rhos, dim=dims, dispstr="un", df=10, df.fixed=TRUE)
+
+system.time(
+g.tC <- gofCopula(tCop, y_obs, simulation = "pb", N = 1000, estim.method="ml")
+)
+ft <- fitCopula(tCop, data = y_obs)
+ft
+ft@copula # the fitted t-copula as tCopula object
+
+# testing normal copula
+nCop <- ellipCopula(family = "normal", param = rhos, dim=dims, dispstr="un", df=10, df.fixed=TRUE)
+system.time(
+g.nC <- gofCopula(nCop, y_obs, simulation = "pb", N = 1000, estim.method="ml")
+)
+
+fn <- fitCopula(nCop, data = y_obs)
+```
+
+
+```{r printing copula goodness-of-fit test results}
+print(g.tC)
+
+print(g.nC)
+```
+
+```{r computing AIC}
+comp_aic <- function(log_lik, n_params, df){
+  k = n_params + df
+  aic <- -2 * log_lik + 2 * k
+  aic
+}
+
+aic_t <- comp_aic(ft@loglik, n_params = 10, df = 10)
+aic_n <- comp_aic(fn@loglik, n_params = 10, df = 10)
+
+```
+
+```{r investigating copula fits}
+ft_t <- fitCopula(tCop, data = y_obs)
+ft_t
+ft_t@copula
+
+ft_n <- fitCopula(nCop, data = y_obs)
+ft_n
+ft_n@copula
+
+sim_t <- rMvdc(ft_t@copula, 1000)
+```
+
+```{r figuring out the vine copula library}
+library(VineCopula)
+
+data(daxreturns)
+TauMatrix(daxreturns)
+```
+
+```{r}
+
+TauMatrix(y_obs)
+
+RVM_R <- RVineStructureSelect(y_obs, c(1:6), progress = TRUE)
+
+str(RVM_R)
+
+summary(RVM_R)
+
+test_gof_Breymann <- RVineGofTest(y_obs,RVM_R,method="Breymann",statistic = "CvM", B = 1000)
+test_gof_Berg <- RVineGofTest(y_obs,RVM_R,method="Berg",statistic = "CvM", B = 1000)
+test_gof_Berg2 <- RVineGofTest(y_obs,RVM_R,method="Berg2",statistic = "CvM", B = 1000)
+test_gof_ECP <- RVineGofTest(y_obs,RVM_R,method="ECP",statistic = "CvM", B = 1000)
+test_gof_ECP2 <- RVineGofTest(y_obs,RVM_R,method="ECP2",statistic = "CvM", B = 1000)
+# other possible methods are "Breymann", "Berg", "Berg2", and "ECP2"
+test_gof_Breymann
+test_gof_Berg
+test_gof_Berg2
+test_gof_ECP
+test_gof_ECP2
+
+# compare AIC's
+aic_t
+aic_n
+```
+
+```{r simulate}
+N <- 1000
+x_sim <- RVineSim(N, RVM_R)
+TauMatrix(x_sim)
+TauMatrix(y_obs)
+```
+
+
+```{r Using CDVineCopulaConditional Library}
+# https://cran.rstudio.com/web/packages/CDVineCopulaConditional/index.html
+library(CDVineCopulaConditional)
+
+# re-order observations so conditioning variables are at the end
+x_reorderd <- y_obs[,c("max_surge_ft", "surge_peak_after_rain_peak_min", "depth_mm", "mean_mm_per_hr", "max_mm_per_hour")]
+
+RVM <- CDVineCondFit(x_reorderd ,Nx=3,treecrit="AIC",type="CVine-DVine",selectioncrit="AIC",
+                     rotations = TRUE)
+summary(RVM)
+RVM$Matrix
+RVM
+# goodness of fit testing
+# test_gof_Breymann <- RVineGofTest(y_obs,RVM,method="Breymann",statistic = "CvM", B = 1000)
+# test_gof_Berg <- RVineGofTest(y_obs,RVM,method="Berg",statistic = "CvM", B = 1000)
+# test_gof_Berg2 <- RVineGofTest(y_obs,RVM,method="Berg2",statistic = "CvM", B = 1000)
+# test_gof_ECP <- RVineGofTest(y_obs,RVM,method="ECP",statistic = "CvM", B = 1000)
+# test_gof_ECP2 <- RVineGofTest(y_obs,RVM,method="ECP2",statistic = "CvM", B = 1000)
+# other possible methods are "Breymann", "Berg", "Berg2", and "ECP2"
+# test_gof_Breymann
+# test_gof_Berg
+# test_gof_Berg2
+# test_gof_ECP
+# test_gof_ECP2
+
+
+# conditional sampling from a D-Vine
+# Set the values of the conditioning variables as those used for the calibration.
+# Order them with respect to RVM$Matrix, considering that is a D-Vine.
+cond1 <- pobs(x_reorderd)[,RVM$Matrix[1,1]]
+cond2 <- pobs(x_reorderd)[,RVM$Matrix[2,2]]
+cond3 <- pobs(x_reorderd)[,RVM$Matrix[3,3]]
+condition <- cbind(cond1,cond2,cond3)
+
+# Simulate the variables
+Sim <- CDVineCondSim(RVM,condition)
+
+# compare to make sure
+head(Sim)
+head(pobs(x_reorderd))
+
+# Plot the simulated variables over the observed
+Sim <- data.frame(Sim)
+obs <- data.frame(pobs(x_reorderd))
+colnames(Sim) <- colnames(x_reorderd)
+overplot(Sim,obs, method = "kendall") # data is in light gray
+```
+
+
+```{r example of fitting univariate distributions}
+# https://rdocumentation.org/packages/fitdistrplus/versions/1.1-11
+library("fitdistrplus")
+
+# EXAMPLES
+data("groundbeef")
+str(groundbeef)
+
+plotdist(groundbeef$serving, histo = TRUE, demp = TRUE)
+
+descdist(groundbeef$serving, boot = 1000)
+
+data(groundbeef)
+x1 <- groundbeef$serving
+f1 <- fitdist(x1, "gamma")
+b1 <- bootdist(f1, niter=51)
+print(b1)
+plot(b1)
+plot(b1, enhance=TRUE)
+summary(b1)
+quantile(b1)
+CIcdfplot(b1, CI.output = "quantile")
+
+# fitting data
+serving <- groundbeef$serving
+fitW <- fitdist(serving, "weibull")
+fitg <- fitdist(serving, "gamma")
+fitln <- fitdist(serving, "lnorm")
+summary(fitW)
+summary(fitg)
+summary(fitln)
+cdfcomp(list(fitW, fitg, fitln), legendtext=c("Weibull", "gamma", "lognormal"))
+denscomp(list(fitW, fitg, fitln), legendtext=c("Weibull", "gamma", "lognormal"))
+qqcomp(list(fitW, fitg, fitln), legendtext=c("Weibull", "gamma", "lognormal"))
+ppcomp(list(fitW, fitg, fitln), legendtext=c("Weibull", "gamma", "lognormal"))
+g <- gofstat(list(fitW, fitg, fitln), fitnames=c("Weibull", "gamma", "lognormal"))
+```
+
+```{r fitting univariate distributions}
+# https://rdocumentation.org/packages/fitdistrplus/versions/1.1-11
+library("fitdistrplus")
+
+data <- x
+
+inspect_univariate <- function(x, colname, uselog = FALSE, normalize = FALSE){
+  v <- x[,colname]
+  if(uselog == TRUE){
+    v <- log(x[,colname])
+  }
+  if(normalize == TRUE){
+    v <- (v-mean(v))/std(v)
+    }
+  plotdist(v, histo = TRUE, demp = TRUE)
+}
+# https://cran.r-project.org/doc/manuals/R-intro.html#Probability-distributions
+
+
+inspect_univariate(x, "depth_mm", uselog = TRUE)
+inspect_univariate(x, "mean_mm_per_hr", uselog = TRUE)
+inspect_univariate(x, "max_mm_per_hour", uselog = FALSE)
+inspect_univariate(x, "max_surge_ft", normalize = FALSE)
+inspect_univariate(x, "surge_peak_after_rain_peak_min", normalize = TRUE)
+
+
+library('rlist')
+fit_and_test <- function(x, colname, lst_dist, uselog = FALSE, normalize = FALSE,
+                         method = 'mle'){
+  # WORK 
+  # v <- x[,"depth_mm"]
+  # END WORK
+  list_models <- list() # initialize list of models
+  # transform data if specified
+  v <- x[,colname]
+  if(uselog == TRUE){
+    v <- log(x[,colname])
+  }
+  if(normalize == TRUE){
+    v <- (v-mean(v))/std(v)
+  }
+  # create models and add them to the list 
+  list_fitted_distributions = list()
+  for (d in lst_dist){
+    if(min(v)<0 & (d == "exp" | d == "gamma" | d == "lnorm" | d == "weibull")){
+      next
+    }
+    list_models <- list.append(list_models, fitdist(v, d, method = method))
+    list_fitted_distributions <- list.append(list_fitted_distributions, d)
+  }
+  names(list_models) <- list_fitted_distributions
+  gof_results <- gofstat(list_models)
+  list("list_models" = list_models, "gof_results" = gof_results)
+}
+
+lst_dist <- c("cauchy", "exp", "gamma", "logis","lnorm", "norm", "weibull")
+inspect_univariate(x, "depth_mm", uselog = TRUE)
+
+# WORK
+inspect_univariate(x, "depth_mm", uselog = TRUE)
+models_and_gof <- fit_and_test(x, "depth_mm", lst_dist, uselog = TRUE, method = 'mle')
+list_models <- models_and_gof$list_models
+gof_results <- models_and_gof$gof_results
+
+gof_results$adtest
+gof_results$kstest
+gof_results$cvmtest
+
+for (mod in list_models){
+  plot(mod)
+  title(main = mod$distname)
+}
+```
