@@ -86,7 +86,7 @@ seed_mrms_hourly = 22901
 # d4b
 dir_local_outputs = dir_repo + "local/outputs/"
 f_simulated_cmpnd_event_summaries = dir_local_outputs + "c_simulated_compound_event_summary.csv"
-f_simulated_cmpnd_event_summaries = dir_local_outputs + "c_simulated_compound_event_summary.csv"
+f_observed_cmpnd_event_summaries = dir_local_outputs + "b_observed_compound_event_summaries.csv"
 dir_swmm_sst_scenarios_scratch = dir_home_sst + "_scratch/"
 dir_waterlevel_ncs_scratch = dir_swmm_sst_scenarios_scratch + "water_level_ncs/"
 dir_rain_weather_scratch = dir_swmm_sst_scenarios_scratch + "weather/"
