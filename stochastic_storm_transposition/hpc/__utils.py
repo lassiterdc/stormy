@@ -84,7 +84,7 @@ f_key_subnames_gridind = dir_time_series + "_key_subnames_and_grid-indices.csv"
 seed_mrms_hourly = 22901
 
 # d4b
-dir_local_outputs = dir_repo + "local/outputs/"
+dir_local_outputs = dir_sst + "local/outputs/"
 f_simulated_cmpnd_event_summaries = dir_local_outputs + "c_simulated_compound_event_summary.csv"
 f_observed_cmpnd_event_summaries = dir_local_outputs + "c_observed_compound_event_summaries_with_k.csv"
 dir_swmm_sst_scenarios_scratch = dir_home_sst + "_scratch/"
