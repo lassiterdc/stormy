@@ -25,6 +25,7 @@ n_events_per_year_sst = 5
 # f_selection = "outputs/b_pdf_selections.csv"
 # f_cdfs_obs = "outputs/b2_F_of_obs_data-cdfvals.csv"
 # f_cdfs_sst = "outputs/b3_F_of_sst_data-cdfvals.csv"
+f_observed_wlevel_rainfall_tseries = "outputs/b_observed_compound_event_timeseries.csv"
 f_observed_compound_event_summaries = "outputs/b_observed_compound_event_summaries.csv"
 f_sst_event_summaries = "outputs/b_sst_event_summaries.csv"
 # f_wlevel_cdf_sims_from_copula = "outputs/r_a_sim_wlevel_cdf.csv"
@@ -33,15 +34,28 @@ f_pdf_performance="outputs/b_pdf_performance_comparison.csv"
 #%% load and process data data
 ds_rlztns = xr.open_dataset(f_rain_realizations)
 
-# df_key = pd.read_csv(f_key_subnames_gridind)
-
 df_mrms_event_summaries = pd.read_csv(f_mrms_event_summaries, parse_dates=["start", "end", "max_intensity_tstep"])
 df_mrms_event_summaries["duration"] = pd.to_timedelta(df_mrms_event_summaries["duration"])
 df_mrms_event_tseries = pd.read_csv(f_mrms_event_timeseries, parse_dates=True, index_col="time")
 df_water_levels = pd.read_csv(f_water_level_storm_surge, parse_dates=True, index_col="date_time")
 
 # join water level and time series data
-df_water_rain_tseries = df_water_levels.join(df_mrms_event_tseries, how="inner")
+# resample water level time series to same timestep as rainfall
+df_water_levels_1min = df_water_levels.loc[:, ["water_level", "predicted_wl", "surge_ft"]].resample('1min').mean().ffill()
+df_water_levels_5min = df_water_levels_1min.loc[:, ["water_level", "predicted_wl", "surge_ft"]].resample('5min').mean()
+
+
+df_water_rain_tseries = df_water_levels_5min.join(df_mrms_event_tseries, how="inner")
+# verify all data was preserved
+if (len(df_water_rain_tseries) - len(df_mrms_event_tseries)) != 0:
+    sys.exit("ERROR: joining the water level to rainfall time series dropped some observations. Timesteps likely aren't lining up.")
+# verify NA values were NOT introduced
+if df_water_rain_tseries.isna().sum().sum() > df_mrms_event_tseries.isna().sum().sum():
+    sys.exit("ERROR: NA Values introduced in joining observed water level time series to observed rain event time series")
+
+df_water_rain_tseries_sorted = df_water_rain_tseries.sort_values(["event_id", "date_time"])
+
+df_water_rain_tseries_sorted.to_csv(f_observed_wlevel_rainfall_tseries)
 
 # compute summary statistics by event for the water levels
 s_surge_event_group = df_water_rain_tseries.groupby("event_id").surge_ft
