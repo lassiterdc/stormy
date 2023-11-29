@@ -219,3 +219,4 @@ for v in ['depth_mm', 'mean_mm_per_hr', 'max_mm_per_hour']:
     fig.text(.5, 1, v, ha='center')
     plt.savefig("plots/b_comparing_sst_to_obs_cdf_for_{}.png".format(v))
 
+#%%
