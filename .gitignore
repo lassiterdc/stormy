@@ -179,3 +179,5 @@ stochastic_storm_transposition/local/a_choosing_copula.nb.html
 stochastic_storm_transposition/local/a_conditional_simulations.nb.html
 stochastic_storm_transposition/local/reprex/2023-11-8_gof_multivariate_copulas/copula fitting.nb.html
 stochastic_storm_transposition/local/reprex/2023-11-8_gof_multivariate_copulas/copula fitting.Rmd
+swmm/hague/swmm_scenarios_sst_hourly/time_series/_event_summary_year*
+swmm/hague/swmm_scenarios_sst_hourly/*.csv
