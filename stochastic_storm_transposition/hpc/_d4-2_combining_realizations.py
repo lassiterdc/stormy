@@ -13,7 +13,7 @@ from __utils import *
 
 start_time = time.time()
 #%%
-f_pattern = dir_rain_weather_scratch_ncs + "sst_yr_{}.nc".format("*")
+f_pattern = dir_rain_weather_scratch_ncs + "sst_yr_{}.nc".format("*") # must match pattern in script _d4_creating_rainfall_timeseries.py
 lst_f_ncs = glob(f_pattern)
 lst_f_ncs.sort()
 bm_time = time.time()
