@@ -56,7 +56,7 @@ wlevel_tdiff = (pd.Series(df_water_rain_tseries.index).diff().dropna().mode())[0
 
 wlevel_freq = pd.tseries.frequencies.to_offset(wlevel_tdiff).freqstr
 
-max_allowable_duration = (pd.Timedelta(3, "days") + 4 * pd.Timedelta(time_buffer, "hours"))
+max_allowable_duration = (pd.Timedelta(3, "days") + 6 * pd.Timedelta(time_buffer, "hours")) # should be 4.5 days
 
 # run loop
 min_obs_wlevel = df_water_rain_tseries.water_level.min()
@@ -92,7 +92,7 @@ for i, sim in df_sim_cmpnd_summary.iterrows():
     while success == False:
         if attempts >= n_attempts:
             # success = False
-            print("rz{} yr{} strm{} - Maximum attempts reached for generating reasonable water level. Attempts = {}".format(rz, yr, strm, attempts)) # DCL WORK
+            # print("rz{} yr{} strm{} - Maximum attempts reached for generating reasonable water level. Attempts = {}".format(rz, yr, strm, attempts)) # DCL WORK
             break
             sys.exit("SCRIPT FAILED FOR YEAR {}: FAILED AFTER {} ATTEMPTS TO GENERATE A SYNTHETIC WATER LEVEL TIME SERIES FOR {}".format(yr, attempts, s_sim_event_summary))
         attempts += 1
@@ -117,10 +117,11 @@ for i, sim in df_sim_cmpnd_summary.iterrows():
         event_endtime = max(sim_datetime_of_last_rainfall, sim_tstep_max_surge)+pd.Timedelta(time_buffer, "hours")
         # duration is start minus end
         duration = event_endtime - event_starttime
-        # if duration is greater than allowable, generate new sim
-        if duration > max_allowable_duration:
-            print("rz{} yr{} strm{} - Maximum allowable duration of {} excceded. Simulation duration = {}".format(rz, yr, strm, max_allowable_duration, duration)) # DCL WORK
-            continue
+        # if duration is greater than allowable, assume that the storm surge and rainfall are independent 
+        # if duration > max_allowable_duration:
+        #     print("rz{} yr{} strm{} - Maximum allowable duration of {} excceded. Simulation duration = {}".format(rz, yr, strm, max_allowable_duration, duration)) # DCL WORK
+        #     print("Assuming rainfall are independent, so fixing the time steps to that of the rainfall")
+        #     continue
         sim_wlevel_times = pd.date_range(event_starttime, event_endtime, freq=wlevel_freq)
         time_to_peak_surge = sim_tstep_max_surge - min(sim_wlevel_times)
         # extract observed surge data
@@ -150,7 +151,7 @@ for i, sim in df_sim_cmpnd_summary.iterrows():
         max_sim_wlevel = s_sim_wlevel.max()
         # if the the simulated water levels is below user defined thresholds, try again
         if (min_sim_wlevel <= (1+wlevel_threshold)*min_obs_wlevel):
-            print("rz{} yr{} strm{} - Minimum simulation water level is below the threadhold of {}. Simulation min = {}".format(rz, yr, strm, (1+wlevel_threshold)*min_obs_wlevel, min_sim_wlevel)) # DCL WORK
+            # print("rz{} yr{} strm{} - Minimum simulation water level is below the threadhold of {}. Simulation min = {}".format(rz, yr, strm, (1+wlevel_threshold)*min_obs_wlevel, min_sim_wlevel)) # DCL WORK
             # if these are exceeded and there have been at least some number of attempts to select and rescale a historical event
             # if ((attempts % resampling_inteval) == 0) and (attempts > 1):
             continue
@@ -208,7 +209,7 @@ for i, sim in df_sim_cmpnd_summary.iterrows():
     lst_ds.append(ds)
     # ds = ds.assign_coords(["realization", "year","storm_id", "datetime"])
 
-#%% export event summaries
+##%% export event summaries
 # df_idx = df_sst_storm_summaries.rz_yr_strm.str.split("_", expand=True)
 # df_idx.columns = ["realization", "year", "storm_id"]
 
