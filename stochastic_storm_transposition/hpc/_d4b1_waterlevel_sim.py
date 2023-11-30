@@ -88,6 +88,10 @@ for i, sim in df_sim_cmpnd_summary.iterrows():
     attempts = 0
     rz = int(sim.realization)
     strm = int(sim.storm_id)
+    # DCL WORK
+    # if strm == 2:
+    #     break
+    # END DCL WORK
     success = False
     while success == False:
         if attempts >= n_attempts:
@@ -202,8 +206,8 @@ for i, sim in df_sim_cmpnd_summary.iterrows():
     # print(df)
     # print("######################################")
     df = df.drop(["date", "time"], axis = 1)
-    # df = df.reset_index(names = "tstep")
-    df = df.set_index(["realization", "year","storm_id", "datetime"])
+    df = df.reset_index(names = "tstep")
+    df = df.set_index(["realization", "year","storm_id", "tstep"])
     # print(df)
     ds = df.to_xarray()
     lst_ds.append(ds)
