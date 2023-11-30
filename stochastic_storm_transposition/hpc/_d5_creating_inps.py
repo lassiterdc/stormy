@@ -20,7 +20,7 @@ yr = int(sys.argv[1]) # a number between 1 and 1000
 script_start_time = datetime.now()
 #%% data
 f_summary = dir_time_series + "_event_summary_year{}.csv".format(yr) # must match formatting in script _d4b
-df_event_summaries = pd.read_csv(f_summary, parse_dates=["event_start", "event_end", "tstep_peak_surge","tstep_max_rain_intensity"])
+df_event_summaries = pd.read_csv(f_summary, parse_dates=["event_start", "event_end"])
 
 lst_f_ncs = return_rzs_for_yr(fldr_realizations, yr)
 ds_rlztns = xr.open_mfdataset(lst_f_ncs, preprocess = define_dims)
