@@ -35,14 +35,14 @@ print("Total time elapsed: {}; time to run open_mfdatset on water levels: {}".fo
 #%% export to a zarr and then export to a netcdf
 bm_time = time.time()
 fl_out_zar = dir_swmm_sst_scenarios_scratch+"waterlevels_combined.zarr"
-ds_w = ds_w.chunk(chunks={"realization": 1, "year": 1, "storm_id": 1})
+# ds_w = ds_w.chunk(chunks={"realization": 1, "year": 1, "storm_id": 1})
 ds_w.to_zarr(fl_out_zar, mode="w")
 print("Total time elapsed: {}; time to export combined water level realizations to zarr: {}".format(time.time() - start_time, time.time() - bm_time))
 
 # Load zarr and export to netcdf file
 bm_time = time.time()
 ds_from_zarr = xr.open_zarr(store=fl_out_zar, chunks={'year':"5000MB"})
-ds_from_zarr.to_netcdf(f_rain_realizations, encoding= {"water_level":{"zlib":True}})
+ds_from_zarr.to_netcdf(f_w_level_sims, encoding= {"water_level":{"zlib":True}})
 # delete zarr file
 shutil.rmtree(fl_out_zar)
 print("Total time elapsed: {}; time to export combined water level realizations to netcdf and delete Zarr: {}".format(time.time() - start_time, time.time() - bm_time))
