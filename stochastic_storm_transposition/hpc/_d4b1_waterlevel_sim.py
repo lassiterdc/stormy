@@ -86,7 +86,7 @@ for i, sim in df_sim_cmpnd_summary.iterrows():
     yr = int(sim.year)
     strm = int(sim.storm_id)
     reasonable_timeseries = False
-    while reasonable_sample == False:
+    while reasonable_timeseries == False:
         success = True
         if attempts >= n_attempts:
             success = False
@@ -205,12 +205,6 @@ for i, sim in df_sim_cmpnd_summary.iterrows():
     lst_ds.append(ds)
     # ds = ds.assign_coords(["realization", "year","storm_id", "datetime"])
 
-# combine netcdfs into one and export
-# ds_combined = xr.combine_nested(lst_ds)
-ds_combined = xr.combine_by_coords(lst_ds)
-ds_combined_loaded = ds.load()
-Path(dir_waterlevel_ncs_scratch).mkdir(parents=True, exist_ok=True)
-ds_combined_loaded.to_netcdf(dir_waterlevel_ncs_scratch + "wlevel_yr{}.nc".format(yr))
 #%% export event summaries
 # df_idx = df_sst_storm_summaries.rz_yr_strm.str.split("_", expand=True)
 # df_idx.columns = ["realization", "year", "storm_id"]
@@ -228,10 +222,21 @@ df_sim_summary = df_sim_cmpnd_summary.join(df_simulated_event_summaries, how="le
 df_sim_summary = df_sim_summary.rename(columns=dict(tstep_of_max_intensity = "tstep_max_rain_intensity",
                                                     duration_hr = "rainfall_duration_hr"))
 
-f_summary = dir_time_series + "_event_summary_year{}.csv".format(yr)
+f_summary = dir_time_series + "_event_summary_year.csv"
 df_sim_summary.to_csv(f_summary)
 
 #%% report run times
+end_time = datetime.now()
+time_script_min = round((end_time - script_start_time).seconds / 60, 1)
+print("Wrote {} water level time series files for each simulated storm. Script runtime: {} (min)".format(count, time_script_min))
 
-time_script_min = round((datetime.now() - script_start_time).seconds / 60, 1)
-print("Wrote {} time series files for each storm realizations for year {}. Script runtime: {} (min)".format(count, yr, time_script_min))
+
+# combine netcdfs into one and export
+# ds_combined = xr.combine_nested(lst_ds)
+ds_combined = xr.combine_by_coords(lst_ds)
+ds_combined_loaded = ds.load()
+# Path(dir_waterlevel_ncs_scratch).mkdir(parents=True, exist_ok=True)
+ds_combined_loaded.to_netcdf(f_w_level_sims)
+
+time_script_min = round((datetime.now() - end_time).seconds / 60, 1)
+print("Wrote {} netcdf file of water level time series in an additional {} (min)".format(time_script_min))
