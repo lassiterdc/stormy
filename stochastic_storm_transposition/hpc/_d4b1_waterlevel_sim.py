@@ -88,12 +88,11 @@ for i, sim in df_sim_cmpnd_summary.iterrows():
     attempts = 0
     rz = int(sim.realization)
     strm = int(sim.storm_id)
-    reasonable_timeseries = False
-    while reasonable_timeseries == False:
-        success = True
+    success = False
+    while success == False:
         if attempts >= n_attempts:
-            success = False
-            print("rz{} yr{} strm{} - Maximum attempts reached for generating reasonable water level. Attempts = ".format(rz, yr, strm, attempts)) # DCL WORK
+            # success = False
+            print("rz{} yr{} strm{} - Maximum attempts reached for generating reasonable water level. Attempts = {}".format(rz, yr, strm, attempts)) # DCL WORK
             break
             sys.exit("SCRIPT FAILED FOR YEAR {}: FAILED AFTER {} ATTEMPTS TO GENERATE A SYNTHETIC WATER LEVEL TIME SERIES FOR {}".format(yr, attempts, s_sim_event_summary))
         attempts += 1
@@ -155,7 +154,7 @@ for i, sim in df_sim_cmpnd_summary.iterrows():
             # if these are exceeded and there have been at least some number of attempts to select and rescale a historical event
             # if ((attempts % resampling_inteval) == 0) and (attempts > 1):
             continue
-        reasonable_sample = True
+        success = True # yay
         # except:
         #     # if there is an error, generate a new sim
         #     if ((attempts % resampling_inteval) == 0) and (attempts > 1):
