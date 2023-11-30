@@ -235,11 +235,44 @@ print("Wrote {} water level time series files for each simulated storm. Script r
 
 
 # combine netcdfs into one and export
-# ds_combined = xr.combine_nested(lst_ds)
-ds_combined = xr.combine_by_coords(lst_ds)
-ds_combined_loaded = ds.load()
-Path(dir_waterlevel_ncs_scratch).mkdir(parents=True, exist_ok=True)
-ds_combined_loaded.to_netcdf(dir_waterlevel_ncs_scratch + "waterlevels_yr{}.nc".format(yr))
+nc_combine_success = False
+try:
+    ds_combined = xr.combine_nested(lst_ds)
+    nc_combine_success = True
+    print("combine nested didn't generate an error. Here is the result:")
+    print("ds_combined")
+    print(ds_combined)
+    print("#################################################")
+except:
+    print("Combine_nested didn't work. Inspecting the first two datasets in the list....")
+    print("lst_ds[0]")
+    print(lst_ds[0])
+    print("#################################################")
+    print("lst_ds[1]")
+    print(lst_ds[1])
+    print("#################################################")
+try:
+    ds_combined = xr.combine_by_coords(lst_ds)
+    nc_combine_success = True
+    print("combine_by_coords didn't generate an error. Here is the result:")
+    print("ds_combined")
+    print(ds_combined)
+    print("#################################################")
+except:
+    print("combine_by_coords didn't work. Inspecting the first two datasets in the list....")
+    print("lst_ds[0]")
+    print(lst_ds[0])
+    print("#################################################")
+    print("lst_ds[1]")
+    print(lst_ds[1])
+    print("#################################################")
 
-time_script_min = round((datetime.now() - end_time).seconds / 60, 1)
-print("Wrote {} netcdf file of water level time series in an additional {} (min)".format(time_script_min))
+if nc_combine_success:
+    ds_combined_loaded = ds.load()
+    Path(dir_waterlevel_ncs_scratch).mkdir(parents=True, exist_ok=True)
+    ds_combined_loaded.to_netcdf(dir_waterlevel_ncs_scratch + "waterlevels_yr{}.nc".format(yr))
+
+    time_script_min = round((datetime.now() - end_time).seconds / 60, 1)
+    print("Wrote {} netcdf file of water level time series in an additional {} (min)".format(time_script_min))
+else:
+    print("No netcdf file of water levels generated!!")
