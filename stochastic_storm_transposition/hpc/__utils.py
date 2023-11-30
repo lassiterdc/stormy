@@ -86,6 +86,7 @@ seed_mrms_hourly = 22901
 # d4b
 dir_local_outputs = dir_sst + "local/outputs/"
 f_sst_event_summaries = dir_local_outputs + "b_sst_event_summaries.csv"
+f_waterlevels_same_tstep_as_sst = dir_local_outputs + "b_observed_waterlevels_sst_timestep.csv"
 f_observed_wlevel_rainfall_tseries = dir_local_outputs + "b_observed_compound_event_timeseries.csv"
 f_simulated_cmpnd_event_summaries = dir_local_outputs + "c_simulated_compound_event_summary.csv"
 f_observed_cmpnd_event_summaries = dir_local_outputs + "c_observed_compound_event_summaries_with_k.csv"
