@@ -30,6 +30,7 @@ f_observed_compound_event_summaries = "outputs/b_observed_compound_event_summari
 f_sst_event_summaries = "outputs/b_sst_event_summaries.csv"
 # f_wlevel_cdf_sims_from_copula = "outputs/r_a_sim_wlevel_cdf.csv"
 f_pdf_performance="outputs/b_pdf_performance_comparison.csv"
+f_waterlevels_same_tstep_as_sst = "outputs/b_observed_waterlevels_sst_timestep.csv"
 
 #%% load and process data data
 ds_rlztns = xr.open_dataset(f_rain_realizations)
@@ -43,7 +44,7 @@ df_water_levels = pd.read_csv(f_water_level_storm_surge, parse_dates=True, index
 # resample water level time series to same timestep as rainfall
 df_water_levels_1min = df_water_levels.loc[:, ["water_level", "predicted_wl", "surge_ft"]].resample('1min').mean().ffill()
 df_water_levels_5min = df_water_levels_1min.loc[:, ["water_level", "predicted_wl", "surge_ft"]].resample('5min').mean()
-
+df_water_levels_5min.to_csv(f_waterlevels_same_tstep_as_sst)
 
 df_water_rain_tseries = df_water_levels_5min.join(df_mrms_event_tseries, how="inner")
 # verify all data was preserved
