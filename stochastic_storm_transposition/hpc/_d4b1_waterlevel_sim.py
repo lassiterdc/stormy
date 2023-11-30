@@ -14,64 +14,36 @@ script_start_time = datetime.now()
 #%% load data
 df_obs_cmpnd_summary = pd.read_csv(f_observed_cmpnd_event_summaries)
 df_sim_cmpnd_summary = pd.read_csv(f_simulated_cmpnd_event_summaries)
-
-vars_k = ["depth_mm", "max_mm_per_hour", "max_surge_ft"]
-df_vars_stormclass = df_compound_summary.loc[:, vars_k]
-
-df_vars_stormclass_scaler = preprocessing.StandardScaler().fit(df_vars_stormclass)
-df_vars_stormclass_scaled = df_vars_stormclass_scaler.transform(df_vars_stormclass)
-
-if plot_weather_gen_stuff:
-    inertias = []
-    ks_to_try = 20
-    for i in range(1,ks_to_try):
-        kmeans = KMeans(n_clusters=i)
-        kmeans.fit(df_vars_stormclass_scaled)
-        inertias.append(kmeans.inertia_)
-    plt.plot(range(1,ks_to_try), inertias, marker='o')
-    plt.title('Elbow method')
-    plt.xlabel('Number of clusters')
-    plt.ylabel('Inertia')
-    plt.savefig(plt_fldr_weather_gen + "kmeans.png")
-    plt.clf()
-    # plt.show()
+df_sst_event_summaries = pd.read_csv(f_sst_event_summaries)
 
 
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore")
-    kmeans = KMeans(n_clusters=n_clusters)
-    kmeans.fit(df_vars_stormclass_scaled)
-#%%
-# plt.scatter(x = df_vars_all.max_surge_ft, y= df_vars_all.duration_hr, c=kmeans.labels_)
-# plt.show()
-if plot_weather_gen_stuff:
-    for v_sim in vars_sim:
-        fig, axes = plt.subplots(2, 2, figsize = (10,8))
-        row = 0
-        col = 0
-        for v_cond in vars_cond:
-            axes[row, col].scatter(df_vars_all[v_sim], df_vars_all[v_cond], c=kmeans.labels_)
-            axes[row, col].set_xlabel(v_sim)
-            axes[row, col].set_ylabel(v_cond)
-            col += 1
-            if col > 1:
-                row += 1
-                col = 0
-        plt.savefig(plt_fldr_weather_gen + "{}_sims.png".format(v_sim))
-        plt.clf()
+vars_all = ["depth_mm", "mean_mm_per_hr", "max_mm_per_hour", "max_surge_ft", "surge_peak_after_rain_peak_min"]
 
-#%% predict k label of synthetic data
-# df_synth_hydro_cond_scaled = df_vars_stormclass_scaler.transform(df_synth_hydro_cond.loc[:, vars_k])
+df_water_rain_tseries = pd.read_csv(f_observed_wlevel_rainfall_tseries, parse_dates=True, index_col="date_time")
 
-# pred_ks = kmeans.predict(df_synth_hydro_cond_scaled)
-obs_ks = kmeans.labels_
+# validate that event IDs align in timeseries and compound summary
+event_sum_computed_from_tseries = df_water_rain_tseries.loc[:,['event_id', "mrms_mm_per_hour","surge_ft"]].groupby("event_id").max().sort_values("event_id")
+
+event_sum = df_obs_cmpnd_summary.sort_values("event_id").loc[:,["event_id", "max_mm_per_hour", "max_surge_ft"]].set_index("event_id")
+event_sum_computed_from_tseries.columns = event_sum.columns
+
+problem = False
+for variable, value in (event_sum_computed_from_tseries - event_sum).sum().items():
+    if not np.isclose(value, 0):
+        problem = True
+        print("ERROR: The event IDs in the observed event summary and observed event time series do not match up.")
+        print("Variable: {} | Sum of differences across all events: {}".format(variable, value))
+if problem:
+    print("(event_sum_computed_from_tseries - event_sum)")
+    print((event_sum_computed_from_tseries - event_sum))
+    print("###################################")
+    sys.exit()
 
 # define function to randomly select an event from the same category
-def get_storm_to_rescale(pred_k):
-    ind_obs_same_class = np.where(obs_ks==pred_k)[0]
-    obs_event_index = np.random.choice(ind_obs_same_class)
-    obs_event_id = df_compound_summary.event_id[obs_event_index] # necessary because the event IDs are 1-indexed
-    return obs_event_id
+def get_storm_to_rescale(sim_k, df_obs_cmpnd_summary = df_obs_cmpnd_summary):
+    sampled_event = df_obs_cmpnd_summary[df_obs_cmpnd_summary["kmeans_class"]==sim_k].sample() # select events of same class and sample one of them
+    obs_event_id = sampled_event.event_id.values
+    return int(obs_event_id)
 #%% create synthetic time series
 # df_water_levels
 # prelim calcs
@@ -82,8 +54,8 @@ wlevel_freq = pd.tseries.frequencies.to_offset(wlevel_tdiff).freqstr
 max_allowable_duration = (pd.Timedelta(3, "days") + 2 * pd.Timedelta(time_buffer, "hours"))
 
 # run loop
-min_obs_wlevel = df_water_levels.water_level.min()
-max_obs_wlevel = df_water_levels.water_level.max()
+min_obs_wlevel = df_water_rain_tseries.water_level.min()
+# max_obs_wlevel = df_water_levels.water_level.max()
 
 i = -1
 lst_s_wlevel_tseries = []
@@ -100,13 +72,12 @@ lst_successful_sim = []
 lst_ds = []
 count = 0
 lag_reset = False
-for i, cond in df_cond.iterrows():
+for i, sim in df_sim_cmpnd_summary.iterrows():
     count += 1
     # i += 1
     attempts = 0
     # absurd_simulation = True
-    reasonable_sample = False
-    generate_new_sim = True
+    reasonable_timeseries = False
     while reasonable_sample == False:
         success = True
         if attempts >= n_attempts:
@@ -115,20 +86,14 @@ for i, cond in df_cond.iterrows():
             sys.exit("SCRIPT FAILED FOR YEAR {}: FAILED AFTER {} ATTEMPTS TO GENERATE A SYNTHETIC WATER LEVEL TIME SERIES FOR {}".format(yr, attempts, s_sim_event_summary))
         attempts += 1
         try:           
-            if generate_new_sim == True:
-                df_new_sim = gen_conditioned_samples(cop_hydro, cond.to_frame().T.reset_index(drop=True), n_samples=1)
-                s_sim_event_summary = df_new_sim.loc[0,:]
-                generate_new_sim = False
-            s_sim_event_summary_scaled = df_vars_stormclass_scaler.transform(pd.DataFrame(s_sim_event_summary.loc[vars_k]).T)
-            pred_k = kmeans.predict(s_sim_event_summary_scaled)
-            obs_event_id = get_storm_to_rescale(pred_k)
+            obs_event_id = get_storm_to_rescale(sim.kmeans_class)
             # source_event_id.append(obs_event_id)
             df_obs_event_tseries = df_water_rain_tseries[df_water_rain_tseries.event_id == obs_event_id]
-            df_obs_event_summary = df_compound_summary.loc[df_compound_summary.event_id == obs_event_id, vars_all]
+            df_obs_event_summary = df_obs_cmpnd_summary.loc[df_obs_cmpnd_summary.event_id == obs_event_id, vars_all]
             # print("obs_event_id")
             # print(obs_event_id)
-            # print("df_compound_summary")
-            # print(df_compound_summary)
+            # print("df_obs_cmpnd_summary")
+            # print(df_obs_cmpnd_summary)
             # print("df_obs_event_summary")
             # print(df_obs_event_summary)
             # compute timestep of peak storm surge
