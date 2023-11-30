@@ -276,6 +276,9 @@ except:
     ds_combined = xr.combine_by_coords(lst_ds, coords = "all", fill_value = -9999, join = "outer")
 
 if nc_combine_success:
+    print("ds_combined_loaded")
+    print(ds_combined_loaded)
+    print("######################################")
     ds_combined_loaded = ds.load()
     Path(dir_waterlevel_ncs_scratch).mkdir(parents=True, exist_ok=True)
     ds_combined_loaded.to_netcdf(dir_waterlevel_ncs_scratch + "waterlevels_yr{}.nc".format(yr))
