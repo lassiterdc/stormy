@@ -89,7 +89,7 @@ for i, sim in df_sim_cmpnd_summary.iterrows():
     rz = int(sim.realization)
     strm = int(sim.storm_id)
     # DCL WORK
-    if strm == 1:
+    if strm == 2:
         break
     # END DCL WORK
     success = False
@@ -256,37 +256,39 @@ nc_combine_success = False
 #     print("lst_ds[1]")
 #     print(lst_ds[1])
 #     print("#################################################")
-try:
-    ds_combined = xr.combine_by_coords(lst_ds, coords = "all", fill_value = -9999, join = "outer")
-    nc_combine_success = True
-    print("combine_by_coords didn't generate an error. Here is the result:")
-    print("ds_combined")
-    print(ds_combined)
-    print("#################################################")
-except:
-    print("combine_by_coords didn't work. Inspecting the first two datasets in the list....")
-    print("lst_ds[0]")
-    print(lst_ds[0])
-    print("#################################################")
-    print("lst_ds[1]")
-    print(lst_ds[1])
-    print("#################################################")
-    print("re running combine by coords to see the error....")
-    print("ds_combined = xr.combine_by_coords(lst_ds, coords = \"all\", fill_value = -9999, join = \"outer\")")
-    ds_combined = xr.combine_by_coords(lst_ds, coords = "all", fill_value = -9999, join = "outer")
+# try:
+ds_combined = xr.merge(lst_ds, compat = "override", fill_value = -9999)
+    # dates = lst_ds[1].datetime
+    # ds_combined.sel(dict(datetime = dates, storm_id = 2))
+    # nc_combine_success = True
+    # print("combine_by_coords didn't generate an error. Here is the result:")
+    # print("ds_combined")
+    # print(ds_combined)
+    # print("#################################################")
+# except:
+#     print("combine_by_coords didn't work. Inspecting the first two datasets in the list....")
+#     print("lst_ds[0]")
+#     print(lst_ds[0])
+#     print("#################################################")
+#     print("lst_ds[1]")
+#     print(lst_ds[1])
+#     print("#################################################")
+#     print("re running combine by coords to see the error....")
+#     print("ds_combined = xr.combine_by_coords(lst_ds, coords = \"all\", fill_value = -9999, join = \"outer\")")
+#     ds_combined = xr.combine_by_coords(lst_ds, coords = "all", fill_value = -9999, join = "outer")
 
-if nc_combine_success:
-    print("ds_combined_loaded")
-    print(ds_combined_loaded)
-    print("######################################")
-    ds_combined_loaded = ds.load()
-    Path(dir_waterlevel_ncs_scratch).mkdir(parents=True, exist_ok=True)
-    ds_combined_loaded.to_netcdf(dir_waterlevel_ncs_scratch + "waterlevels_yr{}.nc".format(yr))
+# if nc_combine_success:
+    # print("ds_combined_loaded")
+    # print(ds_combined)
+    # print("######################################")
+ds_combined_loaded = ds.load()
+Path(dir_waterlevel_ncs_scratch).mkdir(parents=True, exist_ok=True)
+ds_combined_loaded.to_netcdf(dir_waterlevel_ncs_scratch + "waterlevels_yr{}.nc".format(yr))
 
-    time_script_min = round((datetime.now() - end_time).seconds / 60, 1)
-    print("Wrote {} netcdf file of water level time series in an additional {} (min)".format(time_script_min))
-else:
-    print("No netcdf file of water levels generated!!")
+time_script_min = round((datetime.now() - end_time).seconds / 60, 1)
+print("Wrote {} netcdf file of water level time series in an additional {} (min)".format(time_script_min))
+# else:
+    # print("No netcdf file of water levels generated!!")
     # print("Inspecting simulated event summaries for clues.....")
     # print("df_simulated_event_summaries")
     # print(df_simulated_event_summaries)
