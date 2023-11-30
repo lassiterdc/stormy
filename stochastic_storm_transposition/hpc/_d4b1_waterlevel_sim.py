@@ -229,8 +229,8 @@ df_sim_summary = df_sim_summary.rename(columns=dict(tstep_of_max_intensity = "ts
                                                     duration_hr = "rainfall_duration_hr"))
 
 f_summary = dir_time_series + "_event_summary_year{}.csv".format(yr)
-print("df_sim_summary") # DCL WORK
-print(df_sim_summary) # DCL WORK
+# print("df_sim_summary") # DCL WORK
+# print(df_sim_summary) # DCL WORK
 df_sim_summary.to_csv(f_summary)
 
 # export netcdf
