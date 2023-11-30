@@ -72,6 +72,7 @@ lst_event_starts = []
 lst_event_ends = []
 lst_event_durations = []
 lst_peak_surge_tsteps = []
+lst_peak_rain_intensity_tsteps = []
 lst_event_ids = []
 lst_realizations = []
 lst_years = []
@@ -109,12 +110,12 @@ for i, sim in df_sim_cmpnd_summary.iterrows():
         sim_datetime_max_int = start_datetime + pd.Timedelta(sim_tstep_max_int*sst_tstep_min, "minutes")
         sim_datetime_max_surge = sim_datetime_max_int + pd.Timedelta(sim["surge_peak_after_rain_peak_min"], "minutes")
         # round storm surge peak time to the closest timestep
-        sim_tstep_max_surge = sim_datetime_max_surge.round(wlevel_freq)
+        sim_datetimemax_surge = sim_datetime_max_surge.round(wlevel_freq)
         # start time is the minimum of the start date or the timestep of max surge minus the time buffer
-        event_starttime = min(pd.to_datetime(start_date), sim_tstep_max_surge)-pd.Timedelta(time_buffer, "hours")
+        event_starttime = min(pd.to_datetime(start_date), sim_datetimemax_surge)-pd.Timedelta(time_buffer, "hours")
         # end time is the max of the last rainfall or the peak surge tstep plus the time buffer
         sim_datetime_of_last_rainfall = start_datetime + pd.Timedelta(sst_event_summary.duration_n_tsteps*sst_tstep_min, "minutes")
-        event_endtime = max(sim_datetime_of_last_rainfall, sim_tstep_max_surge)+pd.Timedelta(time_buffer, "hours")
+        event_endtime = max(sim_datetime_of_last_rainfall, sim_datetimemax_surge)+pd.Timedelta(time_buffer, "hours")
         # duration is start minus end
         duration = event_endtime - event_starttime
         # if duration is greater than allowable, assume that the storm surge and rainfall are independent 
@@ -123,7 +124,7 @@ for i, sim in df_sim_cmpnd_summary.iterrows():
         #     print("Assuming rainfall are independent, so fixing the time steps to that of the rainfall")
         #     continue
         sim_wlevel_times = pd.date_range(event_starttime, event_endtime, freq=wlevel_freq)
-        time_to_peak_surge = sim_tstep_max_surge - min(sim_wlevel_times)
+        time_to_peak_surge = sim_datetimemax_surge - min(sim_wlevel_times)
         # extract observed surge data
         obs_tstep_max_surge = df_obs_event_tseries.surge_ft.idxmax()
         obs_start_time = obs_tstep_max_surge - time_to_peak_surge
@@ -169,7 +170,8 @@ for i, sim in df_sim_cmpnd_summary.iterrows():
         lst_event_starts.append(event_starttime)
         lst_event_ends.append(event_endtime)
         lst_event_durations.append(duration)
-        lst_peak_surge_tsteps.append(sim_tstep_max_surge)
+        lst_peak_rain_intensity_tsteps.append(sim_datetime_max_int)
+        lst_peak_surge_tsteps.append(sim_datetimemax_surge)
     else: # if not successful, append with NA's
         lst_event_ids.append(np.nan)
         min_sim_wlevels.append(np.nan)
@@ -216,7 +218,7 @@ for i, sim in df_sim_cmpnd_summary.iterrows():
 df_simulated_event_summaries = pd.DataFrame(dict(realization = lst_realizations, year = lst_years, storm_id = lst_storm_ids, 
                                                  success = lst_successful_sim, min_sim_wlevel = min_sim_wlevels,max_sim_wlevel = max_sim_wlevels, obs_event_id_for_rescaling = lst_event_ids,
                                                  event_start = lst_event_starts, event_end = lst_event_ends,
-                                                 event_duration_hr = lst_event_durations, tstep_peak_surge = lst_peak_surge_tsteps))
+                                                 event_duration_hr = lst_event_durations, tstep_max_rain_intensity = lst_peak_rain_intensity_tsteps, tstep_peak_surge = lst_peak_surge_tsteps))
 
 df_simulated_event_summaries = df_simulated_event_summaries.set_index(["realization", "year", "storm_id"])
 
