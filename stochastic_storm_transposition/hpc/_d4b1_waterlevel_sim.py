@@ -89,8 +89,8 @@ for i, sim in df_sim_cmpnd_summary.iterrows():
     rz = int(sim.realization)
     strm = int(sim.storm_id)
     # DCL WORK
-    # if strm == 2:
-    #     break
+    if strm == 1:
+        break
     # END DCL WORK
     success = False
     while success == False:
@@ -206,8 +206,8 @@ for i, sim in df_sim_cmpnd_summary.iterrows():
     # print(df)
     # print("######################################")
     df = df.drop(["date", "time"], axis = 1)
-    df = df.reset_index(names = "tstep")
-    df = df.set_index(["realization", "year","storm_id", "tstep"])
+    # df = df.reset_index(names = "tstep")
+    df = df.set_index(["realization", "year","storm_id", "datetime"])
     # print(df)
     ds = df.to_xarray()
     lst_ds.append(ds)
@@ -241,23 +241,23 @@ print("Wrote {} water level time series files for each simulated storm. Script r
 
 # combine netcdfs into one and export
 nc_combine_success = False
+# try:
+#     ds_combined = xr.combine_nested(lst_ds)
+#     nc_combine_success = True
+#     print("combine nested didn't generate an error. Here is the result:")
+#     print("ds_combined")
+#     print(ds_combined)
+#     print("#################################################")
+# except:
+#     print("Combine_nested didn't work. Inspecting the first two datasets in the list....")
+#     print("lst_ds[0]")
+#     print(lst_ds[0])
+#     print("#################################################")
+#     print("lst_ds[1]")
+#     print(lst_ds[1])
+#     print("#################################################")
 try:
-    ds_combined = xr.combine_nested(lst_ds)
-    nc_combine_success = True
-    print("combine nested didn't generate an error. Here is the result:")
-    print("ds_combined")
-    print(ds_combined)
-    print("#################################################")
-except:
-    print("Combine_nested didn't work. Inspecting the first two datasets in the list....")
-    print("lst_ds[0]")
-    print(lst_ds[0])
-    print("#################################################")
-    print("lst_ds[1]")
-    print(lst_ds[1])
-    print("#################################################")
-try:
-    ds_combined = xr.combine_by_coords(lst_ds)
+    ds_combined = xr.combine_by_coords(lst_ds, coords = "all", fill_value = -9999, join = "outer")
     nc_combine_success = True
     print("combine_by_coords didn't generate an error. Here is the result:")
     print("ds_combined")
@@ -271,6 +271,9 @@ except:
     print("lst_ds[1]")
     print(lst_ds[1])
     print("#################################################")
+    print("re running combine by coords to see the error....")
+    print("ds_combined = xr.combine_by_coords(lst_ds, coords = \"all\", fill_value = -9999, join = \"outer\")")
+    ds_combined = xr.combine_by_coords(lst_ds, coords = "all", fill_value = -9999, join = "outer")
 
 if nc_combine_success:
     ds_combined_loaded = ds.load()
@@ -281,6 +284,6 @@ if nc_combine_success:
     print("Wrote {} netcdf file of water level time series in an additional {} (min)".format(time_script_min))
 else:
     print("No netcdf file of water levels generated!!")
-    print("Inspecting simulated event summaries for clues.....")
-    print("df_simulated_event_summaries")
-    print(df_simulated_event_summaries)
+    # print("Inspecting simulated event summaries for clues.....")
+    # print("df_simulated_event_summaries")
+    # print(df_simulated_event_summaries)
