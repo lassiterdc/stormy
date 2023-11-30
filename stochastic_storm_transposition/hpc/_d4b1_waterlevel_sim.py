@@ -219,9 +219,11 @@ df_simulated_event_summaries = pd.DataFrame(dict(realization = lst_realizations,
                                                  event_duration_hr = lst_event_durations, tstep_peak_surge = lst_peak_surge_tsteps))
 
 df_simulated_event_summaries = df_simulated_event_summaries.set_index(["realization", "year", "storm_id"])
-df_sim_cmpnd_summary = df_sim_cmpnd_summary.set_index(["realization", "year", "storm_id"])
 
-df_sim_summary = df_sim_cmpnd_summary.join(df_simulated_event_summaries, how="left")
+# df_sim_cmpnd_summary_subset = df_sim_cmpnd_summary[df_sim_cmpnd_summary.year == yr]
+# df_sim_cmpnd_summary_subset = df_sim_cmpnd_summary_subset.set_index(["realization", "year", "storm_id"])
+
+df_sim_summary = df_sim_cmpnd_summary.join(df_simulated_event_summaries, how="right")
 
 df_sim_summary = df_sim_summary.rename(columns=dict(tstep_of_max_intensity = "tstep_max_rain_intensity",
                                                     duration_hr = "rainfall_duration_hr"))
