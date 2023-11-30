@@ -53,10 +53,6 @@ if (len(df_water_rain_tseries) - len(df_mrms_event_tseries)) != 0:
 if df_water_rain_tseries.isna().sum().sum() > df_mrms_event_tseries.isna().sum().sum():
     sys.exit("ERROR: NA Values introduced in joining observed water level time series to observed rain event time series")
 
-df_water_rain_tseries_sorted = df_water_rain_tseries.sort_values(["event_id", "date_time"])
-
-df_water_rain_tseries_sorted.to_csv(f_observed_wlevel_rainfall_tseries)
-
 # compute summary statistics by event for the water levels
 s_surge_event_group = df_water_rain_tseries.groupby("event_id").surge_ft
 s_peak_surge_time = s_surge_event_group.idxmax().rename("max_surge_tstep")
@@ -75,12 +71,33 @@ if (events_per_year.max() != n_events_per_year_sst) and (events_per_year.min() !
 
 df_compound_summary.to_csv(f_observed_compound_event_summaries)
 
+# verify that the event summaries are the same
+df_water_rain_tseries_sorted = df_water_rain_tseries.sort_values(["event_id", "date_time"])
+
+event_sum_computed_from_tseries = df_water_rain_tseries_sorted.loc[:,['event_id', "mrms_mm_per_hour","surge_ft"]].groupby("event_id").max().sort_values("event_id")
+
+event_sum = df_compound_summary.loc[:,["event_id", "max_mm_per_hour", "max_surge_ft"]].set_index("event_id")
+event_sum_computed_from_tseries.columns = event_sum.columns
+
+problem = False
+for variable, value in (event_sum_computed_from_tseries - event_sum).sum().items():
+    if not np.isclose(value, 0):
+        problem = True
+        print("ERROR: The event IDs in the observed event summary and observed event time series do not match up.")
+        print("Variable: {} | Sum of differences across all events: {}".format(variable, value))
+if problem:
+    print("(event_sum_computed_from_tseries - event_sum)")
+    print((event_sum_computed_from_tseries - event_sum))
+    print("###################################")
+
+df_water_rain_tseries_sorted.to_csv(f_observed_wlevel_rainfall_tseries)
+
 # processing sst data
 df_sst_storms = ds_rlztns.mean(dim = ["latitude", "longitude"]).to_dataframe().reset_index()
 df_sst_storms = df_sst_storms.rename(dict(time = "tstep_ind", rain = "precip_mm_per_hour"), axis = 1)
 
 ## drop all rows with zeros
-df_sst_storms = df_sst_storms[~(df_sst_storms.precip_mm_per_hour==0)]
+df_sst_storms = df_sst_storms[~(df_sst_storms.precip_mm_per_hour==0)].reset_index(drop=True)
 
 ## compute event statistics
 df_sst_storms["precip_mm"] = df_sst_storms["precip_mm_per_hour"] * (sst_tstep/60) # mm per hour * 5 min per tstep / (60 minutes per hour) = mm per tstep
@@ -88,24 +105,40 @@ df_sst_storms["precip_mm"] = df_sst_storms["precip_mm_per_hour"] * (sst_tstep/60
 df_sums = df_sst_storms.groupby(["realization", "year", "storm_id"]).sum()
 df_mins = df_sst_storms.groupby(["realization", "year", "storm_id"]).min()
 df_maxes = df_sst_storms.groupby(["realization", "year", "storm_id"]).max()
+df_idxmaxes = df_sst_storms.groupby(["realization", "year", "storm_id"]).idxmax()
+df_max_precip_intensity_tstep = df_sst_storms.iloc[df_idxmaxes.precip_mm_per_hour.values, :].groupby(["realization", "year", "storm_id"]).sum()
 
-df_sst_duration_hr = (df_maxes.tstep_ind - df_mins.tstep_ind) * sst_tstep / 60
+# duration in number of timesteps
+df_sst_duration_ntsteps = (df_maxes.tstep_ind - df_mins.tstep_ind)
+df_sst_duration_ntsteps.name = "duration_n_tsteps"
+# duration in hours
+df_sst_duration_hr = df_sst_duration_ntsteps* sst_tstep / 60
 df_sst_duration_hr.name = "duration_hr"
+# depth
 df_sst_depth_mm = df_sums.precip_mm
 df_sst_depth_mm.name = "depth_mm"
+# mean intensity
 df_sst_mean_mm_per_hr = df_sst_depth_mm / df_sst_duration_hr
 df_sst_mean_mm_per_hr.name = "mean_mm_per_hr"
-df_sst_max_mm_per_hour = df_maxes.precip_mm_per_hour
+# max intensity
+df_sst_max_mm_per_hour = df_max_precip_intensity_tstep.precip_mm_per_hour
 df_sst_max_mm_per_hour.name = "max_mm_per_hour"
+# timestep of max intensity
+df_sst_tstep_max_intensity = df_max_precip_intensity_tstep.tstep_ind
+df_sst_tstep_max_intensity.name = "tstep_of_max_intensity"
+# last timestep with rainfall
+df_sst_last_timestep_w_rainfall = df_maxes.tstep_ind
+df_sst_last_timestep_w_rainfall.name = "last_timestep_w_rainfall"
 
 ## create sst event summaries table
-df_sst_event_summaries = pd.concat([df_sst_depth_mm, df_sst_mean_mm_per_hr, df_sst_max_mm_per_hour], axis = 1)
+df_sst_event_summaries = pd.concat([df_sst_depth_mm, df_sst_mean_mm_per_hr, df_sst_max_mm_per_hour,
+                                    df_sst_tstep_max_intensity, df_sst_last_timestep_w_rainfall,
+                                    df_sst_duration_ntsteps], axis = 1)
 
 df_sst_event_summaries.to_csv(f_sst_event_summaries)
 # create list of functions and variables
 fxs = [gev, loggev, weibull_min_dist, logwweibull_min_dist, weibull_max_dist, logwweibull_max_dist,
        gumbel_right, gumbel_left, loggumbel, norm_dist, lognormal, student_t, genpareto_dist, chi_dist, gamma_dist, p3, lp3, sep]
-# fxs = [sep] # DCL WORK
 
 vars_all = ["depth_mm", "mean_mm_per_hr", "max_mm_per_hour", "max_surge_ft", "surge_peak_after_rain_peak_min"]
 #%% fit all possible pdfs and transformations for each variable
