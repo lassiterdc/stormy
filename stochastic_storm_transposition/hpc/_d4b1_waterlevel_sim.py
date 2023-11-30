@@ -221,7 +221,7 @@ df_simulated_event_summaries = pd.DataFrame(dict(realization = lst_realizations,
 df_simulated_event_summaries = df_simulated_event_summaries.set_index(["realization", "year", "storm_id"])
 
 # df_sim_cmpnd_summary_subset = df_sim_cmpnd_summary[df_sim_cmpnd_summary.year == yr]
-# df_sim_cmpnd_summary_subset = df_sim_cmpnd_summary_subset.set_index(["realization", "year", "storm_id"])
+df_sim_cmpnd_summary = df_sim_cmpnd_summary.set_index(["realization", "year", "storm_id"])
 
 df_sim_summary = df_sim_cmpnd_summary.join(df_simulated_event_summaries, how="right")
 
@@ -229,6 +229,8 @@ df_sim_summary = df_sim_summary.rename(columns=dict(tstep_of_max_intensity = "ts
                                                     duration_hr = "rainfall_duration_hr"))
 
 f_summary = dir_time_series + "_event_summary_year{}.csv".format(yr)
+print("df_sim_summary") # DCL WORK
+print(df_sim_summary) # DCL WORK
 df_sim_summary.to_csv(f_summary)
 
 # export netcdf
