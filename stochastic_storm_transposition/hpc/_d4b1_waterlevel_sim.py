@@ -276,3 +276,6 @@ if nc_combine_success:
     print("Wrote {} netcdf file of water level time series in an additional {} (min)".format(time_script_min))
 else:
     print("No netcdf file of water levels generated!!")
+    print("Inspecting simulated event summaries for clues.....")
+    print("df_simulated_event_summaries")
+    print(df_simulated_event_summaries)
