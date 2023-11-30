@@ -10,6 +10,8 @@ from datetime import datetime
 import warnings
 from __utils import *
 
+yr = int(sys.argv[1])
+
 script_start_time = datetime.now()
 # define start time for simulations
 start_datetime = pd.to_datetime(start_date)
@@ -79,11 +81,12 @@ lst_ds = []
 count = 0
 lag_reset = False
 for i, sim in df_sim_cmpnd_summary.iterrows():
+    if yr != int(sim.year): # only create water level time series for the year specified by the python argument
+        continue
     count += 1
     # i += 1
     attempts = 0
     rz = int(sim.realization)
-    yr = int(sim.year)
     strm = int(sim.storm_id)
     reasonable_timeseries = False
     while reasonable_timeseries == False:
@@ -222,7 +225,7 @@ df_sim_summary = df_sim_cmpnd_summary.join(df_simulated_event_summaries, how="le
 df_sim_summary = df_sim_summary.rename(columns=dict(tstep_of_max_intensity = "tstep_max_rain_intensity",
                                                     duration_hr = "rainfall_duration_hr"))
 
-f_summary = dir_time_series + "_event_summary_year.csv"
+f_summary = dir_time_series + "_event_summary_year{}.csv".format(yr)
 df_sim_summary.to_csv(f_summary)
 
 #%% report run times
@@ -235,8 +238,8 @@ print("Wrote {} water level time series files for each simulated storm. Script r
 # ds_combined = xr.combine_nested(lst_ds)
 ds_combined = xr.combine_by_coords(lst_ds)
 ds_combined_loaded = ds.load()
-# Path(dir_waterlevel_ncs_scratch).mkdir(parents=True, exist_ok=True)
-ds_combined_loaded.to_netcdf(f_w_level_sims)
+Path(dir_waterlevel_ncs_scratch).mkdir(parents=True, exist_ok=True)
+ds_combined_loaded.to_netcdf(dir_waterlevel_ncs_scratch + "waterlevels_yr{}.nc".format(yr))
 
 time_script_min = round((datetime.now() - end_time).seconds / 60, 1)
 print("Wrote {} netcdf file of water level time series in an additional {} (min)".format(time_script_min))
