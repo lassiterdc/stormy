@@ -257,7 +257,7 @@ nc_combine_success = False
 #     print(lst_ds[1])
 #     print("#################################################")
 # try:
-ds_combined = xr.merge(lst_ds, compat = "override", fill_value = -9999)
+ds_combined = xr.merge(lst_ds, compat = "override", fill_value = -9999) # where datetime is exxtended, fill with -9999 values
     # dates = lst_ds[1].datetime
     # ds_combined.sel(dict(datetime = dates, storm_id = 2))
     # nc_combine_success = True
@@ -286,7 +286,7 @@ Path(dir_waterlevel_ncs_scratch).mkdir(parents=True, exist_ok=True)
 ds_combined_loaded.to_netcdf(dir_waterlevel_ncs_scratch + "waterlevels_yr{}.nc".format(yr))
 
 time_script_min = round((datetime.now() - end_time).seconds / 60, 1)
-print("Wrote {} netcdf file of water level time series in an additional {} (min)".format(time_script_min))
+print("Wrote netcdf file of water level time series in an additional {} (min)".format(time_script_min))
 # else:
     # print("No netcdf file of water levels generated!!")
     # print("Inspecting simulated event summaries for clues.....")
