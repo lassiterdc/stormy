@@ -233,62 +233,13 @@ df_sim_summary = df_sim_summary.rename(columns=dict(tstep_of_max_intensity = "ts
 f_summary = dir_time_series + "_event_summary_year{}.csv".format(yr)
 df_sim_summary.to_csv(f_summary)
 
+# export netcdf
+ds_combined = xr.merge(lst_ds, compat = "override", fill_value = -9999) # where datetime is exxtended, fill with -9999 values
+
+ds_combined_loaded = ds.load()
+Path(dir_waterlevel_ncs_scratch).mkdir(parents=True, exist_ok=True)
+ds_combined_loaded.to_netcdf(dir_waterlevel_ncs_scratch + "waterlevels_yr{}.nc".format(yr))
 #%% report run times
 end_time = datetime.now()
 time_script_min = round((end_time - script_start_time).seconds / 60, 1)
 print("Wrote {} water level time series files for each simulated storm. Script runtime: {} (min)".format(count, time_script_min))
-
-
-# combine netcdfs into one and export
-nc_combine_success = False
-# try:
-#     ds_combined = xr.combine_nested(lst_ds)
-#     nc_combine_success = True
-#     print("combine nested didn't generate an error. Here is the result:")
-#     print("ds_combined")
-#     print(ds_combined)
-#     print("#################################################")
-# except:
-#     print("Combine_nested didn't work. Inspecting the first two datasets in the list....")
-#     print("lst_ds[0]")
-#     print(lst_ds[0])
-#     print("#################################################")
-#     print("lst_ds[1]")
-#     print(lst_ds[1])
-#     print("#################################################")
-# try:
-ds_combined = xr.merge(lst_ds, compat = "override", fill_value = -9999) # where datetime is exxtended, fill with -9999 values
-    # dates = lst_ds[1].datetime
-    # ds_combined.sel(dict(datetime = dates, storm_id = 2))
-    # nc_combine_success = True
-    # print("combine_by_coords didn't generate an error. Here is the result:")
-    # print("ds_combined")
-    # print(ds_combined)
-    # print("#################################################")
-# except:
-#     print("combine_by_coords didn't work. Inspecting the first two datasets in the list....")
-#     print("lst_ds[0]")
-#     print(lst_ds[0])
-#     print("#################################################")
-#     print("lst_ds[1]")
-#     print(lst_ds[1])
-#     print("#################################################")
-#     print("re running combine by coords to see the error....")
-#     print("ds_combined = xr.combine_by_coords(lst_ds, coords = \"all\", fill_value = -9999, join = \"outer\")")
-#     ds_combined = xr.combine_by_coords(lst_ds, coords = "all", fill_value = -9999, join = "outer")
-
-# if nc_combine_success:
-    # print("ds_combined_loaded")
-    # print(ds_combined)
-    # print("######################################")
-ds_combined_loaded = ds.load()
-Path(dir_waterlevel_ncs_scratch).mkdir(parents=True, exist_ok=True)
-ds_combined_loaded.to_netcdf(dir_waterlevel_ncs_scratch + "waterlevels_yr{}.nc".format(yr))
-
-time_script_min = round((datetime.now() - end_time).seconds / 60, 1)
-print("Wrote netcdf file of water level time series in an additional {} (min)".format(time_script_min))
-# else:
-    # print("No netcdf file of water levels generated!!")
-    # print("Inspecting simulated event summaries for clues.....")
-    # print("df_simulated_event_summaries")
-    # print(df_simulated_event_summaries)
