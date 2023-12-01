@@ -5,10 +5,11 @@ import pandas as pd
 import sys
 from pyswmm import Simulation
 from datetime import datetime
+from __utils import *
 
-from __utils import c6_running_swmm, parse_inp
+# from __utils import c6_running_swmm, parse_inp
 
-f_swmm_scenarios_catalog, dir_swmm_sst_models, max_runtime_min = c6_running_swmm()
+# f_swmm_scenarios_catalog, dir_swmm_sst_models, max_runtime_min = c6_running_swmm()
 
 sim_year = int(sys.argv[1]) # a number between 1 and 1000
 
