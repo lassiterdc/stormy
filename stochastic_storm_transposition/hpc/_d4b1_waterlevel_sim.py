@@ -79,21 +79,23 @@ lst_years = []
 lst_storm_ids = []
 lst_successful_sim = []
 lst_ds = []
+lst_dfs = []
 count = 0
 lag_reset = False
 for i, sim in df_sim_cmpnd_summary.iterrows():
     if yr != int(sim.year): # only create water level time series for the year specified by the python argument
         continue
     count += 1
-    # i += 1
     attempts = 0
     rz = int(sim.realization)
-    strm = int(sim.storm_id)
+    storm_id = int(sim.storm_id)
+    # if storm_id == 2:
+    #     break
     success = False
     while success == False:
         if attempts >= n_attempts:
             # success = False
-            # print("rz{} yr{} strm{} - Maximum attempts reached for generating reasonable water level. Attempts = {}".format(rz, yr, strm, attempts)) # DCL WORK
+            # print("rz{} yr{} storm_id{} - Maximum attempts reached for generating reasonable water level. Attempts = {}".format(rz, yr, storm_id, attempts)) # DCL WORK
             break
             sys.exit("SCRIPT FAILED FOR YEAR {}: FAILED AFTER {} ATTEMPTS TO GENERATE A SYNTHETIC WATER LEVEL TIME SERIES FOR {}".format(yr, attempts, s_sim_event_summary))
         attempts += 1
@@ -104,7 +106,7 @@ for i, sim in df_sim_cmpnd_summary.iterrows():
         df_obs_event_tseries = df_water_rain_tseries[df_water_rain_tseries.event_id == obs_event_id]
         df_obs_event_summary = df_obs_cmpnd_summary.loc[df_obs_cmpnd_summary.event_id == obs_event_id, vars_all]
         # pull the sst event summary associated with the simulation to calculate the time of peak surge
-        sst_event_summary = df_sst_event_summaries.loc[(rz,yr,strm),:]
+        sst_event_summary = df_sst_event_summaries.loc[(rz,yr,storm_id),:]
         # calculate the datetime of the max rain intensity and max storm surge
         sim_tstep_max_int = sst_event_summary.tstep_of_max_intensity
         sim_datetime_max_int = start_datetime + pd.Timedelta(sim_tstep_max_int*sst_tstep_min, "minutes")
@@ -120,7 +122,7 @@ for i, sim in df_sim_cmpnd_summary.iterrows():
         duration = event_endtime - event_starttime
         # if duration is greater than allowable, assume that the storm surge and rainfall are independent 
         # if duration > max_allowable_duration:
-        #     print("rz{} yr{} strm{} - Maximum allowable duration of {} excceded. Simulation duration = {}".format(rz, yr, strm, max_allowable_duration, duration)) # DCL WORK
+        #     print("rz{} yr{} storm_id{} - Maximum allowable duration of {} excceded. Simulation duration = {}".format(rz, yr, storm_id, max_allowable_duration, duration)) # DCL WORK
         #     print("Assuming rainfall are independent, so fixing the time steps to that of the rainfall")
         #     continue
         sim_wlevel_times = pd.date_range(event_starttime, event_endtime, freq=wlevel_freq)
@@ -152,7 +154,7 @@ for i, sim in df_sim_cmpnd_summary.iterrows():
         max_sim_wlevel = s_sim_wlevel.max()
         # if the the simulated water levels is below user defined thresholds, try again
         if (min_sim_wlevel <= (1+wlevel_threshold)*min_obs_wlevel):
-            # print("rz{} yr{} strm{} - Minimum simulation water level is below the threadhold of {}. Simulation min = {}".format(rz, yr, strm, (1+wlevel_threshold)*min_obs_wlevel, min_sim_wlevel)) # DCL WORK
+            # print("rz{} yr{} storm_id{} - Minimum simulation water level is below the threadhold of {}. Simulation min = {}".format(rz, yr, storm_id, (1+wlevel_threshold)*min_obs_wlevel, min_sim_wlevel)) # DCL WORK
             # if these are exceeded and there have been at least some number of attempts to select and rescale a historical event
             # if ((attempts % resampling_inteval) == 0) and (attempts > 1):
             continue
@@ -182,11 +184,11 @@ for i, sim in df_sim_cmpnd_summary.iterrows():
         lst_peak_surge_tsteps.append(np.nan)
     lst_realizations.append(rz)
     lst_years.append(yr)
-    lst_storm_ids.append(strm)
+    lst_storm_ids.append(storm_id)
     lst_successful_sim.append(success)
     # writing to a file
     ## id the realization, and storm
-    f_out = dir_time_series + "weather_realization{}/year{}/_waterlevel_rz{}_yr{}_strm{}.dat".format(rz, yr, rz, yr, strm)
+    f_out = dir_time_series + "weather_realization{}/year{}/_waterlevel_rz{}_yr{}_strm{}.dat".format(rz, yr, rz, yr, storm_id)
     # create data frame with proper formatting to be read in SWMM
     df = pd.DataFrame(dict(date = s_sim_wlevel.index.strftime('%m/%d/%Y'),
                     time = s_sim_wlevel.index.time,
@@ -199,12 +201,13 @@ for i, sim in df_sim_cmpnd_summary.iterrows():
     # export to a netcdf
     df["realization"] = int(rz)
     df["year"] = int(yr)
-    df["storm_id"] = int(strm)
+    df["storm_id"] = int(storm_id)
     df["datetime"] = pd.to_datetime(df['date'].astype(str) + ' ' + df['time'].astype(str))
     # print(df)
     # print("######################################")
     df = df.drop(["date", "time"], axis = 1)
     # df = df.reset_index(names = "tstep")
+    lst_dfs.append(df)
     df = df.set_index(["realization", "year","storm_id", "datetime"])
     # print(df)
     ds = df.to_xarray()
@@ -241,6 +244,11 @@ ds_combined = xr.merge(lst_ds, compat = "override", fill_value = -9999) # where 
 ds_combined_loaded = ds.load()
 Path(dir_waterlevel_ncs_scratch).mkdir(parents=True, exist_ok=True)
 ds_combined_loaded.to_netcdf(dir_waterlevel_ncs_scratch + "waterlevels_yr{}.nc".format(yr))
+
+# also export water level as .csv file
+df_wlevel_combined = pd.concat(lst_dfs).set_index(["realization", "year","storm_id", "datetime"])
+df_wlevel_combined.to_csv(dir_waterlevel_ncs_scratch + "waterlevels_yr{}.csv".format(yr))
+
 #%% report run times
 end_time = datetime.now()
 time_script_min = round((end_time - script_start_time).seconds / 60, 1)
