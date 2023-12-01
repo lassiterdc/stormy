@@ -78,7 +78,7 @@ lst_realizations = []
 lst_years = []
 lst_storm_ids = []
 lst_successful_sim = []
-lst_ds = []
+# lst_ds = []
 lst_dfs = []
 count = 0
 lag_reset = False
@@ -208,10 +208,10 @@ for i, sim in df_sim_cmpnd_summary.iterrows():
     df = df.drop(["date", "time"], axis = 1)
     # df = df.reset_index(names = "tstep")
     lst_dfs.append(df)
-    df = df.set_index(["realization", "year","storm_id", "datetime"])
+    # df = df.set_index(["realization", "year","storm_id", "datetime"])
     # print(df)
-    ds = df.to_xarray()
-    lst_ds.append(ds)
+    # ds = df.to_xarray()
+    # lst_ds.append(ds)
     # ds = ds.assign_coords(["realization", "year","storm_id", "datetime"])
 
 ##%% export event summaries
@@ -239,15 +239,15 @@ f_summary = dir_event_summary_csv_scratch + "_event_summary_year{}.csv".format(y
 df_sim_summary.to_csv(f_summary)
 
 # export netcdf
-ds_combined = xr.merge(lst_ds, compat = "override", fill_value = -9999) # where datetime is exxtended, fill with -9999 values
+# ds_combined = xr.merge(lst_ds, compat = "override", fill_value = -9999) # where datetime is exxtended, fill with -9999 values
 
-ds_combined_loaded = ds.load()
-Path(dir_waterlevel_ncs_scratch).mkdir(parents=True, exist_ok=True)
-ds_combined_loaded.to_netcdf(dir_waterlevel_ncs_scratch + "waterlevels_yr{}.nc".format(yr))
+# ds_combined_loaded = ds.load()
+# Path(dir_waterlevel_ncs_scratch).mkdir(parents=True, exist_ok=True)
+# ds_combined_loaded.to_netcdf(dir_waterlevel_ncs_scratch + "waterlevels_yr{}.nc".format(yr))
 
 # also export water level as .csv file
 df_wlevel_combined = pd.concat(lst_dfs).set_index(["realization", "year","storm_id", "datetime"])
-df_wlevel_combined.to_csv(dir_waterlevel_ncs_scratch + "waterlevels_yr{}.csv".format(yr))
+df_wlevel_combined.to_csv(dir_waterlevel_scratch + "waterlevels_yr{}.csv".format(yr))
 
 #%% report run times
 end_time = datetime.now()
