@@ -1,6 +1,9 @@
-# to run, enter the following in the command line:
-# chmod +x c5__through_c8b_batch_script.sh
-# ./c5__through_c8b_batch_script.sh
+#!/bin/bash
+#SBATCH --ntasks=1				# Number of tasks per serial job (must be 1)
+#SBATCH -p standard				# Queue name "standard" (serial)
+#SBATCH -A quinnlab_paid				# allocation name
+#SBATCH -t 1:00:00				# Run time per serial job (hh:mm:ss)
+#SBATCH --array=1 
 
 ID1=$(sbatch --parsable d5_creating_inps.sh)
 ID2=$(sbatch --parsable --dependency=afterok:$ID1 d6_running_swmm.sh)
