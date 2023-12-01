@@ -5,8 +5,8 @@
 #SBATCH -t 1:00:00				# Run time per serial job (hh:mm:ss)
 #SBATCH --array=1 
 
-ID1=$(sbatch --parsable d5_creating_inps.sh)
-ID2=$(sbatch --parsable --dependency=afterok:$ID1 d6_running_swmm.sh)
+ID2=$(sbatch --parsable d6_running_swmm.sh)
+# ID2=$(sbatch --parsable --dependency=afterok:$ID1 d6_running_swmm.sh)
 ID3=$(sbatch --parsable --dependency=afterok:$ID2 d6b_analyzing_swmm_runs.sh)
 ID4=$(sbatch --parsable --dependency=afterok:$ID3 d7_consolidating_swmm_outputs.sh)
 ID5=$(sbatch --parsable --dependency=afterok:$ID4 d7b_consolidating_swmm_outputs.sh)
