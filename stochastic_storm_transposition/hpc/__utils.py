@@ -116,7 +116,7 @@ dir_swmm_sst_models = dir_swmm_sst_scenarios_scratch + "models/"
 # # dir_time_series_hrly = dir_swmm_sst_scenarios_hrly + "time_series/"
 # f_swmm_scenarios_catalog = dir_swmm_sst_scenarios_hrly_proj + "swmm_scenario_catalogs/" + "_swmm_scenarios_catalog_yr{}.csv"
 
-# norain_gage_name = "no_rain"
+norain_gage_name = "no_rain"
 
 # # c6
 # max_runtime_min_hrly = 60 # maximum minutes of runtime allowable for each SWMM simulation
