@@ -1,11 +1,10 @@
 #%% import libraries
 import pandas as pd
-from __utils import c6b_analyzing_swmm_runs, parse_inp
+from __utils import *
 from glob import glob
 from pathlib import Path
 
 
-dir_swmm_sst_models, f_model_perf_summary, dir_time_series, f_events_summary = c6b_analyzing_swmm_runs()
 f_performance = dir_swmm_sst_models + "_model_performance_year{}.csv".format("*")
 f_summaries = dir_time_series + "_event_summary_year{}.csv".format("*")
 

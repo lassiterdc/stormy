@@ -9,9 +9,7 @@ import numpy as np
 import sys
 # from tqdm import tqdm
 
-from __utils import c8_bootstrapping
-
-f_model_outputs_consolidated, dir_swmm_sst_models, f_bootstrapped_quant_estimates, sst_recurrence_intervals, export_raw_bs_samps = c8_bootstrapping()
+from __utils import *
 
 #%%
 bs_id = int(sys.argv[1]) # a number between 1 and 1000

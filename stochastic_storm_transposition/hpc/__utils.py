@@ -70,10 +70,6 @@ dir_for_sst_files = dir_mrms_coarse + "_inputs/"
 dir_fullres_rain = dir_highres_repo + "data/mrms_nc_preciprate_fullres_dailyfiles_constant_tstep/"
 # f_sst_mrms = dir_mrms + "mrms_template.sst"
 
-# d1b
-sst_tstep_min = 5
-nstormsperyear = 5 # want to choose the 5 largest storms per year
-
 #d4
 fldr_realizations = dir_mrms + "mrms_combined/Realizations/"
 dir_swmm_sst_scenarios = dir_swmm_model + "swmm_scenarios_sst/"
@@ -122,18 +118,18 @@ norain_gage_name = "no_rain"
 max_runtime_min = 60 # maximum minutes of runtime allowable for each SWMM simulation
 
 # # c6b
-# f_model_perf_summary_hrly = dir_swmm_sst_scenarios_hrly_proj + "model_performance_summary.csv"
-# f_events_summary = dir_swmm_sst_scenarios_hrly_proj + "event_summaries.csv"
+f_model_perf_summary = dir_swmm_sst_scenarios + "model_performance_summary.csv"
+f_events_summary = dir_swmm_sst_scenarios + "event_summaries.csv"
 
 # # c7
-# f_model_outputs_consolidated_hrly = dir_swmm_sst_scenarios_hrly_proj + "model_outputs_consolidated.nc"
+f_model_outputs_consolidated = dir_swmm_sst_scenarios + "model_outputs_consolidated.nc"
 # # dir_swmm_sst_models_hrly_home = dir_swmm_sst_scenarios_hrly_home + "models/"
 
 # # c8
-# f_bootstrapped_quant_estimates = dir_swmm_sst_scenarios_hrly_scratch + "models/boostrapping/"
-# sst_recurrence_intervals = [0.1, 0.25, 0.5, 1, 2, 5, 10, 25, 50, 100]
-# f_bootstrapped_consolidated_hrly = dir_swmm_sst_scenarios_hrly_proj + "bootstrapping_consolidated.nc"
-# f_bootstrapped_consolidated_hrly_raw = dir_swmm_sst_scenarios_hrly_proj + "bootstrapping_allsamples_consolidated.nc"
+f_bootstrapped_quant_estimates = dir_swmm_sst_scenarios_scratch + "models/boostrapping/"
+sst_recurrence_intervals = [0.1, 0.25, 0.5, 1, 2, 5, 10, 25, 50, 100]
+f_bootstrapped_consolidated = dir_swmm_sst_scenarios + "bootstrapping_consolidated.nc"
+f_bootstrapped_consolidated_raw = dir_swmm_sst_scenarios + "bootstrapping_allsamples_consolidated.nc"
 export_raw_bs_samps = False
 #%% hard coded variables
 # name_out_realizations = "_combined_realizations.nc"
@@ -147,9 +143,12 @@ cubic_meters_per_cubic_foot = meters_per_foot*meters_per_foot*meters_per_foot
 
 # SST parameters (should line up with the SST input file)
 # WORK 
-nyears = 1000 # should be 1,000 for the final experiment
-nperyear = 20
-nrealizations = 1
+# nyears = 1000 # should be 1,000 for the final experiment
+# nperyear = 20
+# nrealizations = 1
+
+sst_tstep_min = 5
+nstormsperyear = 5
 # nyears = 2
 # nperyear = 20
 # nrealizations = 2

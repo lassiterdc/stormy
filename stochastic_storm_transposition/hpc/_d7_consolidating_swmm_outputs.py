@@ -8,9 +8,7 @@ from datetime import datetime
 import sys
 from tqdm import tqdm 
 
-from __utils import c7_consolidating_outputs, parse_inp
-
-f_model_perf_summary, dir_swmm_sst_models, cubic_meters_per_cubic_foot, nperyear = c7_consolidating_outputs()
+from __utils import *
 
 script_start_time = datetime.now()
 #%% inputs from bash
@@ -81,8 +79,8 @@ for f_inp in df_perf_success.swmm_inp:
                                         ))
         lst_ds_node_fld.append(ds)
         # add datasets with na flooding as place holders to ensure the right number of storms per year
-        if (storm_id==max_storm_num and max_storm_num < nperyear):
-            for storm_number in np.arange(max_storm_num+1, nperyear+1):
+        if (storm_id==max_storm_num and max_storm_num < nstormsperyear):
+            for storm_number in np.arange(max_storm_num+1, nstormsperyear+1):
                 ds = create_all_nan_dataset(a_fld_reshaped, rz, yr, storm_number, freebndry, lst_keys)
                 lst_ds_node_fld.append(ds)
         

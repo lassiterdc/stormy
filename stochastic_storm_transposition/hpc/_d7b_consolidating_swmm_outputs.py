@@ -4,9 +4,8 @@ from datetime import datetime
 from glob import glob
 from tqdm import tqdm
 
-from __utils import c7b_consolidating_outputs
+from __utils import *
 
-f_model_outputs_consolidated, dir_swmm_sst_models = c7b_consolidating_outputs()
 
 f_modelresults = dir_swmm_sst_models + "_model_outputs_year{}.nc".format("*")
 
