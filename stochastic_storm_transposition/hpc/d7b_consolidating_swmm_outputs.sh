@@ -11,13 +11,16 @@
 #SBATCH --mail-type=ALL   
 # SBATCH --exclude=udc-ba26-18,udc-ba27-14,udc-ba26-16,udc-ba26-17
 
-module purge
-module load gcc openmpi eccodes anaconda
-source activate running_swmm
-
 source __directories.sh
+module purge
+module load gcc openmpi eccodes anaconda # the stuff other than anaconda was to ensure eccodes loaded correctly
+DIR=~/.conda/envs/running_swmm
+source activate running_swmm
+export PATH=$DIR/bin:$PATH
+export LD_LIBRARY_PATH=$DIR/lib:$PATH
+export PYTHONPATH=$DIR/lib/python3.11/site-packages:$PATH
 
 # echo "Running SWMM for year ${SLURM_ARRAY_TASK_ID}..."
 
 # running swmm
-python ${assar_dirs[hpc_c7b_py]}
+python ${assar_dirs[hpc_d7b_py]}
