@@ -19,10 +19,15 @@ yr = int(sys.argv[1]) # a number between 1 and 1000
 
 script_start_time = datetime.now()
 #%% data
-f_summary = dir_time_series + "_event_summary_year{}.csv".format(yr) # must match formatting in script _d4b
-df_event_summaries = pd.read_csv(f_summary, parse_dates=["event_start", "event_end"])
+# f_summary = dir_time_series + "_event_summary_year{}.csv".format(yr) # must match formatting in script _d4b
+# df_event_summaries = pd.read_csv(f_summary, parse_dates=["event_start", "event_end"])
 
-lst_f_ncs = return_rzs_for_yr(fldr_realizations, yr)
+df_summaries = pd.read_csv(f_sims_summary, parse_dates=["event_start", "event_end"])
+
+# subset for year 
+df_summaries = df_summaries[df_summaries.year == yr].reset_index(drop = True)
+
+# lst_f_ncs = return_rzs_for_yr(fldr_realizations, yr)
 ds_rlztns = xr.open_dataset(f_rain_realizations)
 # subset for the year
 ds_rlztns = ds_rlztns.sel(dict(year = yr))
@@ -115,7 +120,7 @@ for outfall_type in lst_outfall_types:
                 ## shutil.copy(f_inp_base, f_inp_scen)
                 df_rain_paths = get_rainfiles(rz, yr, storm_id, df_key)
                 # fill in template stuff
-                df_single_event = df_event_summaries[(df_event_summaries.realization==rz) & (df_event_summaries.storm_id==storm_id)]
+                df_single_event = df_summaries[(df_summaries.realization==rz) & (df_summaries.storm_id==storm_id)]
                 df_single_event.reset_index(drop=True, inplace = True)
                 for key in lst_template_keys:
                     # check if the key is for one of the rainfall time series
