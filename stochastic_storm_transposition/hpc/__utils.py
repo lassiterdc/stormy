@@ -119,7 +119,7 @@ f_swmm_scenarios_catalog = dir_swmm_sst_scenarios + "swmm_scenario_catalogs/" + 
 norain_gage_name = "no_rain"
 
 # # c6
-# max_runtime_min_hrly = 60 # maximum minutes of runtime allowable for each SWMM simulation
+max_runtime_min = 60 # maximum minutes of runtime allowable for each SWMM simulation
 
 # # c6b
 # f_model_perf_summary_hrly = dir_swmm_sst_scenarios_hrly_proj + "model_performance_summary.csv"
