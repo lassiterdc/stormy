@@ -7,9 +7,9 @@ dir_sst = dir_repo + "stochastic_storm_transposition/"
 dir_sst_nrflk = dir_sst + "norfolk/"
 # dir_sst_nrflk_hrly = dir_sst_nrflk + "sst_mrms_hourly/"
 dir_mrms = dir_sst_nrflk + "sst_mrms/"
-dir_home = "/home/dcl3nd/stormy/"
-dir_home_sst = dir_home + "sst/"
-dir_scratch_sst = "/scratch/dcl3nd/stormy/"
+# dir_home = "/home/dcl3nd/stormy/"
+# dir_home_sst = dir_home + "sst/"
+# dir_scratch_sst = "/scratch/dcl3nd/stormy/"
 dir_highres_repo = "/scratch/dcl3nd/highres-radar-rainfall-processing/"
 
 
@@ -75,7 +75,7 @@ fldr_realizations = dir_mrms + "mrms_combined/Realizations/"
 dir_swmm_sst_scenarios = dir_swmm_model + "swmm_scenarios_sst/"
 # dir_swmm_sst_scenarios_scratch = dir_scratch_sst + "swmm_sst_hourly/"
 # dir_swmm_sst_scenarios_hrly_home = dir_home_sst + "swmm_sst_hourly/"
-dir_time_series = dir_home_sst + "swmm_time_series/"
+dir_time_series = "/home/dcl3nd/stormy/sst/" + "swmm_time_series/"
 f_key_subnames_gridind = dir_time_series + "_key_subnames_and_grid-indices.csv"
 seed_mrms_hourly = 22901
 
@@ -86,7 +86,7 @@ f_waterlevels_same_tstep_as_sst = dir_local_outputs + "b_observed_waterlevels_ss
 f_observed_wlevel_rainfall_tseries = dir_local_outputs + "b_observed_compound_event_timeseries.csv"
 f_simulated_cmpnd_event_summaries = dir_local_outputs + "c_simulated_compound_event_summary.csv"
 f_observed_cmpnd_event_summaries = dir_local_outputs + "c_observed_compound_event_summaries_with_k.csv"
-dir_swmm_sst_scenarios_scratch = dir_home_sst + "_scratch/"
+dir_swmm_sst_scenarios_scratch = dir_sst + "_scratch/"
 dir_waterlevel_ncs_scratch = dir_swmm_sst_scenarios_scratch + "water_level_ncs/"
 dir_rain_weather_scratch = dir_swmm_sst_scenarios_scratch + "weather/"
 dir_rain_weather_scratch_ncs = dir_rain_weather_scratch + "netcdfs/"
@@ -98,6 +98,7 @@ dir_scenario_weather = dir_swmm_sst_scenarios + "weather/"
 f_rain_realizations = dir_scenario_weather + "rainfall.nc"
 f_w_level_sims = dir_scenario_weather + "water_levels.nc"
 f_sims_summary = dir_scenario_weather + "compound_event_summaries.csv"
+f_sims_wlevel_tseries = dir_scenario_weather + "simulated_wlevel_timeseries.csv"
 
 # d5
 f_inp_base = dir_swmm_sst_scenarios + "hague_sst_model_template.inp"
