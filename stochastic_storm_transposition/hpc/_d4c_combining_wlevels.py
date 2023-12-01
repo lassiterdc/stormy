@@ -29,7 +29,7 @@ df_summaries = pd.concat(lst_df, axis=0, ignore_index=True)
 
 df_summaries = df_summaries.sort_values(["realization", "year", "storm_id"])
 
-df_summaries.to_csv(f_sims_summary)
+df_summaries.to_csv(f_sims_summary, index = False)
 print("Total time elapsed: {}; time load and combine to single csv event summaries: {}".format(time.time() - start_time, time.time() - bm_time))
 
 #%% water level csvs
