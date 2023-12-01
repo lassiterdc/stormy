@@ -1,14 +1,14 @@
 #%% load libraries
 from pathlib import Path
 import os
-from _inputs import def_inputs_for_b
+from _inputs import *
 import xarray as xr
 os.environ['USE_PYGEOS'] = '0'
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 
-f_in_b_nc, f_shp_swmm_subs, f_mrms_rainfall, f_out_b_csv_subs_w_mrms_grid, f_out_swmm_rainfall, mm_per_inch = def_inputs_for_b()
+# f_in_b_nc, f_shp_swmm_subs, f_mrms_rainfall, f_out_b_csv_subs_w_mrms_grid, f_out_swmm_rainfall, mm_per_inch = def_inputs_for_b()
 
 #%% load data
 ds_rain = xr.open_dataset(f_in_b_nc)

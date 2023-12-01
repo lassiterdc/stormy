@@ -3,19 +3,23 @@
 *.png
 *.lock
 *.jpg4
+*.gif
 *.csv
 _temp
+*.svg
 *_archive*
 # data/raw_data/*
 *.out
 *_backup*
-*parameterization*
+*conduit_parameterization*
+*node_parameterization*
+*sub_parameterization*
 *.tsb
 *.dat
 *.zip
 *work*
 # *_test*
-*_inputs*
+# *_inputs*.sst*
 *~$*
 # PCSWMM generated files
 *.chi*
@@ -24,7 +28,7 @@ _temp
 *.rpt*
 *.thm*
 *.~inp*
-
+*arcgis/*
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -161,3 +165,19 @@ swmm/hague/swmm_scenarios_sst_hourly/hague_sst_model_design_storms.ini
 swmm/hague/swmm_scenarios_sst_hourly/hague_sst_model_design_storms.inp
 swmm/hague/swmm_scenarios_sst_hourly/hague_sst_model_design_storms.thm
 swmm/hague/swmm_scenarios_sst_hourly/hague_sst_model_design_storms.~inp
+swmm/hague/swmm_scenarios_sst_hourly/models/year*
+stochastic_storm_transposition/sst_validation/*
+stochastic_storm_transposition/norfolk/sst_mrms_hourly/_inputs/20*.sst
+stochastic_storm_transposition/norfolk/sst_mrms_subdivided/_inputs/20*.sst
+.Rproj.user
+data/climate/NCEI/2023-1-4_NCEI_Hourly Global_order info.pdf
+data/climate/NCEI/2023-1-4_NCEI_Hourly Global_precip_order info.pdf
+data/climate/NCEI/2023-1-4_NCEI_Hourly Global_station_subset_precip_order_info.pdf
+data/climate/NCEI/2023-1-4_NCEI_Hourly Precip_precip_order info.pdf
+stochastic_storm_transposition/local/.vscode/settings.json
+stochastic_storm_transposition/local/a_choosing_copula.nb.html
+stochastic_storm_transposition/local/a_conditional_simulations.nb.html
+stochastic_storm_transposition/local/reprex/2023-11-8_gof_multivariate_copulas/copula fitting.nb.html
+stochastic_storm_transposition/local/reprex/2023-11-8_gof_multivariate_copulas/copula fitting.Rmd
+swmm/hague/swmm_scenarios_sst_hourly/time_series/_event_summary_year*
+swmm/hague/swmm_scenarios_sst_hourly/*.csv

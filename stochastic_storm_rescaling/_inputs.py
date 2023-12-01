@@ -13,8 +13,10 @@ in_a_begin_year = 1928
 min_record_length = 30
 
 # SST stuff
-nrealizations = 1
-
+nrealizations = 2
+sst_tstep = 5
+sst_event_duration = 72 # hours
+sst_storms_per_year = 5
 start_date = "2020-09-01" # start date for each of the time series
 #%% Directories
 fldr_nrflk = str(Path(os.getcwd()).parents[1]) + "/"
@@ -47,8 +49,8 @@ f_out_swmm_waterlevel = fldr_swmm_tseries + "a_water_levels_ft.dat"
 
 # event selection
 min_interevent_time = 12 # hour
-max_event_length = 72 # hours
-min_event_threshold = 0.5 # inches of total rainfall
+# max_event_length = 72 # hours
+min_event_threshold = 0.1 # inches of total rainfall
 dir_mrms_events = dir_ssr_outputs + "c_mrms_events/"
 f_mrms_event_summaries = dir_mrms_events + "mrms_event_summaries.csv"
 f_mrms_event_timeseries = dir_mrms_events + "mrms_event_timeseries.csv"
@@ -76,26 +78,26 @@ wlevel_threshold = 0.5 # i don't want simulated time series that are 50% above o
 fld_out_c_plts = fldr_NCEI + "qaqc_plots/"
 fld_out_c_processed_data = fldr_NCEI + "processed_data/"
 
-def def_work():
-    return f_water_level_storm_surge
+# def def_work():
+#     return f_water_level_storm_surge
 
-def def_work_b():
-    return f_swmm_model, f_mrms_rainfall, f_out_b_csv_subs_w_mrms_grid
+# def def_work_b():
+#     return f_swmm_model, f_mrms_rainfall, f_out_b_csv_subs_w_mrms_grid
 
-def def_work_c():
-    return f_daily_summaries, f_hourlyglobal_precip_all_stations, f_hourlyglobal_precip_subset_stations, f_hourlyprecip
+# def def_work_c():
+#     return f_daily_summaries, f_hourlyglobal_precip_all_stations, f_hourlyglobal_precip_subset_stations, f_hourlyprecip
 
-def def_inputs_for_a():
-    return in_a_begin_year, f_out_a_meta, f_water_level_storm_surge, f_out_a_shp, f_out_swmm_waterlevel
+# def def_inputs_for_a():
+#     return in_a_begin_year, f_out_a_meta, f_water_level_storm_surge, f_out_a_shp, f_out_swmm_waterlevel
 
-def def_inputs_for_b():
-    return f_in_b_nc, f_shp_swmm_subs, f_mrms_rainfall, f_out_b_csv_subs_w_mrms_grid, f_out_swmm_rainfall, mm_per_inch
+# def def_inputs_for_b():
+#     return f_in_b_nc, f_shp_swmm_subs, f_mrms_rainfall, f_out_b_csv_subs_w_mrms_grid, f_out_swmm_rainfall, mm_per_inch
 
-def def_inputs_for_b2():
-    return f_mrms_rainfall, f_water_level_storm_surge, min_interevent_time, max_event_length, min_event_threshold, mm_per_inch, f_mrms_event_summaries, f_mrms_event_timeseries
+# def def_inputs_for_b2():
+#     return f_mrms_rainfall, f_water_level_storm_surge, min_interevent_time, max_event_length, min_event_threshold, mm_per_inch, f_mrms_event_summaries, f_mrms_event_timeseries
 
-def def_inputs_for_c():
-    return f_daily_summaries, f_hourlyprecip, fld_out_c_plts, fld_out_c_processed_data, min_record_length
+# def def_inputs_for_c():
+#     return f_daily_summaries, f_hourlyprecip, fld_out_c_plts, fld_out_c_processed_data, min_record_length
 
-def def_inputs_for_d():
-    return f_mrms_event_summaries, f_mrms_event_timeseries, f_water_level_storm_surge, f_realizations_hrly, f_key_subnames_gridind, nrealizations, sst_hrly_tstep_min, start_date, time_buffer, dir_time_series_hrly, wlevel_threshold
+# def def_inputs_for_d():
+#     return f_mrms_event_summaries, f_mrms_event_timeseries, f_water_level_storm_surge, f_realizations_hrly, f_key_subnames_gridind, nrealizations, sst_hrly_tstep_min, start_date, time_buffer, dir_time_series_hrly, wlevel_threshold
