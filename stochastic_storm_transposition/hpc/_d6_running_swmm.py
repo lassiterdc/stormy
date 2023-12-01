@@ -1,4 +1,6 @@
 #%% loading libraries and importing directories
+sim_year = int(sys.argv[1])
+
 import numpy as np
 from pathlib import Path
 import pandas as pd
@@ -11,31 +13,43 @@ from __utils import *
 
 # f_swmm_scenarios_catalog, dir_swmm_sst_models, max_runtime_min = c6_running_swmm()
 
-sim_year = int(sys.argv[1]) # a number between 1 and 1000
+ # a number between 1 and 1000
 
 f_out_runtimes = dir_swmm_sst_models + "_model_performance_year{}.csv".format(sim_year)
 
 script_start_time = datetime.now()
 #%% loading data
 df_strms = pd.read_csv(f_swmm_scenarios_catalog.format(sim_year))
-# df_strms = df_strms.loc[df_strms.year==sim_year]
+if "storm_num" in df_strms.columns: # this should become irrelevant, this was just so I didn't have to re-run previous script with desired column names
+    df_strms = df_strms.rename(columns=dict(storm_num = "storm_id"))
+
+df_strms = df_strms.sort_values(["realization", "year", "storm_id"])
+
+df_strms.drop(columns = "simulation_index", inplace = True)
+
+df_strms.reset_index(drop=True, inplace=True)
 
 s_tot_rz = int(df_strms.realization.max())
-s_tot_storms = int(len(df_strms))
-s_tot_sims = s_tot_rz * s_tot_storms
+s_strms_per_year = int(df_strms.storm_id.max())
+s_tot_sims = len(df_strms)
 
 #%% run simulations
 runtimes = []
 successes = []
 problems = []
 count = -1
-for f_inp in df_strms.swmm_inp:
+for idx, row in df_strms.iterrows():
     problem = "None"
+    f_inp = row["swmm_inp"]
+    rz = int(row["realization"])
+    yr = int(row["year"])
+    storm_id = int(row["storm_id"])
     count += 1
-    rz, yr, storm_id, freebndry = parse_inp(f_inp)
-    print("Running simulation for realization {}/{}, year {}, storm {}/{}. {} out of {} simulations complete.".format(rz, s_tot_rz, yr, storm_id, s_tot_storms, count, s_tot_sims))
+    print("Running simulation for realization {} year {} storm {}. {} out of {} simulations complete.".format(rz, yr, storm_id, s_strms_per_year, count, s_tot_sims))
     success = True
     sim_time = datetime.now()
+    sim_runtime_min = np.nan
+    # break
     try:
         with Simulation(f_inp) as sim:
             sim_start_time = datetime.now()
