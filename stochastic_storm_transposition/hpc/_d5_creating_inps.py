@@ -23,7 +23,9 @@ f_summary = dir_time_series + "_event_summary_year{}.csv".format(yr) # must matc
 df_event_summaries = pd.read_csv(f_summary, parse_dates=["event_start", "event_end"])
 
 lst_f_ncs = return_rzs_for_yr(fldr_realizations, yr)
-ds_rlztns = xr.open_mfdataset(lst_f_ncs, preprocess = define_dims)
+ds_rlztns = xr.open_dataset(f_rain_realizations)
+# subset for the year
+ds_rlztns = ds_rlztns.sel(dict(year = yr))
 #%% define functions
 def get_rainfiles(rz, yr, storm_id, df_key):
     # format: dir_time_series + "weather_realization{}/year{}/".format(rz, yr) + "rz{}yr{}_strm{}_grid-ind{}.dat".format(rz, yr, storm_id, mrms_index)
@@ -140,7 +142,25 @@ for outfall_type in lst_outfall_types:
                         elif "FREE" in outfall_type:
                             d_fields[key] = "           "
                     elif key == "START_DATE":
-                        d_fields[key] = df_single_event.event_start.dt.strftime('%m/%d/%Y')[0]
+                        try: # dcl work
+                            d_fields[key] = df_single_event.event_start.dt.strftime('%m/%d/%Y')[0]
+                        # DCL WORK
+                        except:
+                            print("The following line caused an error")
+                            print("df_single_event.event_start.dt.strftime('%m/%d/%Y')[0]")
+                            print("df_single_event")
+                            print(df_single_event)
+                            print("#############################################")
+                            print("df_single_event.event_start")
+                            print(df_single_event.event_start)
+                            print("#############################################")
+                            print("df_single_event.event_start.dt.strftime('%m/%d/%Y')")
+                            print(df_single_event.event_start.dt.strftime('%m/%d/%Y'))
+                            print("#############################################")
+                            print("df_single_event.event_start.dt.strftime('%m/%d/%Y')[0]")
+                            print(df_single_event.event_start.dt.strftime('%m/%d/%Y')[0])
+                            print("#############################################")
+                        # END DCL WORK
                     elif key == "START_TIME":
                         d_fields[key] = df_single_event.event_start.dt.strftime("%H:%M:%S")[0]
                     elif key == "REPORT_START_DATE":
