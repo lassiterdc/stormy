@@ -100,7 +100,7 @@ for outfall_type in lst_outfall_types:
                 d_fields = {}
                 df_strms.loc[count, "realization"] = rz
                 df_strms.loc[count, "year"] = yr
-                df_strms.loc[count, "storm_num"] = storm_id
+                df_strms.loc[count, "storm_id"] = storm_id
                 # append new row to pandas dataframe
                 # dic_scen = dict(realization = rz, year = yr, storm = storm_id)
                 # create copy of input file
