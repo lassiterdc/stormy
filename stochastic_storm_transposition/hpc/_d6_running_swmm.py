@@ -1,6 +1,4 @@
 #%% loading libraries and importing directories
-sim_year = int(sys.argv[1])
-
 import numpy as np
 from pathlib import Path
 import pandas as pd
@@ -9,6 +7,7 @@ from pyswmm import Simulation
 from datetime import datetime
 from __utils import *
 
+sim_year = int(sys.argv[1])
 # from __utils import c6_running_swmm, parse_inp
 
 # f_swmm_scenarios_catalog, dir_swmm_sst_models, max_runtime_min = c6_running_swmm()
