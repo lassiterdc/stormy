@@ -114,7 +114,7 @@ dir_swmm_sst_models = dir_swmm_sst_scenarios_scratch + "models/"
 # f_inp_base_hrly = dir_swmm_sst_scenarios_hrly_proj + "hague_sst_model_template.inp"
 
 # # dir_time_series_hrly = dir_swmm_sst_scenarios_hrly + "time_series/"
-# f_swmm_scenarios_catalog = dir_swmm_sst_scenarios_hrly_proj + "swmm_scenario_catalogs/" + "_swmm_scenarios_catalog_yr{}.csv"
+f_swmm_scenarios_catalog = dir_swmm_sst_scenarios + "swmm_scenario_catalogs/" + "_swmm_scenarios_catalog_yr{}.csv"
 
 norain_gage_name = "no_rain"
 
