@@ -28,8 +28,8 @@ df_strms.drop(columns = "simulation_index", inplace = True)
 
 df_strms.reset_index(drop=True, inplace=True)
 
-s_tot_rz = int(df_strms.realization.max())
-s_strms_per_year = int(df_strms.storm_id.max())
+# s_tot_rz = int(df_strms.realization.max())
+# s_strms_per_year = int(df_strms.storm_id.max())
 s_tot_sims = len(df_strms)
 
 #%% run simulations
@@ -44,7 +44,7 @@ for idx, row in df_strms.iterrows():
     yr = int(row["year"])
     storm_id = int(row["storm_id"])
     count += 1
-    print("Running simulation for realization {} year {} storm {}. {} out of {} simulations complete.".format(rz, yr, storm_id, s_strms_per_year, count, s_tot_sims))
+    print("Running simulation for realization {} year {} storm {}. {} out of {} simulations complete.".format(rz, yr, storm_id, count, s_tot_sims))
     success = True
     sim_time = datetime.now()
     sim_runtime_min = np.nan
