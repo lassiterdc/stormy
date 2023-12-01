@@ -15,7 +15,7 @@ dask.config.set(scheduler='single-threaded')
 
 start_time = time.time()
 #%% water level summaries
-f_summary = dir_time_series + "_event_summary_year{}.csv".format('*') # must match format in script d4b
+f_summary = dir_event_summary_csv_scratch + "_event_summary_year{}.csv".format('*') # must match format in script d4b
 lst_f_summaries = glob(f_summary)
 bm_time = time.time()
 lst_df = []

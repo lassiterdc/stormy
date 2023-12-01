@@ -87,6 +87,7 @@ f_observed_wlevel_rainfall_tseries = dir_local_outputs + "b_observed_compound_ev
 f_simulated_cmpnd_event_summaries = dir_local_outputs + "c_simulated_compound_event_summary.csv"
 f_observed_cmpnd_event_summaries = dir_local_outputs + "c_observed_compound_event_summaries_with_k.csv"
 dir_swmm_sst_scenarios_scratch = dir_sst + "_scratch/"
+dir_event_summary_csv_scratch = dir_swmm_sst_scenarios_scratch + "event_summaries/"
 dir_waterlevel_ncs_scratch = dir_swmm_sst_scenarios_scratch + "water_level_ncs/"
 dir_rain_weather_scratch = dir_swmm_sst_scenarios_scratch + "weather/"
 dir_rain_weather_scratch_ncs = dir_rain_weather_scratch + "netcdfs/"

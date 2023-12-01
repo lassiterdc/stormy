@@ -233,7 +233,7 @@ df_sim_summary = df_sim_cmpnd_summary.join(df_simulated_event_summaries, how="ri
 df_sim_summary = df_sim_summary.rename(columns=dict(tstep_of_max_intensity = "tstep_max_rain_intensity",
                                                     duration_hr = "rainfall_duration_hr"))
 
-f_summary = dir_time_series + "_event_summary_year{}.csv".format(yr)
+f_summary = dir_event_summary_csv_scratch + "_event_summary_year{}.csv".format(yr)
 # print("df_sim_summary") # DCL WORK
 # print(df_sim_summary) # DCL WORK
 df_sim_summary.to_csv(f_summary)
