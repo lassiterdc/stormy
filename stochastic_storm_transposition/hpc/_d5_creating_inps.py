@@ -142,25 +142,7 @@ for outfall_type in lst_outfall_types:
                         elif "FREE" in outfall_type:
                             d_fields[key] = "           "
                     elif key == "START_DATE":
-                        try: # dcl work
-                            d_fields[key] = df_single_event.event_start.dt.strftime('%m/%d/%Y')[0]
-                        # DCL WORK
-                        except:
-                            print("The following line caused an error")
-                            print("df_single_event.event_start.dt.strftime('%m/%d/%Y')[0]")
-                            print("df_single_event")
-                            print(df_single_event)
-                            print("#############################################")
-                            print("df_single_event.event_start")
-                            print(df_single_event.event_start)
-                            print("#############################################")
-                            print("df_single_event.event_start.dt.strftime('%m/%d/%Y')")
-                            print(df_single_event.event_start.dt.strftime('%m/%d/%Y'))
-                            print("#############################################")
-                            print("df_single_event.event_start.dt.strftime('%m/%d/%Y')[0]")
-                            print(df_single_event.event_start.dt.strftime('%m/%d/%Y')[0])
-                            print("#############################################")
-                        # END DCL WORK
+                        d_fields[key] = df_single_event.event_start.dt.strftime('%m/%d/%Y')[0]
                     elif key == "START_TIME":
                         d_fields[key] = df_single_event.event_start.dt.strftime("%H:%M:%S")[0]
                     elif key == "REPORT_START_DATE":
