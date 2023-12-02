@@ -6,7 +6,8 @@ from pathlib import Path
 
 
 f_performance = dir_swmm_sst_models + "_model_performance_year{}.csv".format("*")
-f_summaries = dir_time_series + "_event_summary_year{}.csv".format("*")
+# f_summaries = dir_time_series + "_event_summary_year{}.csv".format("*")
+f_summaries = f_swmm_scenarios_catalog.format("*")
 
 
 #%% load performance dataframe
@@ -31,7 +32,7 @@ for f in lst_f_events:
 
 df_events = pd.concat(lst_dfs_events)
 
-df_events.rename(columns=dict(realization_id = "realization"), inplace=True)
+# df_events.rename(columns=dict(realization_id = "realization"), inplace=True)
 
 # df_events_and_perf = df_perf.merge(df_events, on = ["realization", "year", "storm_id"])
 
