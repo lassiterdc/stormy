@@ -169,9 +169,12 @@ def parse_inp(f_inp):
     yr = lst_name_comp[1].split("yr")[-1]
     storm_id = lst_name_comp[2].split(".")[0].split('strm')[-1]
     freebndry = False
-    if len(lst_name_comp) == 4:
+    norain = False
+    if "freebndry" in lst_name_comp[-1]:
         freebndry = True
-    return int(rz), int(yr), int(storm_id), str(freebndry)
+    if "norain" in lst_name_comp[-1]:
+        norain = True
+    return int(rz), int(yr), int(storm_id), str(freebndry), str(norain)
 
 # for loading RainyDay realizations
 def define_dims(ds):
