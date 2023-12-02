@@ -3,8 +3,10 @@ import numpy as np
 from pathlib import Path
 import pandas as pd
 import sys
-from pyswmm import Simulation
+from swmm.toolkit.shared_enum import NodeAttribute
+from pyswmm import Simulation, Output
 from datetime import datetime
+import os
 from __utils import *
 
 sim_year = int(sys.argv[1])
@@ -17,10 +19,27 @@ sim_year = int(sys.argv[1])
 f_out_runtimes = dir_swmm_sst_models + "_model_performance_year{}.csv".format(sim_year)
 
 script_start_time = datetime.now()
+
+#%% define functions
+def create_all_nan_dataset(a_fld_reshaped, rz, yr, storm_id, freebndry, norain, lst_keys):
+    # create dataset with na values with same shape as the flood data
+    a_zeros = np.empty(a_fld_reshaped.shape)
+    a_zeros[:] = np.nan
+    # create dataset with those na values
+    ds = xr.Dataset(data_vars=dict(node_flooding_cubic_meters = (['realization', 'year', 'storm_id', 'freeboundary', 'norain', 'node_id'], a_zeros)),
+                    coords = dict(realization = np.atleast_1d(rz),
+                                    year = np.atleast_1d(yr),
+                                    storm_id = np.atleast_1d(storm_id),
+                                    freeboundary = np.atleast_1d(freebndry),
+                                    norain = np.atleast_1d(norain),
+                                    node_id = lst_keys
+                                    ))
+    return ds
+
 #%% loading data
 df_strms = pd.read_csv(f_swmm_scenarios_catalog.format(sim_year))
-if "storm_num" in df_strms.columns: # this should become irrelevant, this was just so I didn't have to re-run previous script with desired column names
-    df_strms = df_strms.rename(columns=dict(storm_num = "storm_id"))
+# if "storm_num" in df_strms.columns: # this should become irrelevant, this was just so I didn't have to re-run previous script with desired column names
+#     df_strms = df_strms.rename(columns=dict(storm_num = "storm_id"))
 
 df_strms = df_strms.sort_values(["realization", "year", "storm_id"])
 
@@ -33,6 +52,12 @@ df_strms.reset_index(drop=True, inplace=True)
 s_tot_sims = len(df_strms)
 
 #%% run simulations
+# DCL WORK - incorporating processing of outputs into the script
+lst_ds_node_fld = []
+lst_f_outputs_converted_to_netcdf = [] # for removing ones that are processed
+lst_outputs_converted_to_netcdf = [] # to track success
+f_out_modelresults = dir_swmm_sst_models + "_model_outputs_year{}.nc".format(sim_year)
+# END DCL WORK
 runtimes = []
 successes = []
 problems = []
@@ -46,6 +71,7 @@ for idx, row in df_strms.iterrows():
     count += 1
     print("Running simulation for realization {} year {} storm {}. {} out of {} simulations complete.".format(rz, yr, storm_id, count, s_tot_sims))
     success = True
+    output_converted_to_netcdf = False
     sim_time = datetime.now()
     sim_runtime_min = np.nan
     # break
@@ -75,12 +101,60 @@ for idx, row in df_strms.iterrows():
     # MONTIROING
     if success == True:
         print("Simulation runtime (min): {}, Mean simulation runtime (min): {}, Total elapsed time (hr): {}, Expected total time (hr): {}, Estimated time remaining (hr): {}".format(sim_runtime_min, mean_sim_time, tot_elapsed_time_hr, expected_tot_runtime_hr, expected_remaining_time_hr)) 
+        #%% dcl work  - incorporating processing of outputs into the script
+        print("Exporting node flooding as netcdfs....")
+        rz, yr, storm_id, freebndry, norain = parse_inp(f_inp)
+        f_swmm_out = f_inp.split('.inp')[0] + '.out'
+        with Output(f_swmm_out) as out:
+            lst_tot_node_flding = []
+            lst_keys = []
+            for key in out.nodes:
+                d_t_series = pd.Series(out.node_series(key, NodeAttribute.FLOODING_LOSSES)) #cfs
+                tstep_seconds = float(pd.Series(d_t_series.index).diff().mode().dt.seconds)
+                # convert from cfs to cf per tstep then cubic meters per timestep
+                d_t_series = d_t_series * tstep_seconds * cubic_meters_per_cubic_foot
+                # sum all flooded volumes and append lists
+                lst_tot_node_flding.append(d_t_series.sum())
+                lst_keys.append(key)
+            # create array of flooded values with the correct shape for placing in xarray dataset
+            a_fld_reshaped = np.reshape(np.array(lst_tot_node_flding), (1,1,1,1,1,len(lst_tot_node_flding))) # rz, yr, storm, node_id, freeboundary, norain
+            # create dataset with the flood values 
+            ds = xr.Dataset(data_vars=dict(node_flooding_cubic_meters = (['realization', 'year', 'storm_id', 'freeboundary', 'norain', 'node_id'], a_fld_reshaped)),
+                            coords = dict(realization = np.atleast_1d(rz),
+                                            year = np.atleast_1d(yr),
+                                            storm_id = np.atleast_1d(storm_id),
+                                            freeboundary = np.atleast_1d(freebndry),
+                                            norain = np.atleast_1d(norain),
+                                            node_id = lst_keys
+                                            ))
+            lst_ds_node_fld.append(ds)
+            lst_f_outputs_converted_to_netcdf.append(f_swmm_out)
+            output_converted_to_netcdf = True
+        #%% end dcl work
     else: 
         print("Simulation failed after {} minutes.".format(sim_runtime_min))
+    lst_outputs_converted_to_netcdf.append(output_converted_to_netcdf) # document success in processing outputs
 
 #%% export model runtimes to a file
 df_strms["run_completed"] = successes
 df_strms["problem"] = problems
 df_strms["runtime_min"] = runtimes
+df_strms["lst_outputs_converted_to_netcdf"] = lst_outputs_converted_to_netcdf
+
+#%% dcl work - incorporating processing of outputs into the script
+ds_all_node_fld = xr.combine_by_coords(lst_ds_node_fld)
+
+ds_all_node_fld_loaded = ds_all_node_fld.load()
+ds_all_node_fld_loaded.to_netcdf(f_out_modelresults, encoding= {"node_flooding_cubic_meters":{"zlib":True}})
+
+tot_elapsed_time_min = round((datetime.now() - script_start_time).seconds / 60, 1)
+
+# remove processed outputs
+for f_processed_output in lst_f_outputs_converted_to_netcdf:
+    os.remove(f_processed_output)
+print("Total script runtime (min): {}".format(tot_elapsed_time_min))
+print("Removing output files.....")
+#%% end dcl work
+
 
 df_strms.to_csv(f_out_runtimes, index=False)
