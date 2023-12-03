@@ -60,7 +60,7 @@ s_tot_sims = len(df_strms)
 #%% run simulations
 # DCL WORK - incorporating processing of outputs into the script
 lst_ds_node_fld = []
-lst_f_outputs_converted_to_netcdf = [] # for removing ones that are processed
+# lst_f_outputs_converted_to_netcdf = [] # for removing ones that are processed
 lst_outputs_converted_to_netcdf = [] # to track success
 f_out_modelresults = dir_swmm_sst_models + "_model_outputs_year{}.nc".format(sim_year)
 # END DCL WORK
@@ -134,11 +134,14 @@ for idx, row in df_strms.iterrows():
                                         node_id = lst_keys
                                         ))
         lst_ds_node_fld.append(ds)
-        lst_f_outputs_converted_to_netcdf.append(f_swmm_out)
+        # lst_f_outputs_converted_to_netcdf.append(f_swmm_out)
         output_converted_to_netcdf = True
         print("created xarray dataset with total flooding for each node")
         end_create_dataset = datetime.now()
         create_dataset_time_min = round((end_create_dataset - start_create_dataset).seconds / 60, 1)
+        # delete output file after it's been processed
+        os.remove(f_swmm_out)
+        print("Deleted file {}".format(f_swmm_out))
     # benchmarking export netcdf
     export_dataset_times_min.append(create_dataset_time_min)
     mean_export_ds_time_min = round(np.nanmean(export_dataset_times_min), 1)
@@ -183,10 +186,10 @@ tot_elapsed_time_min = round((datetime.now() - script_start_time).seconds / 60, 
 print("exported " + f_out_modelresults)
 
 # remove processed outputs
-print("Removing output files.....")
-for f_processed_output in lst_f_outputs_converted_to_netcdf:
-    os.remove(f_processed_output)
-    print("removed file {}".format(f_processed_output))
+# print("Removing output files.....")
+# for f_processed_output in lst_f_outputs_converted_to_netcdf:
+#     os.remove(f_processed_output)
+#     print("removed file {}".format(f_processed_output))
 
 
 #%% end dcl work
