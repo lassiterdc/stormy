@@ -41,6 +41,7 @@ df_strms = pd.read_csv(f_swmm_scenarios_catalog.format(sim_year))
 
 # DCL WORK - SUBSET TO USE ONLY 1 REALIZATION
 df_strms = df_strms[df_strms["realization"]==1]
+df_strms = df_strms[df_strms.storm_id.isin([1])]
 # END DCL WORK
 
 # if "storm_num" in df_strms.columns: # this should become irrelevant, this was just so I didn't have to re-run previous script with desired column names
