@@ -95,7 +95,7 @@ for idx, row in df_strms.iterrows():
     successes.append(success)
     tot_elapsed_time_hr = round((sim_time - script_start_time).seconds / 60 / 60, 1)
     runtimes.append(sim_runtime_min)
-    mean_sim_time = round(np.mean(runtimes), 1)
+    mean_sim_time = round(np.nanmean(runtimes), 1)
     expected_tot_runtime_hr = round(mean_sim_time*s_tot_sims/60, 1)
     expected_remaining_time_hr = round((expected_tot_runtime_hr - tot_elapsed_time_hr), 1)
     # MONTIROING
