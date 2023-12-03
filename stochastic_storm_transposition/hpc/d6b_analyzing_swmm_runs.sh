@@ -11,6 +11,8 @@
 #SBATCH --mail-type=ALL   
 # SBATCH --exclude=udc-ba26-18,udc-ba27-14,udc-ba26-16,udc-ba26-17
 
+# ijob -c 1 -A quinnlab_paid -p standard --time=0-09:00:00 --mem-per-cpu=32000
+
 source __directories.sh
 module purge
 module load gcc openmpi eccodes anaconda # the stuff other than anaconda was to ensure eccodes loaded correctly
