@@ -15,7 +15,7 @@ lst_f_perf = glob(f_performance)
 lst_f_perf_reruns = glob(f_performance_reruns)
 lst_dfs_perf = []
 for f in lst_f_perf:
-    if "failed_run" in f:
+    if "failed_run" in f: # skip csvs from failed runs
         continue
     df = pd.read_csv(f)
     lst_dfs_perf.append(df)

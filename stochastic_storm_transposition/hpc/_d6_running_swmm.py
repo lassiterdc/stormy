@@ -22,7 +22,7 @@ if which_models == 'failed': # NOTE THIS SHOULD ONLY BE RUN AFTER SCRIPT D6B HAS
     df_perf.reset_index(inplace = True)
     max_runtime_min = 180 # allowing 3 hours per simulation
     # only use needed tasks (NOTE THE TOTAL NUMBER OF TASKS MUST EQUAL OR EXCEED THE NUMBER OF FAILED RUNS)
-    row_index = (sim_year-1)
+    row_index = (sim_year-1) # subtract 1 since python is 0-indexed and tasks are 1-indexed
     if row_index > df_perf.index.max():
         sys.exit("Task number not needed for running simulation because they are all covered by other tasks.")
     # Subset the row with the failed model
