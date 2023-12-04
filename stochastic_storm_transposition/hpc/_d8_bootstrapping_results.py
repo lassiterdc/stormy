@@ -18,11 +18,11 @@ f_out_bs_results = f_bootstrapped_quant_estimates + "return_pds_btstrp_{}.nc".fo
 f_out_bs_results_raw = f_bootstrapped_quant_estimates + "raw_btstrp_{}.nc".format(bs_id)
 
 #%%
-ds_sst = xr.open_dataset(f_model_outputs_consolidated)
+ds_sst_all_outputs = xr.open_dataset(f_model_outputs_consolidated)
 
 
 #%% preprocessing
-ds_sst_compound = ds_sst.sel(freeboundary="False")
+ds_sst_compound = ds_sst_all_outputs.sel(freeboundary="False", norain = "False") # select all compound storm events with rainfall and storm surge
 
 #%% compute quantiles
 def return_period_to_quantile(ds, return_pds):

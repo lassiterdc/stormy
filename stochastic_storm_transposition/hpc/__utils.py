@@ -129,7 +129,7 @@ f_model_outputs_consolidated = dir_swmm_sst_scenarios + "model_outputs_consolida
 
 # # c8
 f_bootstrapped_quant_estimates = dir_swmm_sst_scenarios_scratch + "models/boostrapping/"
-sst_recurrence_intervals = [0.1, 0.25, 0.5, 1, 2, 5, 10, 25, 50, 100]
+sst_recurrence_intervals = [0.5, 1, 2, 5, 10, 25, 50, 100]
 f_bootstrapped_consolidated = dir_swmm_sst_scenarios + "bootstrapping_consolidated.nc"
 f_bootstrapped_consolidated_raw = dir_swmm_sst_scenarios + "bootstrapping_allsamples_consolidated.nc"
 export_raw_bs_samps = False
