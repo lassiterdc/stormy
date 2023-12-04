@@ -10,6 +10,23 @@ import os
 from __utils import *
 
 sim_year = int(sys.argv[1])
+which_models = str(sys.argv[2]) # either all or failed
+if which_models == 'failed':
+    df_perf = pd.read_csv(f_model_perf_summary)
+    df_perf = df_perf[df_perf.run_completed == False]
+    df_perf.reset_index(inplace = True)
+    max_runtime_min = 180 # allowing 3 hours per simulation
+
+    row_index = (sim_year-1)
+    if row_index > df_perf.index.max():
+        sys.exit("Task number not needed for running simulation because they are all covered by other tasks.")
+
+    row_with_failed_run = df_perf.loc[row_index,:]
+    # reset sim year 
+    sim_year = int(row_with_failed_run.year)
+    failed_inp_to_rerun = row_with_failed_run.swmm_inp
+    failed_inp_problem = row_with_failed_run.problem
+
 # from __utils import c6_running_swmm, parse_inp
 
 # f_swmm_scenarios_catalog, dir_swmm_sst_models, max_runtime_min = c6_running_swmm()
@@ -76,6 +93,11 @@ for idx, row in df_strms.iterrows():
     rz = int(row["realization"])
     yr = int(row["year"])
     storm_id = int(row["storm_id"])
+    # if only running a single failed simulation, set the loop to continue until the correct simulation is reached
+    if which_models == "failed":
+        if f_inp != failed_inp_to_rerun:
+            continue
+        print("Re-running failed simulation {} which failed due to problem {}".format(f_inp, failed_inp_problem))
     count += 1
     print("Running simulation for realization {} year {} storm {}. {} out of {} simulations complete.".format(rz, yr, storm_id, count, s_tot_sims))
     success = True
