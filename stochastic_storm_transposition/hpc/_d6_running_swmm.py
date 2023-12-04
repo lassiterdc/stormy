@@ -7,33 +7,47 @@ from swmm.toolkit.shared_enum import NodeAttribute
 from pyswmm import Simulation, Output
 from datetime import datetime
 import os
+from glob import glob
 from __utils import *
 
 sim_year = int(sys.argv[1])
 which_models = str(sys.argv[2]) # either all or failed
-if which_models == 'failed':
+f_out_runtimes = dir_swmm_sst_models + "_model_performance_year{}.csv".format(sim_year)
+f_out_modelresults = dir_swmm_sst_models + "_model_outputs_year{}.nc".format(sim_year)
+if which_models == 'failed': # NOTE THIS SHOULD ONLY BE RUN AFTER SCRIPT D6B HAS BEEN RUN OTHERWISE YOU MIGHT END UP RE-RUNNING SUCCESSFUL SIMULATIONS
+    print("Re-running failed simulations.")
+    print('NOTE THIS SHOULD ONLY BE RUN AFTER SCRIPT D6B HAS BEEN RUN OTHERWISE YOU MIGHT END UP RE-RUNNING SUCCESSFUL SIMULATIONS')
     df_perf = pd.read_csv(f_model_perf_summary)
     df_perf = df_perf[df_perf.run_completed == False]
     df_perf.reset_index(inplace = True)
     max_runtime_min = 180 # allowing 3 hours per simulation
-
+    # only use needed tasks (NOTE THE TOTAL NUMBER OF TASKS MUST EQUAL OR EXCEED THE NUMBER OF FAILED RUNS)
     row_index = (sim_year-1)
     if row_index > df_perf.index.max():
         sys.exit("Task number not needed for running simulation because they are all covered by other tasks.")
-
+    # Subset the row with the failed model
     row_with_failed_run = df_perf.loc[row_index,:]
     # reset sim year 
     sim_year = int(row_with_failed_run.year)
     failed_inp_to_rerun = row_with_failed_run.swmm_inp
     failed_inp_problem = row_with_failed_run.problem
-
+    f_out_runtimes = dir_swmm_sst_models + "_model_performance_year{}_failed_run_id{}.csv".format(sim_year, row_index)
+    f_out_modelresults = dir_swmm_sst_models + "_model_outputs_year{}_failed_run_id{}.nc".format(sim_year, row_index)
+# clear all re-run outputs
+if which_models == "all":
+    fs_re_runs_csvs = glob(dir_swmm_sst_models + "_model_performance_year{}_failed_run_id{}.csv".format("*", "*"))
+    fs_re_runs_netcdfs = glob(dir_swmm_sst_models + "_model_outputs_year{}_failed_run_id{}.nc".format("*", "*"))
+    for f in fs_re_runs_csvs:
+        os.remove(f)
+    for f in fs_re_runs_netcdfs:
+        os.remove(f)
 # from __utils import c6_running_swmm, parse_inp
 
 # f_swmm_scenarios_catalog, dir_swmm_sst_models, max_runtime_min = c6_running_swmm()
 
  # a number between 1 and 1000
 
-f_out_runtimes = dir_swmm_sst_models + "_model_performance_year{}.csv".format(sim_year)
+
 
 script_start_time = datetime.now()
 
@@ -57,7 +71,7 @@ def create_all_nan_dataset(a_fld_reshaped, rz, yr, storm_id, freebndry, norain, 
 df_strms = pd.read_csv(f_swmm_scenarios_catalog.format(sim_year))
 
 # DCL WORK - SUBSET TO USE ONLY 1 REALIZATION
-df_strms = df_strms[df_strms["realization"]==1]
+# df_strms = df_strms[df_strms["realization"]==1]
 # df_strms = df_strms[df_strms.storm_id.isin([1])]
 # END DCL WORK
 
@@ -78,8 +92,7 @@ s_tot_sims = len(df_strms)
 # DCL WORK - incorporating processing of outputs into the script
 lst_ds_node_fld = []
 # lst_f_outputs_converted_to_netcdf = [] # for removing ones that are processed
-lst_outputs_converted_to_netcdf = [] # to track success
-f_out_modelresults = dir_swmm_sst_models + "_model_outputs_year{}.nc".format(sim_year)
+lst_outputs_converted_to_dataset = [] # to track success
 # END DCL WORK
 runtimes = []
 export_dataset_times_min = []
@@ -102,7 +115,7 @@ for idx, row in df_strms.iterrows():
     count += 1
     print("Running simulation for realization {} year {} storm {}. {} out of {} simulations complete.".format(rz, yr, storm_id, count, s_tot_sims))
     success = True
-    output_converted_to_netcdf = False
+    output_converted_to_dataset = False
     loop_start_time = sim_time = datetime.now()
     sim_runtime_min = np.nan
     # break
@@ -158,7 +171,7 @@ for idx, row in df_strms.iterrows():
                                         ))
         lst_ds_node_fld.append(ds)
         # lst_f_outputs_converted_to_netcdf.append(f_swmm_out)
-        output_converted_to_netcdf = True
+        output_converted_to_dataset = True
         print("created xarray dataset with total flooding for each node")
         end_create_dataset = datetime.now()
         create_dataset_time_min = round((end_create_dataset - start_create_dataset).seconds / 60, 1)
@@ -175,45 +188,61 @@ for idx, row in df_strms.iterrows():
     ## estimating time remaining assuming successes
     estimated_loop_time = (mean_sim_time_min+mean_export_ds_time_min)
     expected_tot_runtime_hr = round(estimated_loop_time*s_tot_sims/60, 1)
-
     tot_elapsed_time_hr = round((datetime.now() - script_start_time).seconds / 60 / 60, 1)
     # tot_loop_time_hr = round((datetime.now() - loop_start_time).seconds / 60 / 60, 1)
-    
     expected_remaining_time_hr = round((expected_tot_runtime_hr - tot_elapsed_time_hr), 1)
     if success == True:
         print("Sim runtime (min): {}, Mean sim runtime (min): {}, Time to create dataset (min): {}, Total script time (hr): {}, Expected total time (hr): {}, Estimated time remaining (hr): {}".format(sim_runtime_min, mean_sim_time_min,
                                                                                                                                                                                                  create_dataset_time_min,
-                                                                                                                                                                                      tot_elapsed_time_hr, expected_tot_runtime_hr,
-                                                                                                                                                                                        expected_remaining_time_hr)) 
-        #%% end dcl work
+                                                                                                                                                                                      tot_elapsed_time_hr, expected_tot_runtime_hr, expected_remaining_time_hr)) 
+    #%% end dcl work
     else: 
         print("Simulation failed after {} minutes.".format(sim_runtime_min))
-    lst_outputs_converted_to_netcdf.append(output_converted_to_netcdf) # document success in processing outputs
+    lst_outputs_converted_to_dataset.append(output_converted_to_dataset) # document success in processing outputs
+    # if only running single simulation, stop the script here
+    if which_models == "failed":
+        break
 
-#%% export model runtimes to a file
-df_strms["run_completed"] = successes
-df_strms["problem"] = problems
-df_strms["runtime_min"] = runtimes
-df_strms["export_dataset_min"] = export_dataset_times_min
-df_strms["lst_outputs_converted_to_netcdf"] = lst_outputs_converted_to_netcdf
-df_strms.to_csv(f_out_runtimes, index=False)
-print('Exported ' + f_out_runtimes)
 #%% dcl work - incorporating processing of outputs into the script
-ds_all_node_fld = xr.combine_by_coords(lst_ds_node_fld)
 
-ds_all_node_fld_loaded = ds_all_node_fld.load()
-ds_all_node_fld_loaded.to_netcdf(f_out_modelresults, encoding= {"node_flooding_cubic_meters":{"zlib":True}})
-
-tot_elapsed_time_min = round((datetime.now() - script_start_time).seconds / 60, 1)
-
-print("exported " + f_out_modelresults)
 
 # remove processed outputs
 # print("Removing output files.....")
 # for f_processed_output in lst_f_outputs_converted_to_netcdf:
 #     os.remove(f_processed_output)
 #     print("removed file {}".format(f_processed_output))
-
+#%% export model runtimes to a file
+if which_models == "failed":
+    # export netcdf
+    ds_all_node_fld = ds # single output only
+    ds_all_node_fld_loaded = ds_all_node_fld.load()
+    ds_all_node_fld_loaded.to_netcdf(f_out_modelresults, encoding= {"node_flooding_cubic_meters":{"zlib":True}})
+    tot_elapsed_time_min = round((datetime.now() - script_start_time).seconds / 60, 1)
+    print("exported " + f_out_modelresults)
+    # export performance info
+    df_out = row_with_failed_run.to_frame().T
+    df_out["run_completed"] = success
+    df_out["problem"] = problem
+    df_out["runtime_min"] = sim_runtime_min
+    df_out["export_dataset_min"] = create_dataset_time_min
+    df_out["lst_outputs_converted_to_netcdf"] = output_converted_to_dataset
+    df_out.to_csv(f_out_runtimes, index=False)
+    print('Exported ' + f_out_runtimes)
+else:
+    # export netcdf
+    ds_all_node_fld = xr.combine_by_coords(lst_ds_node_fld)
+    ds_all_node_fld_loaded = ds_all_node_fld.load()
+    ds_all_node_fld_loaded.to_netcdf(f_out_modelresults, encoding= {"node_flooding_cubic_meters":{"zlib":True}})
+    tot_elapsed_time_min = round((datetime.now() - script_start_time).seconds / 60, 1)
+    print("exported " + f_out_modelresults)
+    # export performance info
+    df_strms["run_completed"] = successes
+    df_strms["problem"] = problems
+    df_strms["runtime_min"] = runtimes
+    df_strms["export_dataset_min"] = export_dataset_times_min
+    df_strms["lst_outputs_converted_to_netcdf"] = lst_outputs_converted_to_dataset
+    df_strms.to_csv(f_out_runtimes, index=False)
+    print('Exported ' + f_out_runtimes)
 
 #%% end dcl work
 print("Total script runtime (min): {}".format(tot_elapsed_time_min))
