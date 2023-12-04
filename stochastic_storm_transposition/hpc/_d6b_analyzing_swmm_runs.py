@@ -35,7 +35,7 @@ for ind, row in df_perf_reruns.iterrows():
 
 
 # export performance dataframe
-df_perf.to_csv(f_model_perf_summary, index=False)
+df_perf.to_csv(f_model_perf_summary, index=True)
 
 
 #%% load event summaries
