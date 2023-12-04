@@ -38,10 +38,3 @@ df_events = pd.concat(lst_dfs_events)
 
 # export eventsormance dataframe
 df_events.to_csv(f_events_summary, index=False)
-
-
-
-
-
-
-
