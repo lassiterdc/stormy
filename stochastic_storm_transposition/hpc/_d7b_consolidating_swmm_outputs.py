@@ -25,17 +25,16 @@ def open_dataset_and_assign_attrs(lst_files):
 ds_results = open_dataset_and_assign_attrs(lst_f_modresults)
 ds_results_loaded = ds_results.load() # this seems to speed up the writing of the netcdf file
 
-ds_results_rerun = open_dataset_and_assign_attrs(lst_f_modresults_rerun)
-ds_results_rerun_loaded = ds_results_rerun.load()
-dict_rerun_idx = dict()
-for coord in ds_results_rerun.coords:
-    dict_rerun_idx[coord] = ds_results_rerun[coord].values
+# update ds_results where the model has been re-run
+for f in lst_f_modresults_rerun:
+    ds_results_rerun = open_dataset_and_assign_attrs(f)
+    ds_results_rerun_loaded = ds_results_rerun.load()
+    dict_rerun_idx = dict()
+    for coord in ds_results_rerun.coords:
+        dict_rerun_idx[coord] = ds_results_rerun[coord].values
 
 # https://docs.xarray.dev/en/stable/user-guide/indexing.html#assigning-values-with-indexing
 ds_results_loaded.loc[dict_rerun_idx] = ds_results_rerun_loaded.sel(dict_rerun_idx)
 
 
-
 ds_results_loaded.to_netcdf(f_model_outputs_consolidated, encoding= {"node_flooding_cubic_meters":{"zlib":True}})
-
-#%% also export
