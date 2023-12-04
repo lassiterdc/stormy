@@ -98,6 +98,7 @@ for idx, row in df_strms.iterrows():
         if f_inp != failed_inp_to_rerun:
             continue
         print("Re-running failed simulation {} which failed due to problem {}".format(f_inp, failed_inp_problem))
+        s_tot_sims = 1
     count += 1
     print("Running simulation for realization {} year {} storm {}. {} out of {} simulations complete.".format(rz, yr, storm_id, count, s_tot_sims))
     success = True
