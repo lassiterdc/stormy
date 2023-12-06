@@ -10,6 +10,7 @@ from tqdm import tqdm
 import imageio
 from glob import glob
 from _inputs import *
+import os
 
 # plotting parameters
 width_to_height = 7.5 / 4
@@ -21,18 +22,97 @@ outlier_cutoff = 1e10 # cubic meters
 
 from _inputs import *
 
-scratch_folder = "_scratch/"
-scratch_file = "_scratch/{}"
-
 cmap = "gist_rainbow"
 
-# load data
-_, _, _, _, _, gdf_node_flding, gdf_subs, gdf_nodes, df_comparison = return_attribution_data()
+#%% inspecting water level range across nodes
 
-#%% plotting return periods
-vmax = gdf_node_flding.node_trns_flooding_cubic_meters.max()
+fig, ax = plt.subplots(dpi=300)
+g = sns.ecdfplot(data=df_node_variability, x="std_of_frac_wlevel_median", ax = ax)
+plt.axhline(y = quant_top_var, color = 'r', linestyle = '-') 
+ax.set_xlabel("Standard Deviation of Median Attribution Across Return Periods")
+ax.set_ylabel("Empirical Cumulative Probability")
+plt.savefig(fldr_swmm_analysis_plots + "f_empirical_cdf_of_variability.png",
+            transparent=False, bbox_inches='tight')
+
+# df_counts = pd.concat(lst_dfs)
+# df_counts = df_counts.set_index(["return_period", "frac_wlevel_upper_range"])
+
+str_percentile = str(int(round((1 - quant_top_var)*100,0)))+"%"
+title = "Histogram of attribution standard deviation for top {} variable nodes".format(str_percentile)
+
+# subset based on selected quant
+df_node_variability_subset = df_node_variability[df_node_variability["std_of_frac_wlevel_median"] >= df_node_variability["std_of_frac_wlevel_median"].quantile(quant_top_var)]
+df_node_attribution_subset = df_node_attribution.join(df_node_variability_subset, how = "right")
+
+fig, ax = plt.subplots(dpi=300)
+ax.set_title(title)
+sns.histplot(data=df_node_variability_subset, x="std_of_frac_wlevel_median", ax=ax)
+plt.savefig(fldr_swmm_analysis_plots + "f_histogram_of_variability.png",
+            transparent=False, bbox_inches='tight')
+#%% inspecting the top 20% variable nodes
+gdf_nodes_w_flding = gpd.GeoDataFrame(geometry=gdf_node_attribution.geometry.unique())
+gdf_variable_nodes = gdf_node_attribution.merge(df_node_variability_subset, on = "node_id")
+# gdf_variable_nodes = gdf_variable_nodes[gdf_variable_nodes.flood_return_yrs == 100]
+
+
+fig, ax = plt.subplots(figsize = [width, height], dpi=300) # , subplot_kw=dict(projection=proj)
+
+
+gdf_subs.plot(ax=ax, color="grey", edgecolor="none", alpha = 0.5)
+xlim = ax.get_xlim()
+ylim = ax.get_ylim()
+ax.set_xlim(xlim)
+ax.set_ylim(ylim)
+# gdf_coast.plot(ax=ax, color='black', zorder=1)
+gdf_nodes_w_flding.plot(ax = ax, color = "none", edgecolor = "black", zorder = 1, alpha = 0.7,
+                linewidths = 0.5)
+
+gdf_variable_nodes.plot(ax=ax, column="std_of_frac_wlevel_median",
+                                    vmin=0,# vmax=1,
+                                #  alpha = 0.7,
+                                #  markersize = "marker_size",
+                                    cmap="plasma", edgecolor="none", legend=True,
+                                    missing_kwds=dict(color="none", edgecolor="none", label = "missing values"))
+
+title = "Top {} variable nodes".format(str_percentile)
+ax.set_title(title)
+plt.tight_layout()
+plt.savefig(fldr_swmm_analysis_plots + "f_top_variable_nodes.png",
+            transparent=False, bbox_inches='tight')
+
+
+#%% violin plot
+import seaborn as sns
+fig, ax = plt.subplots(figsize = [8, 6], dpi=300)
+sns.violinplot(data = df_node_attribution_subset.reset_index(), x = "flood_return_yrs", y = "frac_wlevel_median",cut = 0, ax=ax)
+title = "Top {} variable nodes".format(str_percentile)
+ax.set_title(title)
+plt.tight_layout()
+plt.savefig(fldr_swmm_analysis_plots + "f_violin_plt_attribution_variable_nodes.png",
+            transparent=False, bbox_inches='tight')
+
+
+fig, ax = plt.subplots(figsize = [8, 6], dpi=300)
+sns.violinplot(data = df_node_attribution.reset_index(), x = "flood_return_yrs", y = "frac_wlevel_median",cut = 0, ax=ax)
+title = "All nodes"
+ax.set_title(title)
+plt.tight_layout()
+plt.savefig(fldr_swmm_analysis_plots + "f_violin_plt_attribution_allnodes.png",
+            transparent=False, bbox_inches='tight')
+
+
+#%% creating gifs
+# gdf_variable_nodes = gdf_node_attribution.merge(df_node_variability_subset, on = "node_id")
+gdf_node_flding_variable_nodes = gdf_node_flding.merge(df_node_variability_subset, on = "node_id")
+
+quantile_for_vmax = 0.95
 count = -1
 title_return_pd = "{}_yr_flood_vol_recurrence_interval.png"
+# delete old files
+fs_old_plots = glob(fldr_scratch_plots + title_return_pd.format("*"))
+for f in fs_old_plots:
+    os.remove(f)
+
 for rtrn in sst_recurrence_intervals:
     fig, ax = plt.subplots(figsize = [width, height], dpi=300) # , subplot_kw=dict(projection=proj)
 
@@ -44,28 +124,53 @@ for rtrn in sst_recurrence_intervals:
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)
 
-    gdf_subset = gdf_node_flding[gdf_node_flding.flood_return_yrs == rtrn]
+    gdf_subset = gdf_node_flding_variable_nodes[gdf_node_flding_variable_nodes.flood_return_yrs == rtrn]
+    gdf_subset = gdf_subset[gdf_subset.node_flooding_cubic_meters > 0]
 
-    gdf_subset.plot(ax=ax, column="node_trns_flooding_cubic_meters",
-                                     vmin=0, vmax=vmax,
-                                     cmap="Blues", edgecolor="black", legend=True,
-                                     missing_kwds=dict(color="none", edgecolor="lightgrey", label = "missing values"))
-    ax.set_title("\n \n {} year log(flood volume in m$^3$)".format(rtrn))
+    # trying to set the edge colors as attribution
+    # gdf_subset_attribution = gdf_variable_nodes[gdf_variable_nodes.flood_return_yrs == rtrn]
+
+    idx = gdf_subset.set_index(["node_id", "flood_return_yrs"]).index    
+    gdf_subset_attribution = gdf_variable_nodes.set_index(["node_id", "flood_return_yrs"]).loc[idx]
+
+    c_edges = plt.cm.plasma(gdf_subset_attribution["frac_wlevel_mean"])
+
+    gdf_subset["10^3_cubic_meters"] = gdf_subset.node_flooding_cubic_meters * 10**-3
+
+    vmax = gdf_subset["10^3_cubic_meters"].quantile(quantile_for_vmax, interpolation = "lower")
+    gdf_subset.plot(ax=ax, column="10^3_cubic_meters",
+                                     s=50, alpha = .5,vmin=0, vmax=vmax,
+                                     cmap="Blues", edgecolor=None, legend=True, linewidths = 0)
+                                    #  missing_kwds=dict(color="none", edgecolor="lightgrey", label = "missing values"))
+
+    ax.scatter(gdf_subset.geometry.x, gdf_subset.geometry.y, s=30,
+               edgecolor = c_edges, linewidths = 1.5)
+
+    
+    # gdf_subset_attribution.plot(ax=ax, column="frac_wlevel_mean",
+    #                                 #  vmin=0, vmax=1,
+                                    #  alpha = 0.7,
+                                    #  markersize = "marker_size",
+                                    #  cmap="plasma", 
+                                    #  edgecolor=c_edges, legend=True, facecolors = "none")
+                                    #  missing_kwds=dict(color="none", edgecolor="none", label = "missing values"))
+
+    ax.set_title("\n \n {} year log(flood volume in m$^3$) for top {} variable nodes".format(rtrn, str_percentile))
     plt.tight_layout()
-    plt.savefig(scratch_file.format(title_return_pd.format(rtrn)), transparent=False, bbox_inches='tight')
-# plotting attribution statistics
-# merge with the geodataframe for plotting
-gdf_node_attribution = gdf_nodes.merge(df_comparison, how = 'inner', left_on = "NAME", right_on = "node").drop("NAME", axis=1)
-
-gdf_nodes_w_flding = gpd.GeoDataFrame(geometry=gdf_node_attribution.geometry.unique())
+    plt.savefig(fldr_scratch_plots + title_return_pd.format(rtrn), transparent=False, bbox_inches='tight')
+    plt.clf()
 
 title_fld_attribution = "{}_yr_return_flding_quantclosest_flood_vol_attribution.png"
+# delete old files
+fs_old_plots = glob(fldr_scratch_plots + title_fld_attribution.format("*"))
+for f in fs_old_plots:
+    os.remove(f)
 
 for rtrn in sst_recurrence_intervals:
     fig, ax = plt.subplots(figsize = [width, height], dpi=300) # , subplot_kw=dict(projection=proj)
 
     # count += 1
-    gdf_subset = gdf_node_attribution[gdf_node_attribution.flood_return_yrs == rtrn]
+    gdf_subset = gdf_variable_nodes[gdf_variable_nodes.flood_return_yrs == rtrn]
     gdf_subset["marker_size"] = ((gdf_subset["frac_wlevel_var"]+1)**8)
     s_ranks = gdf_subset["frac_wlevel_var"].rank()
     gdf_subset["marker_size"] = (s_ranks/s_ranks.max()+1)*10
@@ -87,10 +192,11 @@ for rtrn in sst_recurrence_intervals:
                                      missing_kwds=dict(color="none", edgecolor="none", label = "missing values"))
 
     
-    ax.set_title("Average flood volume fraction attributable to downstream water level \n of all events causing flood volumes within a {}% bootstrapped confidence interval \n of the {} year flood volume for each node".format(int(sst_conf_interval*100), rtrn))
+    ax.set_title("Average flood attribution of flood events within a {}% bootstrapped confidence interval \n of the {} year flood volume for each node in the top {} variability".format(int(sst_conf_interval*100), rtrn, str_percentile))
     plt.tight_layout()
-    plt.savefig(scratch_file.format(title_fld_attribution.format(rtrn)),
+    plt.savefig(fldr_scratch_plots + title_fld_attribution.format(rtrn),
                 transparent=False, bbox_inches='tight')
+    plt.clf()
 # making an animation
 # https://towardsdatascience.com/how-to-create-a-gif-from-matplotlib-plots-in-python-6bec6c0c952c
 
@@ -120,169 +226,10 @@ def create_gif(files, gif_filepath):
     
 lst_exluded_returns = [0.1, 0.25]
 
-files = glob(scratch_file.format(title_return_pd.format("*")))
-gif_filepath = fldr_swmm_analysis_plots + "recurrence_intervals.gif"
-create_gif(files, gif_filepath)
+# files = glob(fldr_scratch_plots + title_return_pd.format("*"))
+# gif_filepath = fldr_swmm_analysis_plots + "recurrence_intervals.gif"
+# create_gif(files, gif_filepath)
 
-files = glob(scratch_file.format(title_fld_attribution.format("*")))
+files = glob(fldr_scratch_plots + title_fld_attribution.format("*"))
 gif_filepath = fldr_swmm_analysis_plots + "flood_attribution.gif"
 create_gif(files, gif_filepath)
-
-#%% creating box and whiskers of attribution
-# create xarray dataset
-df = pd.DataFrame(gdf_node_attribution)
-node_ids_sorted = df[df.flood_return_yrs == 100].sort_values("lower_CI", ascending=True)["node"].values
-
-df = df.set_index(["flood_return_yrs", "node"])
-df.frac_wlevel_mean[df.frac_wlevel_mean > 1] = 1
-df.frac_wlevel_mean[df.frac_wlevel_mean < 0] = 0
-
-ds = df["frac_wlevel_mean"].to_xarray()
-ds = ds.sel(node = node_ids_sorted)
-# sort by max flooding in 100 year storm
-
-og_node_names = ds.node.values
-ds["node"] = np.arange(len(og_node_names))
-og_returns = ds.flood_return_yrs.values
-ds["flood_return_yrs"] = np.arange(len(og_returns))
-# plotting
-vmin = -.000000000001
-vmax = 1.0000000001
-levels = 6
-fig, ax = plt.subplots()
-ds.plot.pcolormesh(cmap = "coolwarm", x = "flood_return_yrs", y = "node", vmin = vmin, vmax = vmax, ax = ax,
-                   levels = levels, extend = "neither")
-
-#%% violin plot
-import seaborn as sns
-sns.violinplot(data = df.reset_index(), x = "flood_return_yrs", y = "frac_wlevel_mean",cut = 0)
-
-#%% boxplot
-df_ge1y = df[(df["frac_wlevel_mean"].reset_index().flood_return_yrs>=1).values]
-
-df_box = df_ge1y["frac_wlevel_mean"].reset_index().pivot(index = "node", columns = "flood_return_yrs", values = "frac_wlevel_mean")
-
-boxplot = df_box.boxplot()
-boxplot.set_xlabel("Return Period")
-boxplot.set_ylabel("Frac Water Level")
-
-
-sns.boxplot(data=df_ge1y.reset_index(), x = "flood_return_yrs", y = "frac_wlevel_mean")
-#%% inspecting counts
-
-classes = pd.cut(df.frac_wlevel_mean.values, np.linspace(vmin, vmax, levels),labels = np.linspace(vmin,vmax, levels)[1:])
-df["classes"] = np.asarray(classes)
-
-df["classes"] = df["classes"].round(1)
-
-lst_dfs = []
-lst_returns = []
-
-for rtrn, group in df.reset_index().groupby("flood_return_yrs"):
-    if rtrn < 1:
-        continue
-    df_counts = group["classes"].value_counts()
-    df_counts = df_counts.reset_index().sort_values("index")
-    df_counts.columns = ["frac_wlevel_upper_range", "count"]
-    df_counts["density"] = df_counts["count"] / df_counts["count"].sum()
-    # print("Return period: {}".format(rtrn))
-    # print(df_counts)
-    # print("#################")
-    df_counts['return_period'] = rtrn
-    lst_dfs.append(df_counts)
-    lst_returns.append(rtrn)
-
-df_counts = pd.concat(lst_dfs)
-df_counts = df_counts.set_index(["return_period", "frac_wlevel_upper_range"])
-
-# plot bar chart
-sns.set_theme(style="whitegrid")
-
-# penguins = sns.load_dataset("penguins")
-
-# Draw a nested barplot by species and sex
-g = sns.catplot(
-    data=df_counts.reset_index(), kind="bar",
-    x="return_period", y="density", hue="frac_wlevel_upper_range",
-    errorbar="sd", palette="magma", alpha=.8, height=6,
-)
-g.despine(left=True)
-g.set_axis_labels("return period", "density")
-g.legend.set_title("Upper Frac")
-sns.move_legend(g, "upper left", bbox_to_anchor=(.75, .5))
-
-#
-g = sns.catplot(
-    data=df_counts.reset_index(), kind="bar",
-    x="frac_wlevel_upper_range", y="density", hue="return_period",
-    errorbar="sd", palette="magma", alpha=.8, height=6,
-)
-g.despine(left=True)
-g.set_axis_labels("frac_wlevel_upper_range", "density")
-g.legend.set_title("return_period")
-sns.move_legend(g, "upper left", bbox_to_anchor=(.85, .5))
-
-#%% inspecting water level range across nodes
-lst_ranges = []
-lst_nodes = []
-for node, group in df_ge1y.reset_index().groupby("node"):
-    frac_range = group.frac_wlevel_mean.max() - group.frac_wlevel_mean.min()
-    # df_counts = group["classes"].value_counts()
-    # df_counts = df_counts.reset_index().sort_values("index")
-    # df_counts.columns = ["frac_wlevel_upper_range", "count"]
-    # df_counts["density"] = df_counts["count"] / df_counts["count"].sum()
-    # print("Return period: {}".format(rtrn))
-    # print(df_counts)
-    # print("#################")
-    # df_counts['return_period'] = rtrn
-    # lst_dfs.append(df_counts)
-    lst_ranges.append(frac_range)
-    lst_nodes.append(node)
-
-df_node_ranges = pd.DataFrame(dict(node = lst_nodes, range = lst_ranges))
-
-df_node_ranges.hist(column = "range")
-
-sns.histplot(data=df_node_ranges, x="range")
-
-fig, ax = plt.subplots(dpi=300)
-g = sns.ecdfplot(data=df_node_ranges, x="range", ax = ax)
-plt.axhline(y = 0.8, color = 'r', linestyle = '-') 
-ax.set_xlabel("Frac Water Level Range per Node")
-ax.set_ylabel("Empirical Cumulative Probability")
-
-
-# df_counts = pd.concat(lst_dfs)
-# df_counts = df_counts.set_index(["return_period", "frac_wlevel_upper_range"])
-#%% inspecting the top 20% variable nodes
-df_variable_nodes = df_node_ranges[df_node_ranges.range >= df_node_ranges.range.quantile(quant_top_var)]
-
-
-gdf_variable_nodes = gdf_node_attribution.merge(df_variable_nodes, on = "node")
-gdf_variable_nodes = gdf_variable_nodes[gdf_variable_nodes.flood_return_yrs == 100]
-
-
-fig, ax = plt.subplots(figsize = [width, height], dpi=300) # , subplot_kw=dict(projection=proj)
-
-
-gdf_subs.plot(ax=ax, color="grey", edgecolor="none", alpha = 0.5)
-xlim = ax.get_xlim()
-ylim = ax.get_ylim()
-ax.set_xlim(xlim)
-ax.set_ylim(ylim)
-# gdf_coast.plot(ax=ax, color='black', zorder=1)
-gdf_nodes_w_flding.plot(ax = ax, color = "none", edgecolor = "black", zorder = 1, alpha = 0.7,
-                linewidths = 0.5)
-
-gdf_variable_nodes.plot(ax=ax, column="range",
-                                    vmin=0, vmax=1,
-                                #  alpha = 0.7,
-                                #  markersize = "marker_size",
-                                    cmap="plasma", edgecolor="none", legend=True,
-                                    missing_kwds=dict(color="none", edgecolor="none", label = "missing values"))
-
-
-ax.set_title("Nodes in top 20% of variability")
-plt.tight_layout()
-plt.savefig(scratch_file.format(title_fld_attribution.format(rtrn)),
-            transparent=False, bbox_inches='tight')
