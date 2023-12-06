@@ -12,8 +12,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 import xarray as xr
 
-#%% load data
-df_variable_nodes, ds_flood_attribution, ds_sst_compound, ds_sst_freebndry, ds_events, _, _, _, _ = return_attribution_data()
 #%%
 allvars = predictors + response
 lst_sse_hat_per_node = []
@@ -22,7 +20,7 @@ lst_reg_rf_models = []
 df_rf_perf = pd.DataFrame()
 count = -1
 node_count = -1
-for node in tqdm(df_variable_nodes.node.values):
+for node in tqdm(df_variable_nodes.index.values):
     node_count += 1
     ds_flood_attribution_sub = ds_flood_attribution.sel(node_id = node)
     ds_sst_compound_sub = ds_sst_compound.sel(node_id = node)
