@@ -11,8 +11,6 @@ from sklearn.ensemble import RandomForestRegressor
 df_rf_perf = pd.read_csv("analysis/random_forest/g_random_forest_parameter_tuning.csv")
 df_rf_parameters = pd.read_csv("analysis/random_forest/g_random_forest_parameters.csv")
 
-_, ds_flood_attribution, ds_sst_compound, _, ds_events, _, _, _, _ = return_attribution_data()
-
 allvars = predictors + response
 #%% analyzing
 lst_fit_models = []
@@ -60,7 +58,8 @@ df_importance_ranked = df_importance.rank(axis = 1, ascending = False).astype(in
 
 lst_val_counts = []
 for column in df_importance_ranked:
-    s = df_importance_ranked[column].value_counts()
+    s = df_importance_ranked[column].value_counts().sort_index()
+    s.name = column
     lst_val_counts.append(s)
     # fig, ax = plt.subplots()
     # df_importance_ranked[column].value_counts().plot(kind = 'barh', ax = ax)
@@ -68,9 +67,9 @@ for column in df_importance_ranked:
     # ax.set_ylabel("feature importance ranking")
     # ax.set_title(column)
 df_val_counts = pd.DataFrame(lst_val_counts).fillna(0)
-df_val_counts = df_val_counts.T.sort_index().T
+# df_val_counts = df_val_counts.T.sort_index().T
 
-fig, ax = plt.subplots(dpi = 300, figsize = (8, 4))
+fig, ax = plt.subplots(dpi = 300, figsize = (9, 5))
 
 lst_colors = ['#d53e4f','#fc8d59','#fee08b','#e6f598','#99d594','#3288bd']
 lst_colors.reverse()
@@ -79,11 +78,11 @@ df_val_counts.plot.barh(ax = ax, color = lst_colors, label = "importance ranking
 ax.set_xlabel("node_count")
 # ax.set_ylabel("count")
 ax.set_title("Random Forest Feature Importance Plot for Predicting Flood Attribution")
-fig.legend(bbox_to_anchor=(1.08,.92))
+fig.legend(bbox_to_anchor=(1.11,.92), title = "Importance\nRanking")
 plt.tight_layout()
 # handles, labels = ax.get_legend_handles_labels()
 plt.yticks(rotation=45)
-plt.savefig("analysis/plots/f_importance.png")
+plt.savefig("analysis/plots/f_importance.png", bbox_inches = 'tight')
 
 #%% show nodes with different important features
 df_importance_ranked[df_importance_ranked.max_mm_per_hour == 1]
