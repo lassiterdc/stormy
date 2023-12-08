@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata xml:lang="en"><Esri><CreaDate>20231206</CreaDate><CreaTime>15140600</CreaTime><ArcGISFormat>1.0</ArcGISFormat><SyncOnce>TRUE</SyncOnce><DataProperties><lineage><Process ToolSource="c:\program files\arcgis\pro\Resources\ArcToolbox\toolboxes\Data Management Tools.tbx\RepairGeometry" Date="20231206" Time="151406">RepairGeometry subcatchments DELETE_NULL Esri</Process></lineage></DataProperties></Esri></metadata>
