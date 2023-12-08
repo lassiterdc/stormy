@@ -22,6 +22,7 @@ dir_sst_outs <-paste0(dir_sst, "local/outputs/")
 f_obs_cdf <- paste0(dir_sst_outs, "b2_F_of_obs_data-cdfvals.csv")
 f_sst_cdf <- paste0(dir_sst_outs, "b3_F_of_sst_data-cdfvals.csv")
 f_out_sim_wlevel <- paste0(dir_sst_outs, "r_a_sim_wlevel_cdf.csv")
+f_out_sim_wlevel_with_emp_cdf <- paste0(dir_sst_outs, "r_a_sim_wlevel_cdf_with_multivariate_empcdf.csv")
 
 # define variables and order then with the storm surge variables first
 # which is needed for conditional simulation
@@ -97,5 +98,152 @@ overplot(Sim[1:n_to_plot,],obs[1:n_to_plot,], method = "kendall") # data is in l
 # export simulated data to csv
 tibble(Sim) %>% write_csv(f_out_sim_wlevel)
 ```
+```{r}
+# building empirical CDF of simulated events
+# pasted from https://github.com/ben519/mltools/blob/22d9c397aad1e7bc9d01366d4bcc76f39ae0d579/R/empirical_cdf.R#L19
+empirical_cdf <- function(x, ubounds){
+  # Build the empirical_cdf of the given data
+  # CDF points are the points given by ubounds
+  # x can be a numeric vector or a data.table
+  # ubounds can be a numeric vector or a data.table, but must correspond to x accordingly
+  
+  #--------------------------------------------------
+  # Hack to pass 'no visible binding for global variable' notes from R CMD check
+  
+  BoundID <- NULL
+  N <- NULL
+  N.cum <- NULL
+  
+  #--------------------------------------------------
+  # Check the input
+  
+  if(!is.numeric(x) & !is.data.table(x))
+    stop("x must be numeric or a data.table object")
+  
+  if(!is.numeric(ubounds) & !is.data.table(ubounds))
+    stop("ubounds must be numeric or a data.table object")
+  
+  if(is.data.table(ubounds)){
+    if(ncol(ubounds) > 1){
+      if(!is.data.table(x)){
+        stop("If ubounds is a data.table with multiple columns, x should be a data.table object with corresponding columns")
+      } else if(length(setdiff(colnames(ubounds), colnames(x))) > 0)
+        stop("ubounds contains columns not found in x")
+    }
+  }
+  
+  if(is.data.table(x)){
+    if(ncol(x) > 1 & !is.data.table(ubounds)){
+      stop("If x is a data.table with multiple columns, ubounds must be a data.table with at least one column otherwise it is unclear which column of x ubounds relates to.")
+    }
+  }
+  
+  #--------------------------------------------------
+  
+  # Build ubounds
+  if(!is.data.table(ubounds)){
+    ubounds <- data.table(UpperBound = ubounds)
+    if(is.data.table(x)) setnames(ubounds, "UpperBound", colnames(x))  # Here, colnames(x) should be one value
+  }
+  
+  # If x is a vector
+  if(mode(x) == "numeric"){
+    
+    # Convert x to a data.table object
+    x <- data.table(x)
+    setnames(x, names(ubounds))
+  }
+  
+  #--------------------------------------------------
+  # From here on, assume x is a data.table
+  
+  # Convert columns of x and ubounds to numeric. This is to fix a data.table bug involving rolling joins on integer columns
+  x <- x[, colnames(ubounds), with=F]
+  ubounds <- copy(ubounds)
+  for(col in colnames(ubounds)){
+    set(x, j=col, value=as.numeric(x[[col]]))
+    set(ubounds, j=col, value=as.numeric(ubounds[[col]]))
+  }
+  
+  # Reduce to uniques
+  uboundsUniques <- unique(ubounds)
+  
+  # Build a copy of x
+  binned <- copy(x[, names(uboundsUniques), with=FALSE])
+  
+  # For each binning column, match each row of x to the nearest boundary above
+  for(col in names(uboundsUniques)){
+    uboundDT <- unique(data.table(uboundsUniques[[col]], uboundsUniques[[col]]))
+    setnames(uboundDT, c(col, paste0("Bound.", col)))
+    binned <- uboundDT[binned, on=col, roll=-Inf, nomatch=0]
+  }
+  
+  # Aggregate to unique tuples based on Bound.* columns
+  binned.uniques <- binned[, .N, keyby=eval(paste0("Bound.", names(ubounds)))]
+  setnames(binned.uniques, paste0("Bound.", names(ubounds)), names(ubounds))
+  
+  # Get the count of samples directly below EVERY bound
+  uboundsUniques <- binned.uniques[uboundsUniques, on=names(ubounds)]
+  uboundsUniques[is.na(N), N := 0]
+  
+  # Counting (see https://stackoverflow.com/a/40583817/2146894)
+  if(ncol(ubounds) == 1){
+    uboundsUniques[, N.cum := cumsum(N)]
+  } else{
+    fixedCols <- names(ubounds)[-1]
+    uboundsUniques[, N.cum := cumsum(N), by=fixedCols]
+    
+    for(i in seq_len(ncol(ubounds) - 1)){
+      i = i + 1
+      fixedCols <- names(ubounds)[-i]
+      uboundsUniques[, N.cum := cumsum(N.cum), by=fixedCols]
+    }
+  }
+  
+  # Cleanup
+  samples <- nrow(x)
+  uboundsUniques[, `:=`(N = NULL, CDF = N.cum/samples)]
+  
+  # Join back to ubounds in case of potential duplicate ubounds
+  ubounds <- uboundsUniques[ubounds, on=names(ubounds)]
+  
+  return(ubounds[])
+}
+```
 
+
+```{r}
+# testing empirical_cdf functuion
+dt <- data.table(x=c(0.3, 1.3, 1.4, 3.6), y=c(1.2, 1.2, 3.8, 3.9))
+empirical_cdf(dt$x, ubounds=1:4)
+empirical_cdf(dt, ubounds=CJ(x = 1:4, y = 1:4))
+```
+
+```{r}
+# compute the empirical CDF value of each compound event
+library("data.table")
+
+dt_sim = data.table(Sim)
+
+emp_cdf_sim <- empirical_cdf(dt_sim, dt_sim[1,])
+
+dt_results <- data.table()
+
+# Loop through all rows
+for (i in 1:nrow(dt_sim)) {
+  # print(i)
+  # Accessing elements in each row
+  row_values <- dt_sim[i, ]
+  
+  emp_cdf_sim <- empirical_cdf(dt_sim, row_values)
+  
+  dt_results <- rbind(dt_results, emp_cdf_sim)
+  
+  # Append the squared_age to the result_list
+  # result_list <- c(result_list, squared_age)
+}
+
+# export simulated data to csv
+tibble(dt_results) %>% write_csv(f_out_sim_wlevel_with_emp_cdf)
+```
 
