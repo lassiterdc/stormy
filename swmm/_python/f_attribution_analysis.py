@@ -160,6 +160,8 @@ for rtrn in sst_recurrence_intervals:
     plt.savefig(fldr_scratch_plots + title_return_pd.format(rtrn), transparent=False, bbox_inches='tight')
     plt.clf()
 
+
+
 title_fld_attribution = "{}_yr_return_flding_quantclosest_flood_vol_attribution.png"
 # delete old files
 fs_old_plots = glob(fldr_scratch_plots + title_fld_attribution.format("*"))
@@ -233,3 +235,193 @@ lst_exluded_returns = [0.1, 0.25]
 files = glob(fldr_scratch_plots + title_fld_attribution.format("*"))
 gif_filepath = fldr_swmm_analysis_plots + "flood_attribution.gif"
 create_gif(files, gif_filepath)
+
+#%% trying to create plot that shoes attribution as color and volume as point size
+from pathlib import Path
+import rioxarray as rxr
+use_aerial_imagery = True
+image_agg_factor = 10
+
+f_imagery =  f_imagery_fullres
+if Path(f_imagery).is_file() and use_aerial_imagery:
+    imag_agg_factor = int(image_agg_factor)
+    pass
+else: 
+    f_imagery = None
+    imag_agg_factor = None
+
+if f_imagery is not None:
+    ds_im = rxr.open_rasterio(f_imagery, chunks=dict(x="1000MB"))
+    ds_im = ds_im.coarsen(dict(x = imag_agg_factor, y = imag_agg_factor)).mean()
+    ds_im = ds_im.rio.reproject("EPSG:4326")
+    ds_im = ds_im/255
+#%%
+title_plt = "{}_yr_fld_attribution_sized_by_volume.png"
+# delete old files
+fs_old_plots = glob(fldr_scratch_plots + title_plt.format("*"))
+for f in fs_old_plots:
+    os.remove(f)
+
+for rtrn in sst_recurrence_intervals:
+    # DCL WORK
+    # if rtrn not in [50,100]:
+    #     continue
+    # DCL WORK
+    fig, ax = plt.subplots(figsize = [width, height], dpi=300) # , subplot_kw=dict(projection=proj)
+
+    # count += 1
+    gdf_subset = gdf_variable_nodes[gdf_variable_nodes.flood_return_yrs == rtrn]
+    # gdf_subset["marker_size"] = ((gdf_subset["frac_wlevel_var"]+1)**8)
+    # s_ranks = gdf_subset["frac_wlevel_var"].rank()
+    
+    gdf_subset = gdf_subset.set_index(["node_id", "flood_return_yrs"])
+    idx = gdf_subset.index    
+    gdf_subset_flooding = gdf_node_flding_variable_nodes.set_index(["node_id", "flood_return_yrs"]).loc[idx]
+    # gdf_subset_flooding["10^3_cubic_meters"] = gdf_subset_flooding.node_flooding_cubic_meters * 10**-3
+    # var_to_use_for_size = 
+
+    gdf_subset = gdf_subset.join(gdf_subset_flooding["node_flooding_cubic_meters"])
+    # c_edges = plt.cm.plasma(gdf_subset_attribution["frac_wlevel_mean"])
+
+    # np.histogram(gdf_subset[var_to_use_for_size], bins = 5)
+
+    gdf_subset_flooding["log_of_flooding_cubic_meters"] = np.log10(gdf_subset["node_flooding_cubic_meters"])
+    log_fld_floor = 1
+    log_fld_ceil = np.ceil(gdf_subset_flooding["log_of_flooding_cubic_meters"].max())
+    single_int_bin_edges = np.arange(log_fld_floor, log_fld_ceil+1)
+    # bin_edges_skip_negatives = [log_fld_floor]
+    bin_edges_skip_negatives = []
+    # bin_labels = ["$<10$ $m^3$"]
+    bin_labels = []
+    label_pattern = "$>10^{}$ $m^3$"
+    for edge in single_int_bin_edges:
+        bin_edges_skip_negatives.append(edge)
+        bin_labels.append(label_pattern.format(int(edge)))
+
+    # for ind, row in gdf_subset_flooding["log_of_flooding_cubic_meters"].iter():
+    #     continue
+
+    s_size_categories = pd.cut(gdf_subset_flooding["log_of_flooding_cubic_meters"], bins=bin_edges_skip_negatives, right = True,
+           labels = np.arange(1, len(bin_edges_skip_negatives)))
+    s_size_categories.name = "marker_size"
+        
+    # max_marker_size = gdf_subset[var_to_use_for_size].quantile(quantile_for_vmax, interpolation = "lower")
+
+    gdf_subset["order_of_magnitude"] = s_size_categories.values
+    # this will exclude any flood value that is less than 10**-1 (0.1 cubic meters)
+    gdf_subset = gdf_subset.dropna()
+    gdf_subset["marker_size"] = (gdf_subset["order_of_magnitude"].astype(int)+1)**3
+    # gdf_subset["marker_size"][gdf_subset["marker_size"] > max_marker_size] = max_marker_size
+    gdf_subs.dissolve().geometry.exterior.plot(ax=ax, color="black", edgecolor="none", alpha = .7, zorder = 6)
+    ax.grid(zorder = 5, alpha = 0.7)
+    xlim = ax.get_xlim()
+    ylim = ax.get_ylim()
+    ax.set_xlim(xlim)
+    ax.set_ylim(ylim)
+
+    if f_imagery is not None:
+        ds_im.plot.imshow(x = "x", y = "y", ax = ax, zorder = 4, alpha = 0.6)
+
+    # gdf_coast.plot(ax=ax, color='black', zorder=1)
+    # gdf_nodes_w_flding.plot(ax = ax, color = "none", edgecolor = "black", zorder = 1, alpha = 0.7,
+    #                linewidths = 0.5)
+    gdf_subset.plot(ax=ax, column="frac_wlevel_mean",
+                                     vmin=0, vmax=1,
+                                     alpha = 0.8,
+                                     markersize = 0,
+                                     edgecolor="none",
+                                     facecolor = "none",
+                                     cmap="plasma", legend=True,
+                                     zorder = 7)
+                                    #  missing_kwds=dict(color="none", edgecolor="none", label = "missing values"))
+    # cmap = plt.cm.get_cmap("plasma", 5)
+    # c_edges = plt.cm.plasma(gdf_subset["frac_wlevel_mean"])
+    # c_edges = cmap((gdf_subset["frac_wlevel_mean"]))
+    scatter = ax.scatter(gdf_subset.geometry.x, gdf_subset.geometry.y, s=gdf_subset["marker_size"],
+               edgecolor = c_edges, facecolor = "none", linewidths = 1.75,
+               alpha = .9, zorder = 7)
+    
+    handles, labels = scatter.legend_elements(prop="sizes", alpha=0.6)
+    legend2 = ax.legend(handles, bin_labels, loc="upper right", title="Flood Volume")
+    ax.set_title("Average flood attribution of flood events within a {}% bootstrapped confidence interval \n of the {} year flood volume for each node in the top {} variability".format(int(sst_conf_interval*100), rtrn, str_percentile))
+    plt.tight_layout()
+    plt.savefig(fldr_swmm_analysis_plots + title_plt.format(rtrn),
+                transparent=False, bbox_inches='tight')
+    # plt.clf()
+files = glob(fldr_swmm_analysis_plots + title_plt.format("*"))
+gif_filepath = fldr_swmm_analysis_plots + "flood_attribution_and_volume.gif"
+create_gif(files, gif_filepath)
+
+#%% plotting flood return period vs. rainfall and storm surge return period
+df_return_pd_analysis = pd.read_csv(f_return_pd_analysis).set_index(["realization", "year", "storm_id", "node_id"])
+# find unique events
+lst_strm_id_vals = ["realization", "year", "storm_id"]
+lst_weather_stats = ["max_sim_wlevel", "depth_mm"]
+unique_storms_with_flding = df_return_pd_analysis.loc[:,lst_strm_id_vals].drop_duplicates()
+unique_storms_with_flding = unique_storms_with_flding.sort_values(lst_strm_id_vals).reset_index(drop=True)
+
+df_events_subset = df_events.join(unique_storms_with_flding.set_index(lst_strm_id_vals), how = "right")
+df_events_subset = df_events_subset.loc[:, lst_weather_stats]
+
+return_periods_for_plotting = np.arange(0.2, 2000+0.2, step = 0.2)
+quants_weather = return_period_to_quantile(ds_events, return_periods_for_plotting)
+ds_quants_weather, df_quants_weather = compute_return_periods(ds_events, quants_weather, return_periods_for_plotting)
+df_quants_weather = df_quants_weather.loc[:, lst_weather_stats]
+
+# assign a return period to each weather stat
+# stat = "max_sim_wlevel"
+lst_s_assigned_return_pds = []
+
+max_return_pd = df_return_pd_analysis.reset_index().year.max()
+
+for stat in lst_weather_stats:
+    df_quants_weather_subset = df_quants_weather[stat].drop_duplicates(keep = "first")
+    s_assigned_rtrn_pds = pd.cut(df_events_subset[stat], bins = df_quants_weather_subset, labels = df_quants_weather_subset.index.values[:-1],
+                                 include_lowest = True)
+    s_assigned_rtrn_pds = s_assigned_rtrn_pds.astype(float)
+    s_assigned_rtrn_pds.name = "{}_return_pd_yrs".format(stat)
+    missing_vals = s_assigned_rtrn_pds[s_assigned_rtrn_pds.isna()]
+    if len(missing_vals)>0:
+        # figure out whether the storms are really small or really large
+        df_missing = df_events_subset.join(missing_vals, how = "right")
+        if len(missing_vals) == 1:
+            # if the missing value is the max value in the dataset,
+            # assign it a return period equal to the number of years in the dataset
+            if (df_missing[stat] == df_events_subset[stat].max()).values[0]:
+                s_assigned_rtrn_pds = s_assigned_rtrn_pds.replace(np.nan, max_return_pd)
+    lst_s_assigned_return_pds.append(s_assigned_rtrn_pds)
+
+df_event_stat_return_pds = pd.DataFrame(lst_s_assigned_return_pds).T
+
+
+# df_return_pd_analysis.join(df_event_stat_return_pds.reset_index(), on = lst_strm_id_vals, how = "left")
+
+df_return_pd_analysis = df_return_pd_analysis.join(df_event_stat_return_pds)
+
+#%% plot it!!!!!!
+import matplotlib as mpl
+
+
+cmap = plt.cm.viridis  # define the colormap
+cmaplist = [cmap(i) for i in range(cmap.N)]
+# define the bins and normalize
+bounds = np.sort(df_return_pd_analysis.flood_return_yrs.unique())
+norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
+
+fig, ax = plt.subplots(dpi=300)
+df_return_pd_analysis.plot.scatter(ax=ax, 
+                           x = "max_sim_wlevel_return_pd_yrs",
+                           y = "depth_mm_return_pd_yrs",
+                           c="flood_return_yrs",
+                           logx = True,
+                           logy = True,
+                           cmap = cmap,
+                           norm = norm,
+                           alpha = 0.9,
+                           zorder = 8)
+ax.grid(zorder = 5, alpha = 0.7)
+ax.set_title("Flood Return Period vs. Boundary Condition Return Period")
+
+plt.savefig(fldr_swmm_analysis_plots + "f_flood_return_pd_vs_bndry_return_pd.png",
+            transparent=False, bbox_inches='tight')
+    
