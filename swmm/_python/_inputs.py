@@ -16,10 +16,15 @@ dir_outputprocessing = dir_swmm_sst + "_output_processing/"
 dir_swmm_shps = dir_swmm + "swmm_model/exported_layers/"
 dir_swmm_design_storms = dir_swmm_sst + "design_storm_scenarios/"
 
+dir_data = dir_stormy + "data/"
+dir_geospatial_data = dir_data + "geospatial/"
 
+f_imagery_fullres = dir_geospatial_data + "imagery.tif"
 
 # simulated event statistics
 dir_sst = dir_stormy + "stochastic_storm_transposition/"
+# dir_sst_local_outputs = dir_sst + "local/outputs/"
+# f_simulated_compound_event_summary = dir_sst_local_outputs + "c_simulated_compound_event_summary.csv"
 # dir_local_outputs = dir_sst + "local/outputs/"
 dir_scenario_weather = dir_swmm_sst + "weather/"
 # f_simulated_cmpnd_event_summaries = dir_local_outputs + "c_simulated_compound_event_summary.csv"
@@ -74,6 +79,7 @@ fldr_scratch_plots = fldr_scratch + "plots/"
 fldr_swmm_analysis = fldr_python + "analysis/"
 fldr_swmm_analysis_plots = fldr_swmm_analysis + "plots/"
 f_bootstrapping_analysis = fldr_swmm_analysis + "df_comparison_bootstrapped.csv"
+f_return_pd_analysis = fldr_swmm_analysis + "df_bootstrapped_eventids_for_each_node_and_return_period.csv"
 
 ## plots 
 dir_plots = dir_outputprocessing + "_plots/"
@@ -102,9 +108,9 @@ def return_period_to_quantile(ds, return_pds):
         quants.append(quant)
     return quants
 
-def compute_return_periods(ds, quants):
-    ds_quants = ds.quantile(quants, dim = ["storm_id", "realization", "year"], method="closest_observation")
-    ds_quants = ds_quants.assign_coords(dict(quantile = sst_recurrence_intervals))
+def compute_return_periods(ds, quants, recurrence_interval_yrs = sst_recurrence_intervals, method = "closest_observation"):
+    ds_quants = ds.quantile(quants, dim = ["storm_id", "realization", "year"], method=method)
+    ds_quants = ds_quants.assign_coords(dict(quantile = recurrence_interval_yrs))
     ds_quants = ds_quants.rename((dict(quantile="flood_return_yrs")))
     df_quants = ds_quants.to_dataframe()
     return ds_quants, df_quants
@@ -119,8 +125,10 @@ gdf_out = gpd.read_file(f_shp_out)
 gdf_nodes = pd.concat([gdf_jxns, gdf_strg, gdf_out]).loc[:, ["NAME", "geometry"]]
 gdf_nodes = gdf_nodes.to_crs(proj)
 df_comparison = pd.read_csv(f_bootstrapping_analysis)
-
 df_events = pd.read_csv(f_sims_summary).set_index(["realization", "year", "storm_id"])
+
+# df_simulated_compound_event_summary = 
+
 # this is a workaround because I left the format as a string
 try:
     event_duration_hr = pd.to_timedelta(df_events["event_duration_hr"]) / np.timedelta64(1, 'h')
@@ -208,13 +216,4 @@ df_quants_fld = ds_quants_fld.to_dataframe()
 df_quants_fld = df_quants_fld.reset_index()
 gdf_node_flding = gdf_nodes.merge(df_quants_fld, how = 'inner', left_on = "NAME", right_on = "node_id").drop("NAME", axis=1)
 
-# # compute event statistic quantiles
-# ## rain depth
-# da_rain_depth = ds_events.depth_mm
-# ds_quants, df_quants = compute_return_periods(da_rain_depth)
-# ## rain intensity
-# da_rain_int = ds_events.max_mm_per_hour
-# ## peak storm surge
-# da_wlevel = ds_events.max_sim_wlevel
-
-# return df_node_variability, ds_flood_attribution, ds_sst_compound, ds_sst_freebndry, gdf_node_flding, gdf_subs, gdf_nodes, df_comparison
+# joining flood attribution by quantile to weather quantiles
