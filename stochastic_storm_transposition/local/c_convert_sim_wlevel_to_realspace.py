@@ -27,6 +27,7 @@ sst_tstep = 5 # minutes
 n_events_per_year_sst = 5
 k_selection = 5
 estimate_k = False # if true, run code for generating elbow method plot
+sst_recurrence_intervals = [0.5, 1, 2, 5, 10, 25, 50, 100]
 
 f_selection = "outputs/b_pdf_selections.csv"
 f_cdfs_obs = "outputs/b2_F_of_obs_data-cdfvals.csv"
@@ -53,8 +54,22 @@ df_cond_sim = pd.read_csv(f_wlevel_cdf_sims_from_copula)
 
 vars_all = ["depth_mm", "mean_mm_per_hr", "max_mm_per_hour", "max_surge_ft", "surge_peak_after_rain_peak_min"]
 
+def return_period_to_quantile(n_events_per_year_sst, return_periods):
+    total_years = 5000 # this number doesn't matter
+    total_events = total_years*n_events_per_year_sst
+    quants = []
+    for return_pd in return_periods:
+        expected_num_of_storms = total_years / return_pd
+        quant = 1 - expected_num_of_storms / total_events
+        quants.append(quant)
+    return quants
+
+return_period_quantiles = return_period_to_quantile(n_events_per_year_sst,sst_recurrence_intervals)
+
+
+
 # creating dataframe of real-space water level values from conditional copula simulation
-def return_realspace_for_var(df, varname, df_selection = df_selection):
+def return_realspace_for_var(df, varname, df_selection = df_selection, calc_return_pds = False, return_period_quantiles = None):
         s_dist_info = df_selection[df_selection.data == varname].T.squeeze()
 
         dist = s_dist_info["fx"]
@@ -82,8 +97,10 @@ def return_realspace_for_var(df, varname, df_selection = df_selection):
                 continue
             else:
                 fx = f["args"]["fx"]
-
-        s_cdf = df[varname].copy()
+        if calc_return_pds:
+            s_cdf = return_period_quantiles
+        else:
+            s_cdf = df[varname].copy()
         if np.isnan(shape): # 2 parameter
             s_var_trns = pd.Series(fx.ppf(s_cdf, loc, scale), name = varname)
         else: # 3 parameters
@@ -138,9 +155,13 @@ def return_realspace_for_var(df, varname, df_selection = df_selection):
 
 # create dataframe of realspace simulations
 lst_realspace_copula_sims = []
+lst_realspace_return_periods = []
 for v in vars_all:
     s_var_fit_cdf = return_realspace_for_var(df=df_cond_sim, varname=v, df_selection = df_selection)
     lst_realspace_copula_sims.append(s_var_fit_cdf)
+
+    s_var_fit_cdf_returns = return_realspace_for_var(df=df_cond_sim, varname=v, df_selection = df_selection, calc_return_pds = True, return_period_quantiles = return_period_quantiles)
+    lst_realspace_return_periods.append(s_var_fit_cdf_returns)
 df_realspace_copula_sims = pd.concat(lst_realspace_copula_sims, axis = 1)
 
 
