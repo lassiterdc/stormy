@@ -49,7 +49,7 @@ x_sst_cond <- as.matrix(df_sst_cdf)
 RVM <- CDVineCondFit(y_obs ,Nx=length(vars_rain),treecrit="AIC",type="CVine-DVine",selectioncrit="AIC",
                      rotations = TRUE)
 # inspect fitted copula object
-# summary(RVM)
+summary(RVM)
 
 
 # conditional sampling from a D-Vine
