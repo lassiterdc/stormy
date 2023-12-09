@@ -35,6 +35,7 @@ f_cdfs_obs = "outputs/b2_F_of_obs_data-cdfvals.csv"
 f_sst_event_summaries = "outputs/b_sst_event_summaries.csv"
 f_observed_compound_event_summaries = "outputs/b_observed_compound_event_summaries.csv"
 f_wlevel_cdf_sims_from_copula = "outputs/r_a_sim_wlevel_cdf.csv"
+f_wlevel_cdf_sims_from_copula_with_multvar_empcdf = "outputs/r_a_sim_wlevel_cdf_with_multivariate_empcdf.csv"
 f_simulated_compound_event_summary = "outputs/c_simulated_compound_event_summary.csv"
 f_observed_compound_event_summaries_with_k = "outputs/c_observed_compound_event_summaries_with_k.csv"
 
@@ -47,8 +48,8 @@ df_compound_summary = pd.read_csv(f_observed_compound_event_summaries, index_col
 # load selected marginal distribution information
 df_selection = pd.read_csv(f_selection)
 # load conditional simulations from R script
-df_cond_sim = pd.read_csv(f_wlevel_cdf_sims_from_copula)
-
+# df_cond_sim = pd.read_csv(f_wlevel_cdf_sims_from_copula)
+df_cond_sim = pd.read_csv(f_wlevel_cdf_sims_from_copula_with_multvar_empcdf)
 
 # create list of functions and variables
 
@@ -155,19 +156,20 @@ def return_realspace_for_var(df, varname, df_selection = df_selection, calc_retu
 
 # create dataframe of realspace simulations
 lst_realspace_copula_sims = []
-lst_realspace_return_periods = []
+# lst_realspace_return_periods = []
 for v in vars_all:
     s_var_fit_cdf = return_realspace_for_var(df=df_cond_sim, varname=v, df_selection = df_selection)
     lst_realspace_copula_sims.append(s_var_fit_cdf)
 
-    s_var_fit_cdf_returns = return_realspace_for_var(df=df_cond_sim, varname=v, df_selection = df_selection, calc_return_pds = True, return_period_quantiles = return_period_quantiles)
-    lst_realspace_return_periods.append(s_var_fit_cdf_returns)
+    # s_var_fit_cdf_returns = return_realspace_for_var(df=df_cond_sim, varname=v, df_selection = df_selection, calc_return_pds = True, return_period_quantiles = return_period_quantiles)
+    # lst_realspace_return_periods.append(s_var_fit_cdf_returns)
 df_realspace_copula_sims = pd.concat(lst_realspace_copula_sims, axis = 1)
-
-
+# add columns for empirical multivariate_cdf
+df_realspace_copula_sims["n_emp_multivar_cdf"] = df_cond_sim["N.cum"]
+df_realspace_copula_sims["emp_multivar_cdf"] = df_cond_sim["CDF"]
 # figuring out what's going on with some weird values
 vars_surge = ["max_surge_ft", "surge_peak_after_rain_peak_min"]
-df_simulated_compound_event_summaries = df_sst_event_summaries.join(df_realspace_copula_sims.loc[:, vars_surge])
+df_simulated_compound_event_summaries = df_sst_event_summaries.join(df_realspace_copula_sims.loc[:, vars_surge+["n_emp_multivar_cdf","emp_multivar_cdf"]])
 
 df_inspection = df_simulated_compound_event_summaries.join(df_cond_sim, rsuffix="_cdf")
 
