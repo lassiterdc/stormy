@@ -25,12 +25,14 @@ from _inputs import *
 cmap = "gist_rainbow"
 
 #%% inspecting water level range across nodes
-
-fig, ax = plt.subplots(dpi=300)
+size_scaler = 1.6
+fig, ax = plt.subplots(dpi=300, figsize=(2.5,4.5))
 g = sns.ecdfplot(data=df_node_variability, x=std_varname, ax = ax)
 plt.axhline(y = quant_top_var, color = 'r', linestyle = '-') 
-ax.set_xlabel("Standard Deviation of Mean Attribution Across Return Periods")
+ax.set_xlabel("Standard Deviation \nof Mean Attribution")
 ax.set_ylabel("Empirical Cumulative Probability")
+ax.axhspan(quant_top_var, 1, facecolor='green', alpha=0.5, label='Shaded Area')
+ax.axhspan(quant_top_var, 0, facecolor='grey', alpha=0.5, label='Shaded Area')
 plt.savefig(fldr_swmm_analysis_plots + "f_empirical_cdf_of_variability.png",
             transparent=False, bbox_inches='tight')
 
@@ -43,7 +45,7 @@ title = "Histogram of attribution standard deviation for top {} variable nodes".
 # subset based on selected quant
 df_node_variability_subset = df_node_variability[df_node_variability[std_varname] >= df_node_variability[std_varname].quantile(quant_top_var)]
 df_node_attribution_subset = df_node_attribution.join(df_node_variability_subset, how = "right")
-
+#%%
 # fig, ax = plt.subplots(dpi=300)
 # ax.set_title(title)
 # sns.histplot(data=df_node_variability_subset, x=std_varname, ax=ax)
