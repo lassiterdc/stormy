@@ -23,12 +23,12 @@ f_imagery_fullres = dir_geospatial_data + "imagery.tif"
 
 # simulated event statistics
 dir_sst = dir_stormy + "stochastic_storm_transposition/"
-# dir_sst_local_outputs = dir_sst + "local/outputs/"
-# f_simulated_compound_event_summary = dir_sst_local_outputs + "c_simulated_compound_event_summary.csv"
-# dir_local_outputs = dir_sst + "local/outputs/"
+dir_local_outputs = dir_sst + "local/outputs/"
+f_simulated_cmpnd_event_summaries = dir_local_outputs + "c_simulated_compound_event_summary.csv"
+f_simulated_cmpnd_event_cdfs = dir_local_outputs + "r_a_sim_wlevel_cdf.csv"
 dir_scenario_weather = dir_swmm_sst + "weather/"
-# f_simulated_cmpnd_event_summaries = dir_local_outputs + "c_simulated_compound_event_summary.csv"
 f_sims_summary = dir_scenario_weather + "compound_event_summaries.csv"
+
 
 # other inputs
 cubic_feet_per_cubic_meter = 35.3147
@@ -118,6 +118,7 @@ def compute_return_periods(ds, quants, recurrence_interval_yrs = sst_recurrence_
 #%% data processing
 ds_sst = xr.open_dataset(f_sst_results)
 # df_sst_events = pd.read_csv(f_sst_event_summaries)
+storm_id_variables = ["realization", "year", "storm_id"]
 proj = ccrs.PlateCarree()
 gdf_jxns = gpd.read_file(f_shp_jxns)
 gdf_strg = gpd.read_file(f_shp_strg)
@@ -125,10 +126,22 @@ gdf_out = gpd.read_file(f_shp_out)
 gdf_nodes = pd.concat([gdf_jxns, gdf_strg, gdf_out]).loc[:, ["NAME", "geometry"]]
 gdf_nodes = gdf_nodes.to_crs(proj)
 df_comparison = pd.read_csv(f_bootstrapping_analysis)
-df_events = pd.read_csv(f_sims_summary).set_index(["realization", "year", "storm_id"])
+df_events = pd.read_csv(f_sims_summary).set_index(storm_id_variables)
 
-# df_simulated_compound_event_summary = 
+# compute number of years
+n_years_generated = len(df_events.reset_index().realization.unique()) * len(df_events.reset_index().year.unique())
+n_storms_generated = n_years_generated * len(df_events.reset_index().storm_id.unique()) 
 
+# add multivariate empirical CDF columns to df_events
+df_events_with_emp_cdf = pd.read_csv(f_simulated_cmpnd_event_summaries).set_index(storm_id_variables)
+# load cdf values
+df_events_cdf_simulation = pd.read_csv(f_simulated_cmpnd_event_cdfs).join(df_events_with_emp_cdf.reset_index().loc[:, storm_id_variables]).set_index(storm_id_variables)
+# add everything to the df_events dataframe
+df_events = df_events.join(df_events_with_emp_cdf.loc[:, ["n_emp_multivar_cdf", "emp_multivar_cdf"]])
+df_events = df_events.join(df_events_cdf_simulation, rsuffix="_cdf")
+df_events = df_events.join(df_events_cdf_simulation*n_years_generated, rsuffix="_emp_return_pd_yr")
+n_years_simulated = df_events.reset_index().realization.max() * df_events.reset_index().year.max()
+df_events["empirical_event_return_pd_yr"] = df_events["emp_multivar_cdf"] * n_years_simulated
 # this is a workaround because I left the format as a string
 try:
     event_duration_hr = pd.to_timedelta(df_events["event_duration_hr"]) / np.timedelta64(1, 'h')
@@ -153,13 +166,14 @@ df_comparison = workaround_replace_vals("frac_wlevel_median", df_comparison)
 
 #%% dcl work - figuring out better way of isolating the nodes that have variable attribution
 # identifying variable nodes
-vrblity_anly_var = 'frac_wlevel_median'
+vrblity_anly_var = 'frac_wlevel_mean'
 # return the standard deviation of the target variability analysis variable; replace NA values with  0 (this means there was just 1 observation) and sort values
 df_node_variability = df_comparison.reset_index().loc[:, ["node_id", vrblity_anly_var]].groupby("node_id").std().fillna(0).sort_values(vrblity_anly_var)
-df_node_variability = df_node_variability.rename(columns = dict(frac_wlevel_median = "std_of_frac_wlevel_median"))
+std_varname = "std_of_{}".format(vrblity_anly_var)
+df_node_variability = df_node_variability.rename(columns = {vrblity_anly_var:std_varname})
 
 # df_variable_nodes = 
-df_variable_nodes = df_node_variability[df_node_variability["std_of_frac_wlevel_median"] >= df_node_variability["std_of_frac_wlevel_median"].quantile(quant_top_var)]
+df_variable_nodes = df_node_variability[df_node_variability[std_varname] >= df_node_variability[std_varname].quantile(quant_top_var)]
 # df_node_attribution_subset = df_node_attribution.join(df_node_variability_subset, how = "right")
 
 # df_comparison.loc[(slice(None), "UN69"),]
