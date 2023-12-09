@@ -22,7 +22,7 @@ from _inputs import *
 scratch_folder = "_scratch/"
 scratch_file = "_scratch/{}"
 
-cmap = "gist_rainbow"
+# cmap = "gist_rainbow"
 
 #%% computing bootstrap confidence intervals around flood volumes
 lst_ds_bs_CIs = []
