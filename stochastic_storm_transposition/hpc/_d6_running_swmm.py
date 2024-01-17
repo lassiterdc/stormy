@@ -14,6 +14,7 @@ sim_year = int(sys.argv[1])
 which_models = str(sys.argv[2]) # either all or failed
 f_out_runtimes = dir_swmm_sst_models + "_model_performance_year{}.csv".format(sim_year)
 f_out_modelresults = dir_swmm_sst_models + "_model_outputs_year{}.nc".format(sim_year)
+storm_id_to_run = None
 if which_models == 'failed': # NOTE THIS SHOULD ONLY BE RUN AFTER SCRIPT D6B HAS BEEN RUN OTHERWISE YOU MIGHT END UP RE-RUNNING SUCCESSFUL SIMULATIONS
     print("Re-running failed simulations.")
     print('NOTE THIS SHOULD ONLY BE RUN AFTER SCRIPT D6B HAS BEEN RUN OTHERWISE YOU MIGHT END UP RE-RUNNING SUCCESSFUL SIMULATIONS')
@@ -34,13 +35,21 @@ if which_models == 'failed': # NOTE THIS SHOULD ONLY BE RUN AFTER SCRIPT D6B HAS
     f_out_runtimes = dir_swmm_sst_models + "_model_performance_year{}_failed_run_id{}.csv".format(sim_year, row_index)
     f_out_modelresults = dir_swmm_sst_models + "_model_outputs_year{}_failed_run_id{}.nc".format(sim_year, row_index)
 # clear all re-run outputs
-if which_models == "all":
+elif which_models == "all":
     fs_re_runs_csvs = glob(dir_swmm_sst_models + "_model_performance_year{}_failed_run_id{}.csv".format("*", "*"))
     fs_re_runs_netcdfs = glob(dir_swmm_sst_models + "_model_outputs_year{}_failed_run_id{}.nc".format("*", "*"))
     for f in fs_re_runs_csvs:
         os.remove(f)
     for f in fs_re_runs_netcdfs:
         os.remove(f)
+else:
+    try:
+        storm_id_to_run = int(which_models)
+    except Exception as e:
+        print("Attempted to run a single storm, but which_models could not be converted to an integer. Check the arguments to the python script.")
+        sys.exit(e)
+
+
 # from __utils import c6_running_swmm, parse_inp
 
 # f_swmm_scenarios_catalog, dir_swmm_sst_models, max_runtime_min = c6_running_swmm()
@@ -106,6 +115,10 @@ for idx, row in df_strms.iterrows():
     rz = int(row["realization"])
     yr = int(row["year"])
     storm_id = int(row["storm_id"])
+    # if a certain storm is being run, skip all simulations but those for that storm
+    if storm_id_to_run is not None:
+        if storm_id != storm_id_to_run:
+            continue
     # if only running a single failed simulation, set the loop to continue until the correct simulation is reached
     if which_models == "failed":
         if f_inp != failed_inp_to_rerun:
@@ -152,7 +165,7 @@ for idx, row in df_strms.iterrows():
             lst_keys = []
             for key in out.nodes:
                 d_t_series = pd.Series(out.node_series(key, NodeAttribute.FLOODING_LOSSES)) #cfs
-                tstep_seconds = float(pd.Series(d_t_series.index).diff().mode().dt.seconds)
+                tstep_seconds = pd.Series(d_t_series.index).diff().mode().dt.seconds.values[0]
                 # convert from cfs to cf per tstep then cubic meters per timestep
                 d_t_series = d_t_series * tstep_seconds * cubic_meters_per_cubic_foot
                 # sum all flooded volumes and append lists
