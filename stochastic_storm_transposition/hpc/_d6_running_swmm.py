@@ -12,8 +12,12 @@ from __utils import *
 
 sim_year = int(sys.argv[1])
 which_models = str(sys.argv[2]) # either all or failed or an integer
-print("Running models: {} for year {} (if an integer, simulated a specific storm number)".format(sim_year, which_models))
-delete_swmm_outputs = bool(sys.argv[3])
+print("Running models: {} for year {} (if an integer, simulating a specific storm number)".format(which_models, sim_year))
+delete_swmm_outputs = int(sys.argv[3])
+if delete_swmm_outputs == 1:
+    delete_swmm_outputs = True
+else:
+    delete_swmm_outputs = False
 print("Deleting SWMM .out files is set to {}".format(delete_swmm_outputs))
 f_out_runtimes = dir_swmm_sst_models + "_model_performance_year{}.csv".format(sim_year)
 f_out_modelresults = dir_swmm_sst_models + "_model_outputs_year{}.nc".format(sim_year)
