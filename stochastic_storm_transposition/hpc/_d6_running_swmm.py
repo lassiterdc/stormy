@@ -12,8 +12,9 @@ from __utils import *
 
 sim_year = int(sys.argv[1])
 which_models = str(sys.argv[2]) # either all or failed or an integer
+realizations_to_use = str(sys.argv[3])
 print("Running models: {} for year {} (if an integer, simulating a specific storm number)".format(which_models, sim_year))
-delete_swmm_outputs = int(sys.argv[3])
+delete_swmm_outputs = int(sys.argv[4])
 if delete_swmm_outputs == 1:
     delete_swmm_outputs = True
 else:
@@ -56,7 +57,15 @@ else:
         print("Attempted to run a single storm, but which_models could not be converted to an integer. Check the arguments to the python script.")
         sys.exit(e)
 
-
+try:
+    realization_to_run = int(realizations_to_use)
+    print("Running realization {}".format(realization_to_run))
+except:
+    if realizations_to_use == "all":
+        realization_to_run = None
+        print("Running all realizations")
+    else:
+        sys.exit("Missing or invalid argument for \"realization_to_run\"")
 # from __utils import c6_running_swmm, parse_inp
 
 # f_swmm_scenarios_catalog, dir_swmm_sst_models, max_runtime_min = c6_running_swmm()
@@ -125,6 +134,10 @@ for idx, row in df_strms.iterrows():
     # if a certain storm is being run, skip all simulations but those for that storm
     if storm_id_to_run is not None:
         if storm_id != storm_id_to_run:
+            continue
+    # if certain realizations are being run, skip sims but those for that realization
+    if realization_to_run is not None:
+        if rz != realization_to_run:
             continue
     # if only running a single failed simulation, set the loop to continue until the correct simulation is reached
     if which_models == "failed":
@@ -253,7 +266,7 @@ else:
     # export netcdf
     ds_all_node_fld = xr.combine_by_coords(lst_ds_node_fld)
     ds_all_node_fld_loaded = ds_all_node_fld.load()
-    ds_all_node_fld_loaded.to_netcdf(f_out_modelresults, encoding= {"node_flooding_cubic_meters":{"zlib":True}})
+    ds_all_node_fld_loaded.to_netcdf(f_out_modelresults, encoding= {"node_flooding_cubic_meters":{"zlib":True}}, engine = "h5netcdf")
     tot_elapsed_time_min = round((datetime.now() - script_start_time).seconds / 60, 1)
     print("exported " + f_out_modelresults)
     # export performance info
