@@ -11,7 +11,10 @@ from glob import glob
 from __utils import *
 
 sim_year = int(sys.argv[1])
-which_models = str(sys.argv[2]) # either all or failed
+which_models = str(sys.argv[2]) # either all or failed or an integer
+print("Running models: {} for year {} (if an integer, simulated a specific storm number)".format(sim_year, which_models))
+delete_swmm_outputs = bool(sys.argv[3])
+print("Deleting SWMM .out files is set to {}".format(delete_swmm_outputs))
 f_out_runtimes = dir_swmm_sst_models + "_model_performance_year{}.csv".format(sim_year)
 f_out_modelresults = dir_swmm_sst_models + "_model_outputs_year{}.nc".format(sim_year)
 storm_id_to_run = None
@@ -189,8 +192,9 @@ for idx, row in df_strms.iterrows():
         end_create_dataset = datetime.now()
         create_dataset_time_min = round((end_create_dataset - start_create_dataset).seconds / 60, 1)
         # delete output file after it's been processed
-        os.remove(f_swmm_out)
-        print("Deleted file {}".format(f_swmm_out))
+        if delete_swmm_outputs:
+            os.remove(f_swmm_out)
+            print("Deleted file {}".format(f_swmm_out))
     # benchmarking export netcdf
     export_dataset_times_min.append(create_dataset_time_min)
     mean_export_ds_time_min = round(np.nanmean(export_dataset_times_min), 1)
