@@ -53,8 +53,8 @@ DRY_ONLY         NO
 1                INTENSITY 0:05     1.0      TIMESERIES 1               
 2                INTENSITY 0:05     1.0      TIMESERIES 2               
 3                INTENSITY 0:05     1.0      TIMESERIES 3               
-4                INTENSITY 0:05     1.0      TIMESERIES 4               
-5                INTENSITY 0:05     1.0      TIMESERIES 5               
+4                INTENSITY 0:05     1.0      TIMESERIES 4        
+5                INTENSITY 0:05     1.0      TIMESERIES 5           
 no_rain          INTENSITY 0:06     1.0      TIMESERIES no_rain         
 
 [SUBCATCHMENTS]
@@ -3812,14 +3812,14 @@ UN91             -0.28      4.544      0          0          2800
 ;;Name           Elevation  Type       Stage Data       Gated    Route To        
 ;;-------------- ---------- ---------- ---------------- -------- ----------------
 E143250          -3.54      TIMESERIES water_level      NO                       
-E147007          -3.54      TIMESERIES water_level      NO                       
+E147007          -3.54      TIMESERIES water_level      NO                         
 
 [STORAGE]
-;;Name           Elev.    MaxDepth   InitDepth  Shape       Curve Name/Params            SurDepth Fevap    Psi      Ksat     IMD     
-;;-------------- -------- ---------- ---------- ----------- ---------------------------- -------- -------- -------- -------- --------
-F134155          5.71     1.35       0          TABULAR     p3                           0        0       
-S1               0.54     5          0          TABULAR     p2                           0        0       
-T66              -1.1     5.437      0          TABULAR     p1                           0        0       
+;;Name           Elev.    MaxDepth   InitDepth  Shape      Curve Name/Params            N/A      Fevap    Psi      Ksat     IMD     
+;;-------------- -------- ---------- ---------- ---------- ---------------------------- -------- --------          -------- --------
+F134155          5.71     1.35       0          TABULAR    p3                         0        0       
+S1               0.54     5          0          TABULAR    p2                         0        0       
+T66              -1.1     5.437      0          TABULAR    p1                         0        0       
 
 [CONDUITS]
 ;;Name           From Node        To Node          Length     Roughness  InOffset   OutOffset  InitFlow   MaxFlow   
