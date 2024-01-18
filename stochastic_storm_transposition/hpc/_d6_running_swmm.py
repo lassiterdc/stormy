@@ -72,8 +72,6 @@ except:
 
  # a number between 1 and 1000
 
-
-
 script_start_time = datetime.now()
 
 #%% define functions
@@ -173,12 +171,12 @@ for idx, row in df_strms.iterrows():
     # benchmarking write netcdf
     start_create_dataset = datetime.now()
     create_dataset_time_min = np.nan
-    # MONTIROING
+    # if the run was succesful, process the results
     if success == True:
         # print("Simulation runtime (min): {}, Mean simulation runtime (min): {}, Total elapsed time (hr): {}, Expected total time (hr): {}, Estimated time remaining (hr): {}".format(sim_runtime_min, mean_sim_time, tot_elapsed_time_hr, expected_tot_runtime_hr, expected_remaining_time_hr)) 
         #%% dcl work  - incorporating processing of outputs into the script
         print("Exporting node flooding as netcdfs....")
-        rz, yr, storm_id, freebndry, norain = parse_inp(f_inp)
+        __, __, __, freebndry, norain = parse_inp(f_inp) # this function also returns rz, yr, storm_id which are not needed since they were determined earlier
         f_swmm_out = f_inp.split('.inp')[0] + '.out'
         with Output(f_swmm_out) as out:
             lst_tot_node_flding = []
@@ -236,7 +234,6 @@ for idx, row in df_strms.iterrows():
     # if only running single simulation, stop the script here
     if which_models == "failed":
         break
-
 #%% dcl work - incorporating processing of outputs into the script
 
 
