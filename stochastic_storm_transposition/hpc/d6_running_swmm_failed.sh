@@ -5,7 +5,7 @@
 #SBATCH -p standard				# Queue name "standard" (serial)
 #SBATCH -A quinnlab_paid				# allocation name # can use dev for testing
 #SBATCH -t 32:00:00				# Run time per serial job (hh:mm:ss)
-#SBATCH --array=1-5	# Array of jobs, 1 for each of 1000 years (1-1000)
+#SBATCH --array=18,40,43,61,109,119,158,213,233,246,269,314,390,416,438,443,452,455,462,483,622,640,662,668,676,681,710,716,729,764,786,797,808,820,834,875,972 # Array of jobs, 1 for each of 1000 years (1-1000)
 #SBATCH --mem-per-cpu=16000
 #SBATCH --mail-user=dcl3nd@virginia.edu          # address for email notification
 #SBATCH --mail-type=ALL   
@@ -25,4 +25,4 @@ source activate running_swmm
 # echo "Running SWMM for year ${SLURM_ARRAY_TASK_ID}..."
 
 # running swmm
-python ${assar_dirs[hpc_d6_py]} ${SLURM_ARRAY_TASK_ID} "failed"
+python ${assar_dirs[hpc_d6_py]} ${SLURM_ARRAY_TASK_ID} "all" "1" 0 # arguments: year, which models to run (failed, all, or specific storm number), which realizations to run, and whether to delete swmm .out files
