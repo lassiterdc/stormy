@@ -37,4 +37,4 @@ for f in lst_f_modresults_rerun:
 ds_results_loaded.loc[dict_rerun_idx] = ds_results_rerun_loaded.sel(dict_rerun_idx)
 
 
-ds_results_loaded.to_netcdf(f_model_outputs_consolidated, encoding= {"node_flooding_cubic_meters":{"zlib":True}})
+ds_results_loaded.to_netcdf(f_model_outputs_consolidated, encoding= {"node_flooding_cubic_meters":{"zlib":True}}, engine = "h5netcdf")
