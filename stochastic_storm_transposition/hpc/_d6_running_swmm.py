@@ -121,6 +121,7 @@ runtimes = []
 export_dataset_times_min = []
 lst_flow_errors = []
 lst_runoff_errors = []
+lst_routing_timestep_used = []
 # export_dataset_times = []
 successes = []
 problems = []
@@ -190,6 +191,7 @@ for idx, row in df_strms.iterrows():
                 sim._model.swmm_end()
                 runoff_error = sim.runoff_error
                 flow_routing_error = sim.flow_routing_error
+                lst_routing_timestep_used.append(routing_tstep)
         except Exception as e:
             print("Simulation failed due to error: {}".format(e))
             problem = e
@@ -283,6 +285,7 @@ if which_models == "failed":
     # export performance info
     df_out = row_with_failed_run.to_frame().T
     df_out["run_completed"] = success
+    df_out["routing_timestep"] = lst_routing_timestep_used
     df_out["flow_continuity_error"] = lst_flow_errors
     df_out["runoff_continuity_error"] = lst_runoff_errors
     df_out["problem"] = problem
@@ -300,6 +303,7 @@ else:
     print("exported " + f_out_modelresults)
     # export performance info
     df_strms["run_completed"] = successes
+    df_strms["routing_timestep"] = lst_routing_timestep_used
     df_strms["flow_continuity_error"] = lst_flow_errors
     df_strms["runoff_continuity_error"] = lst_runoff_errors
     df_strms["problem"] = problems
