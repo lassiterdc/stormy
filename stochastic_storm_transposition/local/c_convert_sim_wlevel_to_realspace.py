@@ -36,6 +36,7 @@ f_sst_event_summaries = "outputs/b_sst_event_summaries.csv"
 f_observed_compound_event_summaries = "outputs/b_observed_compound_event_summaries.csv"
 f_wlevel_cdf_sims_from_copula = "outputs/r_a_sim_wlevel_cdf.csv"
 f_wlevel_cdf_sims_from_copula_with_multvar_empcdf = "outputs/r_a_sim_wlevel_cdf_with_multivariate_empcdf.csv"
+f_wlevel_cdf_sims_from_copula_with_multvar_empcdf_subset = "outputs/r_a_sim_wlevel_cdf_with_multivariate_empcdf_subset.csv"
 f_simulated_compound_event_summary = "outputs/c_simulated_compound_event_summary.csv"
 f_observed_compound_event_summaries_with_k = "outputs/c_observed_compound_event_summaries_with_k.csv"
 
@@ -50,6 +51,10 @@ df_selection = pd.read_csv(f_selection)
 # load conditional simulations from R script
 # df_cond_sim = pd.read_csv(f_wlevel_cdf_sims_from_copula)
 df_cond_sim = pd.read_csv(f_wlevel_cdf_sims_from_copula_with_multvar_empcdf)
+df_emp_cdf_subset = pd.read_csv(f_wlevel_cdf_sims_from_copula_with_multvar_empcdf_subset).loc[:, ["N.cum", "CDF"]]
+df_emp_cdf_subset = df_emp_cdf_subset.rename(columns = {"N.cum":"n_emp_3var_cdf", "CDF":"emp_3var_cdf"})
+
+df_cond_sim = df_cond_sim.join(df_emp_cdf_subset)
 
 # create list of functions and variables
 
@@ -167,9 +172,11 @@ df_realspace_copula_sims = pd.concat(lst_realspace_copula_sims, axis = 1)
 # add columns for empirical multivariate_cdf
 df_realspace_copula_sims["n_emp_multivar_cdf"] = df_cond_sim["N.cum"]
 df_realspace_copula_sims["emp_multivar_cdf"] = df_cond_sim["CDF"]
+df_realspace_copula_sims["n_emp_3var_cdf"] = df_cond_sim["n_emp_3var_cdf"]
+df_realspace_copula_sims["emp_3var_cdf"] = df_cond_sim["emp_3var_cdf"]
 # figuring out what's going on with some weird values
 vars_surge = ["max_surge_ft", "surge_peak_after_rain_peak_min"]
-df_simulated_compound_event_summaries = df_sst_event_summaries.join(df_realspace_copula_sims.loc[:, vars_surge+["n_emp_multivar_cdf","emp_multivar_cdf"]])
+df_simulated_compound_event_summaries = df_sst_event_summaries.join(df_realspace_copula_sims.loc[:, vars_surge+["n_emp_multivar_cdf","emp_multivar_cdf", "n_emp_3var_cdf","emp_3var_cdf"]])
 
 df_inspection = df_simulated_compound_event_summaries.join(df_cond_sim, rsuffix="_cdf")
 

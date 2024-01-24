@@ -23,6 +23,7 @@ f_obs_cdf <- paste0(dir_sst_outs, "b2_F_of_obs_data-cdfvals.csv")
 f_sst_cdf <- paste0(dir_sst_outs, "b3_F_of_sst_data-cdfvals.csv")
 f_out_sim_wlevel <- paste0(dir_sst_outs, "r_a_sim_wlevel_cdf.csv")
 f_out_sim_wlevel_with_emp_cdf <- paste0(dir_sst_outs, "r_a_sim_wlevel_cdf_with_multivariate_empcdf.csv")
+f_out_sim_wlevel_with_emp_cdf_subset <- paste0(dir_sst_outs, "r_a_sim_wlevel_cdf_with_multivariate_empcdf_subset.csv")
 
 # define variables and order then with the storm surge variables first
 # which is needed for conditional simulation
@@ -214,9 +215,9 @@ empirical_cdf <- function(x, ubounds){
 
 ```{r}
 # testing empirical_cdf functuion
-dt <- data.table(x=c(0.3, 1.3, 1.4, 3.6), y=c(1.2, 1.2, 3.8, 3.9))
-empirical_cdf(dt$x, ubounds=1:4)
-empirical_cdf(dt, ubounds=CJ(x = 1:4, y = 1:4))
+# dt <- data.table(x=c(0.3, 1.3, 1.4, 3.6), y=c(1.2, 1.2, 3.8, 3.9))
+# empirical_cdf(dt$x, ubounds=1:4)
+# empirical_cdf(dt, ubounds=CJ(x = 1:4, y = 1:4))
 ```
 
 ```{r}
@@ -225,19 +226,25 @@ library("data.table")
 
 dt_sim = data.table(Sim)
 
+dt_sim_subset = data.table(tibble(Sim) %>% select(max_surge_ft, depth_mm, max_mm_per_hour))
+
 emp_cdf_sim <- empirical_cdf(dt_sim, dt_sim[1,])
 
 dt_results <- data.table()
+dt_subset_results <- data.table()
 
 # Loop through all rows
 for (i in 1:nrow(dt_sim)) {
   # print(i)
   # Accessing elements in each row
   row_values <- dt_sim[i, ]
+  row_values_subset <- dt_sim_subset[i,]
   
   emp_cdf_sim <- empirical_cdf(dt_sim, row_values)
+  emp_cdf_sim_subset <- empirical_cdf(dt_sim_subset, row_values_subset)
   
   dt_results <- rbind(dt_results, emp_cdf_sim)
+  dt_subset_results <- rbind(dt_subset_results, emp_cdf_sim_subset)
   
   # Append the squared_age to the result_list
   # result_list <- c(result_list, squared_age)
@@ -245,5 +252,8 @@ for (i in 1:nrow(dt_sim)) {
 
 # export simulated data to csv
 tibble(dt_results) %>% write_csv(f_out_sim_wlevel_with_emp_cdf)
+tibble(dt_subset_results) %>% write_csv(f_out_sim_wlevel_with_emp_cdf_subset)
+
+# also simulate on just three of the variables
 ```
 
