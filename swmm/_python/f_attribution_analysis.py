@@ -10,6 +10,7 @@ from tqdm import tqdm
 import imageio
 from glob import glob
 from _inputs import *
+from _utils import *
 import os
 
 # plotting parameters
@@ -20,9 +21,8 @@ width = height * width_to_height
 # outlier cutoff:
 outlier_cutoff = 1e10 # cubic meters
 
-from _inputs import *
-
 cmap = "gist_rainbow"
+
 
 #%% inspecting water level range across nodes
 size_scaler = 1.6
@@ -84,31 +84,6 @@ plt.savefig(fldr_swmm_analysis_plots + "f_top_variable_nodes.png",
 
 
 #%% violin plot
-
-# df_node_attribution["variable_node"] = False
-# index_values_to_update = df_node_attribution_subset.index.values
-# df_node_attribution.loc[index_values_to_update, "variable_node"] = True
-
-# import seaborn as sns
-# fig, ax = plt.subplots(figsize = [8, 6], dpi=300)
-# sns.violinplot(data = df_node_attribution_subset.reset_index(), x = "flood_return_yrs", y = "frac_wlevel_median",cut = 0, ax=ax)
-# title = "Top {} variable nodes".format(str_percentile)
-# ax.set_title(title)
-# plt.tight_layout()
-# plt.savefig(fldr_swmm_analysis_plots + "f_violin_plt_attribution_variable_nodes.png",
-#             transparent=False, bbox_inches='tight')
-
-
-# fig, ax = plt.subplots(figsize = [8, 6], dpi=300)
-# sns.violinplot(data = df_node_attribution.reset_index(), x = "flood_return_yrs", y = "frac_wlevel_median",cut = 0, ax=ax)
-# title = "All nodes"
-# ax.set_title(title)
-# plt.tight_layout()
-# plt.savefig(fldr_swmm_analysis_plots + "f_violin_plt_attribution_allnodes.png",
-#             transparent=False, bbox_inches='tight')
-
-
-#%%
 df_node_attribution["variable_node"] = False
 index_values_to_update = df_node_attribution_subset.index.values
 df_node_attribution.loc[index_values_to_update, "variable_node"] = True
@@ -120,8 +95,8 @@ sns.set_style("whitegrid")
 fig, ax = plt.subplots(figsize = [10*plt_scale, 5*plt_scale], dpi=300)
 sns.violinplot(data=df_node_attribution_gt_1yr, x="flood_return_yrs", y="frac_wlevel_mean", hue="variable_node",
                cut = 0,
-               split=True, inner="quart", fill=True,
-               palette={True: "g", False: ".35"}, ax = ax)
+               split=True, inner="quart", fill=True, alpha = 0.5,
+               palette={True: "green", False: "grey"}, ax = ax)
 space = "               "
 ax.set_ylabel("(Rain Driven)" + space + "Flood Attribution" + space + "(Surge Driven)")
 ax.set_xlabel("Flood Return Period (years)")
@@ -137,9 +112,9 @@ for title in titles:
     if title == "True":
         legend_labels.append("Variable Nodes")
     if title == "False":
-        legend_labels.append("All Nodes")
+        legend_labels.append("Nonvariable Nodes")
 
-ax.legend(handles, legend_labels, title="", title_fontsize="15", ncols=2, bbox_to_anchor=(0.5, 1.08), loc='upper center',)
+ax.legend(handles, legend_labels, title="", title_fontsize="15", ncols=2, bbox_to_anchor=(0.5, 1.1), loc='upper center',)
 
 plt.savefig(fldr_swmm_analysis_plots + "f_violin_plt_attribution.png",
             transparent=False, bbox_inches='tight')
@@ -299,7 +274,7 @@ if f_imagery is not None:
     ds_im = ds_im.coarsen(dict(x = imag_agg_factor, y = imag_agg_factor)).mean()
     ds_im = ds_im.rio.reproject("EPSG:4326")
     ds_im = ds_im/255
-#%%
+#%% creating plot of variable node locations colored by attribution and sized by magnitude
 
 use_aerial_imagery = True
 # vmin = 0.01 # m
@@ -436,280 +411,3 @@ plt.savefig(fldr_swmm_analysis_plots + title_plt,
 # create_gif(files, gif_filepath)
 
 
-#%% attempt 2 at plotting flood return period vs. event return period
-# df_return_pd_analysis = pd.read_csv(f_return_pd_analysis) # .set_index(["realization", "year", "storm_id", "node_id"])
-# find unique events
-# lst_strm_id_vals = storm_id_variables
-
-# unique_storms_with_flding = df_return_pd_analysis.loc[:,lst_strm_id_vals].drop_duplicates()
-# unique_storms_with_flding = unique_storms_with_flding.sort_values(lst_strm_id_vals).reset_index(drop=True)
-
-# df_events_subset = df_events.join(unique_storms_with_flding.set_index(lst_strm_id_vals), how = "right")
-
-# df_flood_and_event_returns = df_return_pd_analysis.set_index(["realization", "year", "storm_id", "node_id"]).join(df_events_subset)
-
-# df_sst_compound = ds_sst_compound.to_dataframe()
-# ranking using xarray
-# df_sst_compound_ranked = ds_sst_compound.node_flooding_cubic_meters.rank("node_id").to_dataframe()
-
-# ranking using pandas dataframe
-# rank_using_df = df_sst_compound.reset_index().loc[:,["node_id", "node_flooding_cubic_meters"]].groupby("node_id").rank(ascending = False, method = "average")
-# rank_using_df.columns = ["flooding_ranked"]
-
-
-# rank_using_df_with_event_info = df_sst_compound.reset_index().join(rank_using_df)
-# max_ranks = rank_using_df_with_event_info.loc[:,["node_id", "flooding_ranked"]].groupby("node_id").max()
-# max_ranks.columns = ["max_rank"]
-
-# df_flood_and_event_returns = rank_using_df_with_event_info.set_index(["realization", "year", "storm_id", "node_id"]).join(df_events)
-# df_flood_and_event_returns = df_flood_and_event_returns.join(max_ranks)
-
-# nyears_modeled_in_swmm = df_sst_compound.reset_index().realization.max() * df_sst_compound.reset_index().year.max()
-# nsimulations = nyears_modeled_in_swmm * df_sst_compound.reset_index().storm_id.max()
-
-# df_flood_and_event_returns["flood_empirical_quantile"] = (df_flood_and_event_returns.flooding_ranked / df_flood_and_event_returns.max_rank).values
-# df_flood_and_event_returns["flood_empirical_return_yr"] = (df_flood_and_event_returns.flood_empirical_quantile)*nyears_modeled_in_swmm
-
-# trying to use scipy
-#%% plotting event returns vs. node flooding returns
-from scipy.stats.mstats import plotting_positions
-plotting_positions
-df_sst_compound = ds_sst_compound.to_dataframe()
-nyears_modeled_in_swmm = df_sst_compound.reset_index().realization.max() * df_sst_compound.reset_index().year.max()
-# sort index values
-df_sst_compound = df_sst_compound.sort_index()
-# extract sorted values of simulated storms
-# simulated_storms_all = df_sst_compound.reset_index().loc[:, storm_id_variables]
-# simulated_storms_all = simulated_storms_all.drop_duplicates().reset_index(drop = True).sort_values(storm_id_variables)
-# only keep the n_largest storms per year
-def keep_largest_n_events(df_to_subset, n_largest_to_keep, str_rank_var, lst_group_vars,):
-    variable_ranked_and_subset = df_to_subset.loc[:, str_rank_var].sort_values(ascending = False).groupby(level = lst_group_vars).head(n_largest_to_keep)
-    variable_ranked_and_subset = variable_ranked_and_subset.sort_index()
-    df_nlargest = df_to_subset.loc[variable_ranked_and_subset.index.values,:]
-    # confirm tha tthe 2 largest flood values are indeed being returned
-    # df_nlargest.loc[(1,1,slice(None),"UN90"),:]
-    # df_to_subset.loc[(1,1,slice(None),"E1331931"),:]
-    print("Keeping {}% of the data.".format((len(variable_ranked_and_subset) / len(df_to_subset))*100))
-    return df_nlargest
-# df_events_n_largest = keep_largest_n_events(df_events, n_largest_to_keep=2, str_rank_var="max_mm_per_hour",
-#                                              lst_group_vars=["realization", "year"])
-
-df_sst_compound_n_largest = keep_largest_n_events(df_sst_compound, n_largest_to_keep=2, str_rank_var="node_flooding_cubic_meters",
-                                                  lst_group_vars=["realization", "year", "node_id"])
-# simulated_storms_subset = df_sst_compound_n_largest.reset_index().loc[:, storm_id_variables]
-# simulated_storms_subset = simulated_storms_subset.drop_duplicates().reset_index(drop = True)
-# compute plotting positions for all nodes (weibull)
-emp_cdf = df_sst_compound_n_largest.loc[:,"node_flooding_cubic_meters"].groupby(level = "node_id").apply(plotting_positions, alpha=0, beta=0)
-# create a dataframe with the plotting positions
-lst_dfs = []
-for node, row in emp_cdf.items():
-    storms = df_sst_compound_n_largest.loc[(slice(None),slice(None),slice(None),node)].reset_index().loc[:,storm_id_variables]
-    df_emp_cdf_loop = pd.DataFrame(dict(flood_empirical_quantile = row))
-    df_emp_cdf_loop["node_id"] = node
-    df_emp_cdf_loop["flood_empirical_return_yr"] = row * nyears_modeled_in_swmm
-    df_emp_cdf_loop = df_emp_cdf_loop.join(storms)
-    # add storm id info to the dataframe for re-joining
-    lst_dfs.append(df_emp_cdf_loop)
-
-df_empicial_cdf_vals_by_node = pd.concat(lst_dfs, ignore_index = True)
-
-# join df_events with the simulated cdf values
-
-df_flood_and_event_returns = df_empicial_cdf_vals_by_node.set_index(["realization", "year", "storm_id", "node_id"]).join(df_events)
-df_flood_and_event_returns = df_flood_and_event_returns.join(df_sst_compound)
-
-print("The minimum empirical return period for flooding was {}".format(df_flood_and_event_returns.flood_empirical_return_yr.min()))
-# find unique events
-vars_of_interest = ["node_flooding_cubic_meters", "flood_empirical_return_yr", "empirical_event_return_pd_yr",
-                    'max_mm_per_hour_emp_return_pd_yr', 'max_surge_ft_emp_return_pd_yr', 'depth_mm_emp_return_pd_yr']
-df_flood_and_event_returns_no_zeros = df_flood_and_event_returns.loc[:,vars_of_interest].copy()
-# remove all rows where flooding is 0
-df_flood_and_event_returns_no_zeros = df_flood_and_event_returns_no_zeros[df_flood_and_event_returns_no_zeros.node_flooding_cubic_meters>0].copy()
-df_flood_and_event_returns_no_zeros["node_flooding_order_of_magnitude"] = np.log10(df_flood_and_event_returns_no_zeros.node_flooding_cubic_meters)
-# only include flooding of 1 cubic meter or more
-# df_flood_and_event_returns = df_flood_and_event_returns[df_flood_and_event_returns["node_flooding_order_of_magnitude"]>=0]
-print("After removing node events with 0 flooding, the minimum empirical return period for flooding was {}".format(df_flood_and_event_returns_no_zeros.flood_empirical_return_yr.min()))
-#%% plotting
-import matplotlib as mpl
-
-
-def plot_flood_return_vs_other_return(df, other_var, ylabel, ax = None, show_cbar = False, 
-                                      show_ylabel = False, show_xlabel = False, savefig = False,
-                                      point_size_scaler = 1, show_xticks= True,
-                                      show_yticks = True, vmax = None):
-    marker_size = df.node_flooding_order_of_magnitude**2/3 * point_size_scaler
-    if ax is None:
-        fig, ax = plt.subplots(dpi=300)
-    if vmax is None:
-        vmax = df.node_flooding_order_of_magnitude.quantile(0.98)
-    artist = df.plot.scatter(ax=ax, 
-                            x = "flood_empirical_return_yr",
-                            y = other_var,
-                            c = "node_flooding_order_of_magnitude",
-                            s = marker_size,
-                            vmin = 0,
-                            vmax = vmax,
-                            logx = True,
-                            logy = True,
-                            cmap = "viridis",
-                            colorbar = False,
-                            #    norm = norm,
-                            alpha = 0.9,
-                            zorder = 8)
-    ax.grid(zorder = 5, alpha = 0.7, which = 'both')
-    ax.set_ylim(1, 500)
-    ax.set_xlim(1, 500)
-    
-    if show_xlabel:
-        ax.set_xlabel("Empirical Node Flooding Return (yr)")
-    else:
-        ax.set_xlabel("")
-    if show_ylabel:
-        ax.set_ylabel(ylabel +  " Return (yr)")
-    else:
-        ax.set_ylabel("")
-
-    if show_xticks == False:
-        ax.set_xticklabels([])
-    if show_yticks == False:
-        ax.set_yticklabels([])
-
-
-    ax.axline(xy1=(0,0), xy2=(100,100), zorder=10, c = "red", alpha = 0.5)
-    if show_cbar:
-        cbar = ax.figure.colorbar(ax.collections[0], label = "log$_{10}$ of node flooding (m$^3$)",
-                           shrink = 1, orientation = "horizontal", location = "top",
-                           anchor = (0.5, 0), aspect = 35)
-        # cbar = ax.figure.colorbar(ax.collections[0], label = "log$_{10}$ of node flooding (m$^3$)",
-        #                    aspect = 35)
-        tick_locator = ticker.MaxNLocator(nbins = 4)
-        cbar.locator = tick_locator
-        cbar.update_ticks()
-
-    # fig.colorbar(artist, ax = ax, shrink = 0.6, label = "log$_10$(node flooding m$^3$)")
-    if savefig:
-        plt.savefig(fldr_swmm_analysis_plots + "f_empirical_flooding_vs_{}.png".format(other_var),
-                    transparent=False, bbox_inches='tight')
-
-
-# plot_flood_return_vs_other_return(other_var, ylabel)
-#%%
-other_vars = ["empirical_event_return_pd_yr",'max_mm_per_hour_emp_return_pd_yr', 'max_surge_ft_emp_return_pd_yr', 'depth_mm_emp_return_pd_yr']
-ylabels = ["Compound Event", "Rain Intensity", "Storm Surge", "Rain Depth"]
-
-import matplotlib.pyplot as plt
-from matplotlib.gridspec import GridSpec
-from matplotlib import ticker
-
-scaling = 0.8
-
-# Create a 2x2 grid for the plots
-fig = plt.figure(figsize=(8*scaling, 10*scaling), layout = 'constrained')
-gs = GridSpec(2, 3, height_ratios = [1,.3], figure = fig)
-# top
-ax1 = plt.subplot(gs[0, :])
-# bottom left
-ax2 = plt.subplot(gs[1, 0])
-# bottom middle
-ax3 = plt.subplot(gs[1, 1])
-# bottom right
-ax4 = plt.subplot(gs[1, 2])
-
-lst_axes = [ax1, ax2, ax3, ax4]
-
-df_for_plotting = pd.DataFrame(dict(other_var = other_vars, ylabel = ylabels))
-
-df_data = df_flood_and_event_returns_no_zeros#.sample(1000)
-
-base_pt_size = 1.3
-for ind, row in df_for_plotting.iterrows():
-    show_cbar = False
-    show_ylabel = True
-    point_size_scaler = 0.33*base_pt_size
-    show_xticks = True
-    show_yticks = False
-    if ind == 0:
-        show_cbar = True
-        point_size_scaler = 1*base_pt_size
-        show_yticks = True
-        show_xticks = True
-    show_xlabel = False
-    if ind == 1:
-        show_yticks = True
-        show_xticks = True
-        # show_xlabel = True
-    if ind == 2:
-        show_xlabel = True
-    plot_flood_return_vs_other_return(df_data, row.other_var, row.ylabel, ax = lst_axes[ind],
-                                       show_cbar=show_cbar, show_ylabel=show_ylabel,
-                                       show_xlabel=show_xlabel, point_size_scaler=point_size_scaler,
-                                       show_xticks= show_xticks, show_yticks = show_yticks,
-                                       vmax = 4)
-plt.savefig(fldr_swmm_analysis_plots + "f_empirical_flooding_vs_all_return_pds.png",
-                    transparent=False, bbox_inches='tight', dpi = 400)
-#%% plotting flood return period vs. rainfall and storm surge return period
-lst_weather_stats = ["max_sim_wlevel", "depth_mm"]
-df_events_subset = df_events_subset.loc[:, lst_weather_stats]
-
-return_periods_for_plotting = np.arange(0.2, 2000+0.2, step = 0.2)
-quants_weather = return_period_to_quantile(ds_events, return_periods_for_plotting)
-ds_quants_weather, df_quants_weather = compute_return_periods(ds_events, quants_weather, return_periods_for_plotting)
-df_quants_weather = df_quants_weather.loc[:, lst_weather_stats]
-
-# assign a return period to each weather stat
-# stat = "max_sim_wlevel"
-lst_s_assigned_return_pds = []
-
-max_return_pd = df_return_pd_analysis.reset_index().year.max()
-
-for stat in lst_weather_stats:
-    df_quants_weather_subset = df_quants_weather[stat].drop_duplicates(keep = "first")
-    s_assigned_rtrn_pds = pd.cut(df_events_subset[stat], bins = df_quants_weather_subset, labels = df_quants_weather_subset.index.values[:-1],
-                                 include_lowest = True)
-    s_assigned_rtrn_pds = s_assigned_rtrn_pds.astype(float)
-    s_assigned_rtrn_pds.name = "{}_return_pd_yrs".format(stat)
-    missing_vals = s_assigned_rtrn_pds[s_assigned_rtrn_pds.isna()]
-    if len(missing_vals)>0:
-        # figure out whether the storms are really small or really large
-        df_missing = df_events_subset.join(missing_vals, how = "right")
-        if len(missing_vals) == 1:
-            # if the missing value is the max value in the dataset,
-            # assign it a return period equal to the number of years in the dataset
-            if (df_missing[stat] == df_events_subset[stat].max()).values[0]:
-                s_assigned_rtrn_pds = s_assigned_rtrn_pds.replace(np.nan, max_return_pd)
-    lst_s_assigned_return_pds.append(s_assigned_rtrn_pds)
-
-df_event_stat_return_pds = pd.DataFrame(lst_s_assigned_return_pds).T
-
-
-# df_return_pd_analysis.join(df_event_stat_return_pds.reset_index(), on = lst_strm_id_vals, how = "left")
-
-df_return_pd_analysis = df_return_pd_analysis.join(df_event_stat_return_pds)
-
-#%% plot it!!!!!!
-import matplotlib as mpl
-
-
-cmap = plt.cm.viridis  # define the colormap
-cmaplist = [cmap(i) for i in range(cmap.N)]
-# define the bins and normalize
-bounds = np.sort(df_return_pd_analysis.flood_return_yrs.unique())
-norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
-
-fig, ax = plt.subplots(dpi=300)
-df_return_pd_analysis.plot.scatter(ax=ax, 
-                           x = "max_sim_wlevel_return_pd_yrs",
-                           y = "depth_mm_return_pd_yrs",
-                           c="flood_return_yrs",
-                           logx = True,
-                           logy = True,
-                           cmap = cmap,
-                           norm = norm,
-                           alpha = 0.9,
-                           zorder = 8)
-ax.grid(zorder = 5, alpha = 0.7)
-ax.set_title("Flood Return Period vs. Boundary Condition Return Period")
-
-plt.savefig(fldr_swmm_analysis_plots + "f_flood_return_pd_vs_bndry_return_pd.png",
-            transparent=False, bbox_inches='tight')
-    
