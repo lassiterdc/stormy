@@ -13,7 +13,10 @@ from __utils import *
 sim_year = int(sys.argv[1])
 which_models = str(sys.argv[2]) # either all or failed or an integer
 realizations_to_use = str(sys.argv[3])
-print("Running models: {} for year {} (if an integer, simulating a specific storm number)".format(which_models, sim_year))
+if which_models == "all":
+    print("Running models {} models for year {}".format(which_models, sim_year))
+else:
+    print("Running models for storm {} of year {}".format(which_models, sim_year))
 delete_swmm_outputs = int(sys.argv[4])
 if delete_swmm_outputs == 1:
     delete_swmm_outputs = True
@@ -200,10 +203,16 @@ for idx, row in df_strms.iterrows():
         # there is no need to run the simulation again with a smaller timestep
         if success:
             if (abs(flow_routing_error) <= continuity_error_thresh) and (abs(runoff_error) <= continuity_error_thresh):
+                print("Simulation succesfully completed with continuity errors within prespecified threshold of {}% using a routing timestep of {}. Flow routing and runoff errors are {} and {}".format(
+                    continuity_error_thresh, routing_tstep, flow_routing_error, runoff_error
+                ))
                 break
             else:
                 print("The simulation was run with a routing timestep of {}. Runoff and flow continuity errors were {} and {}. Re-running simulation.".format(
                     routing_tstep, runoff_error, flow_routing_error))
+    # DCL WORK
+    print(f_inp) # printing input file path so I can make sure the routing time step is being updated
+    # END DCL WORK
     problems.append(problem)
     successes.append(success)
     # record flow and runoff errors
@@ -264,9 +273,8 @@ for idx, row in df_strms.iterrows():
     # tot_loop_time_hr = round((datetime.now() - loop_start_time).seconds / 60 / 60, 1)
     expected_remaining_time_hr = round((expected_tot_runtime_hr - tot_elapsed_time_hr), 1)
     if success == True:
-        print("Sim runtime (min): {}, Mean sim runtime (min): {}, Time to create dataset (min): {}, Total script time (hr): {}, Expected total time (hr): {}, Estimated time remaining (hr): {}".format(sim_runtime_min, mean_sim_time_min,
-                                                                                                                                                                                                 create_dataset_time_min,
-                                                                                                                                                                                      tot_elapsed_time_hr, expected_tot_runtime_hr, expected_remaining_time_hr)) 
+        print("Sim runtime (min): {}, Mean sim runtime (min): {}, Time to create dataset (min): {}, Total script time (hr): {}, Expected total time (hr): {}, Estimated time remaining (hr): {}".format(
+            sim_runtime_min, mean_sim_time_min,create_dataset_time_min,tot_elapsed_time_hr, expected_tot_runtime_hr, expected_remaining_time_hr)) 
     else: 
         print("Simulation failed after {} minutes.".format(sim_runtime_min))
     lst_outputs_converted_to_dataset.append(output_converted_to_dataset) # document success in processing outputs
