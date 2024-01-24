@@ -119,10 +119,13 @@ lst_outputs_converted_to_dataset = [] # to track success
 # END DCL WORK
 runtimes = []
 export_dataset_times_min = []
+lst_flow_errors = []
+lst_runoff_errors = []
 # export_dataset_times = []
 successes = []
 problems = []
 count = -1
+
 for idx, row in df_strms.iterrows():
     problem = "None"
     f_inp = row["swmm_inp"]
@@ -149,32 +152,67 @@ for idx, row in df_strms.iterrows():
     output_converted_to_dataset = False
     loop_start_time = sim_time = datetime.now()
     sim_runtime_min = np.nan
-    # break
-    try:
-        with Simulation(f_inp) as sim:
-            sim_start_time = datetime.now()
-            for step in sim:
-                sim_time = datetime.now()
-                sim_runtime_min = round((sim_time - sim_start_time).seconds / 60, 1)
-                if sim_runtime_min > max_runtime_min:
-                    problem = "User-defined maximum simulation time limit of {} minutes reached, so simulation was halted.".format(max_runtime_min)
-                    print(problem)
-                    success = False
-                    break
-                pass
-    except Exception as e:
-        print("Simulation failed due to error: {}".format(e))
-        problem = e
-        success = False
+    for routing_tstep in lst_alternative_routing_tsteps:
+        # modify inp file with routing timestep
+        with open(f_inp, 'r') as file:
+            # Read all lines from the file
+            lines = file.readlines()
+        for i, line in enumerate(lines):
+            if "ROUTING_STEP" in line:
+                line_of_interest = line
+                # Modify the text in that line
+                # write the first part of the line (to make sure I'm getting the spacing right)
+                first_part = ""
+                for substring in line_of_interest.split(' ')[0:-1]:
+                    # spaces are collapsed when splitting by spaces so
+                    # I am adding a space to each substring
+                    first_part += substring + " "
+                # write the full line to replace the original with
+                newline = first_part + str(routing_tstep) + "\n"
+                lines[i] = line.replace(line_of_interest, newline)
+        with open(f_inp, 'w') as file:
+            file.writelines(lines)
+        # run simulation
+        runoff_error = 9999
+        flow_routing_error = 9999
+        try:
+            with Simulation(f_inp) as sim:
+                sim_start_time = datetime.now()
+                for step in sim:
+                    sim_time = datetime.now()
+                    sim_runtime_min = round((sim_time - sim_start_time).seconds / 60, 1)
+                    if sim_runtime_min > max_runtime_min:
+                        problem = "User-defined maximum simulation time limit of {} minutes reached, so simulation was halted.".format(max_runtime_min)
+                        print(problem)
+                        success = False
+                        break
+                    pass
+                sim._model.swmm_end()
+                runoff_error = sim.runoff_error
+                flow_routing_error = sim.flow_routing_error
+        except Exception as e:
+            print("Simulation failed due to error: {}".format(e))
+            problem = e
+            success = False
+        # if the run was succesful and the flow routing and runoff routing errors are below the prespecified threshold,
+        # there is no need to run the simulation again with a smaller timestep
+        if success:
+            if (abs(flow_routing_error) <= continuity_error_thresh) and (abs(runoff_error) <= continuity_error_thresh):
+                break
+            else:
+                print("The simulation was run with a routing timestep of {}. Runoff and flow continuity errors were {} and {}. Re-running simulation.".format(
+                    routing_tstep, runoff_error, flow_routing_error))
     problems.append(problem)
     successes.append(success)
+    # record flow and runoff errors
+    lst_flow_errors.append(flow_routing_error)
+    lst_runoff_errors.append(runoff_error)
     # benchmarking write netcdf
     start_create_dataset = datetime.now()
     create_dataset_time_min = np.nan
     # if the run was succesful, process the results
     if success == True:
         # print("Simulation runtime (min): {}, Mean simulation runtime (min): {}, Total elapsed time (hr): {}, Expected total time (hr): {}, Estimated time remaining (hr): {}".format(sim_runtime_min, mean_sim_time, tot_elapsed_time_hr, expected_tot_runtime_hr, expected_remaining_time_hr)) 
-        #%% dcl work  - incorporating processing of outputs into the script
         print("Exporting node flooding as netcdfs....")
         __, __, __, freebndry, norain = parse_inp(f_inp) # this function also returns rz, yr, storm_id which are not needed since they were determined earlier
         f_swmm_out = f_inp.split('.inp')[0] + '.out'
@@ -227,21 +265,13 @@ for idx, row in df_strms.iterrows():
         print("Sim runtime (min): {}, Mean sim runtime (min): {}, Time to create dataset (min): {}, Total script time (hr): {}, Expected total time (hr): {}, Estimated time remaining (hr): {}".format(sim_runtime_min, mean_sim_time_min,
                                                                                                                                                                                                  create_dataset_time_min,
                                                                                                                                                                                       tot_elapsed_time_hr, expected_tot_runtime_hr, expected_remaining_time_hr)) 
-    #%% end dcl work
     else: 
         print("Simulation failed after {} minutes.".format(sim_runtime_min))
     lst_outputs_converted_to_dataset.append(output_converted_to_dataset) # document success in processing outputs
     # if only running single simulation, stop the script here
     if which_models == "failed":
         break
-#%% dcl work - incorporating processing of outputs into the script
 
-
-# remove processed outputs
-# print("Removing output files.....")
-# for f_processed_output in lst_f_outputs_converted_to_netcdf:
-#     os.remove(f_processed_output)
-#     print("removed file {}".format(f_processed_output))
 #%% export model runtimes to a file
 if which_models == "failed":
     # export netcdf
@@ -253,6 +283,8 @@ if which_models == "failed":
     # export performance info
     df_out = row_with_failed_run.to_frame().T
     df_out["run_completed"] = success
+    df_out["flow_continuity_error"] = lst_flow_errors
+    df_out["runoff_continuity_error"] = lst_runoff_errors
     df_out["problem"] = problem
     df_out["runtime_min"] = sim_runtime_min
     df_out["export_dataset_min"] = create_dataset_time_min
@@ -268,6 +300,8 @@ else:
     print("exported " + f_out_modelresults)
     # export performance info
     df_strms["run_completed"] = successes
+    df_strms["flow_continuity_error"] = lst_flow_errors
+    df_strms["runoff_continuity_error"] = lst_runoff_errors
     df_strms["problem"] = problems
     df_strms["runtime_min"] = runtimes
     df_strms["export_dataset_min"] = export_dataset_times_min
@@ -275,7 +309,4 @@ else:
     df_strms.to_csv(f_out_runtimes, index=False)
     print('Exported ' + f_out_runtimes)
 
-#%% end dcl work
 print("Total script runtime (min): {}".format(tot_elapsed_time_min))
-
-
