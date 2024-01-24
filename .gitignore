@@ -187,3 +187,5 @@ swmm/_python/analysis_from_hourly/readme.md
 swmm/hague/swmm_scenarios_sst/_troubleshooting/2023-12-3_ERROR 363/rz1_yr193_strm1.inp
 data/geospatial/imagery.*
 stochastic_storm_transposition/_scratch/models/*
+stochastic_storm_transposition/_scratch/models/most_negative_interaction/running_locally/rz1_yr764_strm5.inp
+stochastic_storm_transposition/_scratch/models/most_negative_interaction/running_using_pyswmm/rz1_yr764_strm5.inp
