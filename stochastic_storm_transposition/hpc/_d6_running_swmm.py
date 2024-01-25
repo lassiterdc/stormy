@@ -14,7 +14,7 @@ sim_year = int(sys.argv[1])
 which_models = str(sys.argv[2]) # either all or failed or an integer
 realizations_to_use = str(sys.argv[3])
 if which_models == "all":
-    print("Running models {} models for year {}".format(which_models, sim_year))
+    print("Running {} storms for year {}".format(which_models, sim_year))
 else:
     print("Running models for storm {} of year {}".format(which_models, sim_year))
 delete_swmm_outputs = int(sys.argv[4])
@@ -122,9 +122,17 @@ lst_outputs_converted_to_dataset = [] # to track success
 # END DCL WORK
 runtimes = []
 export_dataset_times_min = []
-lst_flow_errors = []
-lst_runoff_errors = []
+# simulation stats to return
+lst_flow_errors_frompyswmm = []
+lst_runoff_errors_frompyswmm = []
 lst_routing_timestep_used = []
+## from rpt
+lst_flow_errors_fromrpt = []
+lst_runoff_errors_fromrpt = []
+lst_total_flooding_system_rpt = []
+lst_total_flooding_nodes_rpt = []
+lst_frac_diff_node_minus_system_flood_rpt = []
+
 # export_dataset_times = []
 successes = []
 problems = []
@@ -177,8 +185,14 @@ for idx, row in df_strms.iterrows():
         with open(f_inp, 'w') as file:
             file.writelines(lines)
         # run simulation
-        runoff_error = 9999
-        flow_routing_error = 9999
+        runoff_error_pyswmm = -9999
+        flow_routing_error_pyswmm = -9999
+
+        runoff_error_rpt = -9999
+        flow_routing_error_rpt = -9999
+        total_flooding_system_rpt = -9999
+        total_flooding_nodes_rpt = -9999
+        frac_diff_node_minus_system_flood_rpt = -9999
         try:
             with Simulation(f_inp) as sim:
                 sim_start_time = datetime.now()
@@ -192,9 +206,8 @@ for idx, row in df_strms.iterrows():
                         break
                     pass
                 sim._model.swmm_end()
-                runoff_error = sim.runoff_error
-                flow_routing_error = sim.flow_routing_error
-                lst_routing_timestep_used.append(routing_tstep)
+                runoff_error_pyswmm = sim.runoff_error
+                flow_routing_error_pyswmm = sim.flow_routing_error
         except Exception as e:
             print("Simulation failed due to error: {}".format(e))
             problem = e
@@ -202,22 +215,23 @@ for idx, row in df_strms.iterrows():
         # if the run was succesful and the flow routing and runoff routing errors are below the prespecified threshold,
         # there is no need to run the simulation again with a smaller timestep
         if success:
-            if (abs(flow_routing_error) <= continuity_error_thresh) and (abs(runoff_error) <= continuity_error_thresh):
+            if (abs(flow_routing_error_pyswmm) <= continuity_error_thresh) and (abs(runoff_error_pyswmm) <= continuity_error_thresh):
                 print("Simulation succesfully completed with continuity errors within prespecified threshold of {}% using a routing timestep of {}. Flow routing and runoff errors are {} and {}".format(
-                    continuity_error_thresh, routing_tstep, flow_routing_error, runoff_error
+                    continuity_error_thresh, routing_tstep, flow_routing_error_pyswmm, runoff_error_pyswmm
                 ))
                 break
             else:
                 print("The simulation was run with a routing timestep of {}. Runoff and flow continuity errors were {} and {}. Re-running simulation.".format(
-                    routing_tstep, runoff_error, flow_routing_error))
+                    routing_tstep, runoff_error_pyswmm, flow_routing_error_pyswmm))
     # DCL WORK
-    print(f_inp) # printing input file path so I can make sure the routing time step is being updated
+    # print(f_inp) # printing input file path so I can make sure the routing time step is being updated
     # END DCL WORK
     problems.append(problem)
     successes.append(success)
     # record flow and runoff errors
-    lst_flow_errors.append(flow_routing_error)
-    lst_runoff_errors.append(runoff_error)
+    lst_flow_errors_frompyswmm.append(flow_routing_error_pyswmm)
+    lst_runoff_errors_frompyswmm.append(runoff_error_pyswmm)
+    lst_routing_timestep_used.append(routing_tstep)
     # benchmarking write netcdf
     start_create_dataset = datetime.now()
     create_dataset_time_min = np.nan
@@ -228,18 +242,19 @@ for idx, row in df_strms.iterrows():
         __, __, __, freebndry, norain = parse_inp(f_inp) # this function also returns rz, yr, storm_id which are not needed since they were determined earlier
         f_swmm_out = f_inp.split('.inp')[0] + '.out'
         with Output(f_swmm_out) as out:
-            lst_tot_node_flding = []
-            lst_keys = []
-            for key in out.nodes:
-                d_t_series = pd.Series(out.node_series(key, NodeAttribute.FLOODING_LOSSES)) #cfs
-                tstep_seconds = pd.Series(d_t_series.index).diff().mode().dt.seconds.values[0]
-                # convert from cfs to cf per tstep then cubic meters per timestep
-                d_t_series = d_t_series * tstep_seconds * cubic_meters_per_cubic_foot
-                # sum all flooded volumes and append lists
-                lst_tot_node_flding.append(d_t_series.sum())
-                lst_keys.append(key)
+            units = out.units
+        rpt_path = f_swmm_out.split(".out")[0] + ".rpt"
+        s_node_flooding,total_flooding_system_rpt,runoff_error_rpt,\
+            flow_routing_error_rpt,frac_diff_node_minus_system_flood_rpt = return_flood_losses_and_continuity_errors(rpt_path)
+        
+        if units["system"] == "US":
+            tot_flood_losses_rpt_system_m3 = total_flooding_system_rpt * 10e6 * cubic_meters_per_gallon # default units are in millions of gallons
+            node_flooding_m3 = s_node_flooding * 10e6 * cubic_meters_per_gallon # default units are in millions of gallons
+        else:
+            print('UNITS NOT RECOGNIZED; NEED TO BE UPDATED FOR METRIC PROBABLY')
+        total_flooding_nodes_rpt = node_flooding_m3.sum()
         # create array of flooded values with the correct shape for placing in xarray dataset
-        a_fld_reshaped = np.reshape(np.array(lst_tot_node_flding), (1,1,1,1,1,len(lst_tot_node_flding))) # rz, yr, storm, node_id, freeboundary, norain
+        a_fld_reshaped = np.reshape(np.array(node_flooding_m3), (1,1,1,1,1,len(node_flooding_m3))) # rz, yr, storm, node_id, freeboundary, norain
         # create dataset with the flood values 
         ds = xr.Dataset(data_vars=dict(node_flooding_cubic_meters = (['realization', 'year', 'storm_id', 'freeboundary', 'norain', 'node_id'], a_fld_reshaped)),
                         coords = dict(realization = np.atleast_1d(rz),
@@ -247,7 +262,7 @@ for idx, row in df_strms.iterrows():
                                         storm_id = np.atleast_1d(storm_id),
                                         freeboundary = np.atleast_1d(freebndry),
                                         norain = np.atleast_1d(norain),
-                                        node_id = lst_keys
+                                        node_id = node_flooding_m3.index.values
                                         ))
         lst_ds_node_fld.append(ds)
         # lst_f_outputs_converted_to_netcdf.append(f_swmm_out)
@@ -259,6 +274,12 @@ for idx, row in df_strms.iterrows():
         if delete_swmm_outputs:
             os.remove(f_swmm_out)
             print("Deleted file {}".format(f_swmm_out))
+    # recording stuff that would be gotten from rpt
+    lst_flow_errors_fromrpt.append(flow_routing_error_rpt)
+    lst_runoff_errors_fromrpt.append(runoff_error_rpt)
+    lst_total_flooding_system_rpt.append(total_flooding_system_rpt)
+    lst_total_flooding_nodes_rpt.append(total_flooding_nodes_rpt)
+    lst_frac_diff_node_minus_system_flood_rpt.append(frac_diff_node_minus_system_flood_rpt)
     # benchmarking export netcdf
     export_dataset_times_min.append(create_dataset_time_min)
     mean_export_ds_time_min = round(np.nanmean(export_dataset_times_min), 1)
@@ -294,8 +315,13 @@ if which_models == "failed":
     df_out = row_with_failed_run.to_frame().T
     df_out["run_completed"] = success
     df_out["routing_timestep"] = lst_routing_timestep_used
-    df_out["flow_continuity_error"] = lst_flow_errors
-    df_out["runoff_continuity_error"] = lst_runoff_errors
+    df_out["flow_continuity_error_pyswmm"] = lst_flow_errors_frompyswmm
+    df_out["runoff_continuity_error_pyswmm"] = lst_runoff_errors_frompyswmm
+    df_out["flow_continuity_error_rpt"] = lst_flow_errors_fromrpt
+    df_out["runoff_continuity_error_rpt"] = lst_runoff_errors_fromrpt
+    df_out["total_system_flooding_rpt"] = lst_total_flooding_system_rpt
+    df_out["total_flooding_from_nodes_rpt"] = lst_total_flooding_nodes_rpt
+    df_out["frac_diff_node_minus_system_flood_rpt"] = lst_frac_diff_node_minus_system_flood_rpt
     df_out["problem"] = problem
     df_out["runtime_min"] = sim_runtime_min
     df_out["export_dataset_min"] = create_dataset_time_min
@@ -312,8 +338,13 @@ else:
     # export performance info
     df_strms["run_completed"] = successes
     df_strms["routing_timestep"] = lst_routing_timestep_used
-    df_strms["flow_continuity_error"] = lst_flow_errors
-    df_strms["runoff_continuity_error"] = lst_runoff_errors
+    df_strms["flow_continuity_error_pyswmm"] = lst_flow_errors_frompyswmm
+    df_strms["runoff_continuity_error_pyswmm"] = lst_runoff_errors_frompyswmm
+    df_strms["flow_continuity_error_rpt"] = lst_flow_errors_fromrpt
+    df_strms["runoff_continuity_error_rpt"] = lst_runoff_errors_fromrpt
+    df_strms["total_system_flooding_rpt"] = lst_total_flooding_system_rpt
+    df_strms["total_flooding_from_nodes_rpt"] = lst_total_flooding_nodes_rpt
+    df_strms["frac_diff_node_minus_system_flood_rpt"] = lst_frac_diff_node_minus_system_flood_rpt
     df_strms["problem"] = problems
     df_strms["runtime_min"] = runtimes
     df_strms["export_dataset_min"] = export_dataset_times_min
