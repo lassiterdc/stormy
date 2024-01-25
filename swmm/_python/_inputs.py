@@ -46,6 +46,7 @@ size_scaling_factor = 0.875 # the PowerPoint for the figure is this fraction the
 target_text_size_in = 0.984252 # 2.5 cm
 pts_per_inch = 72
 cubic_meters_per_cubic_foot = 0.0283168
+cubic_meters_per_gallon = 0.00378541
 # define filepaths
 ## 
 
