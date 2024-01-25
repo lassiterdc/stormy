@@ -306,6 +306,7 @@ def return_flood_losses_and_continuity_errors(swmm_rpt):
 
     return s_node_flooding,system_flooding,runoff_continuity_error_perc,flow_continuity_error_perc,frac_diff_node_minus_system_flood
 
+
 def compute_total_node_flooding(lst_out_files):
     from swmm.toolkit.shared_enum import NodeAttribute
     from pyswmm import Simulation, Output, Nodes
