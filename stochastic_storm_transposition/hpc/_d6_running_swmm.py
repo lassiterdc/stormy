@@ -193,8 +193,8 @@ for idx, row in df_strms.iterrows():
         flow_routing_error_pyswmm = -9999
         runoff_error_rpt = -9999
         flow_routing_error_rpt = -9999
-        total_flooding_system_rpt = -9999
-        total_flooding_nodes_rpt = -9999
+        tot_flood_losses_rpt_system_m3 = -9999
+        tot_flood_losses_rpt_nodes_m3 = -9999
         frac_diff_node_minus_system_flood_rpt = -9999
         try:
             with Simulation(f_inp) as sim:
@@ -233,7 +233,6 @@ for idx, row in df_strms.iterrows():
                 flow_continuity_issues = True
                 print("The simulation was run with a routing timestep of {}. Runoff and flow continuity errors were {} and {}. Re-running simulation.".format(
                     routing_tstep, runoff_error_pyswmm, flow_routing_error_pyswmm))
-
     # DCL WORK
     # print(f_inp) # printing input file path so I can make sure the routing time step is being updated
     # END DCL WORK
@@ -265,7 +264,7 @@ for idx, row in df_strms.iterrows():
             node_flooding_m3 = s_node_flooding * 10e6 * cubic_meters_per_gallon # default units are in millions of gallons
         else:
             print('UNITS NOT RECOGNIZED; NEED TO BE UPDATED FOR METRIC PROBABLY')
-        total_flooding_nodes_rpt = node_flooding_m3.sum()
+        tot_flood_losses_rpt_nodes_m3 = node_flooding_m3.sum()
         # create array of flooded values with the correct shape for placing in xarray dataset
         a_fld_reshaped = np.reshape(np.array(node_flooding_m3), (1,1,1,1,1,len(node_flooding_m3))) # rz, yr, storm, node_id, freeboundary, norain
         # create dataset with the flood values 
@@ -291,7 +290,7 @@ for idx, row in df_strms.iterrows():
     lst_flow_errors_fromrpt.append(flow_routing_error_rpt)
     lst_runoff_errors_fromrpt.append(runoff_error_rpt)
     lst_total_flooding_system_rpt.append(tot_flood_losses_rpt_system_m3)
-    lst_total_flooding_nodes_rpt.append(total_flooding_nodes_rpt)
+    lst_total_flooding_nodes_rpt.append(tot_flood_losses_rpt_nodes_m3)
     lst_frac_diff_node_minus_system_flood_rpt.append(frac_diff_node_minus_system_flood_rpt)
     # benchmarking export netcdf
     export_dataset_times_min.append(create_dataset_time_min)
@@ -335,7 +334,7 @@ if which_models == "failed":
     df_out["runoff_continuity_error_exceeds_threshold"] = runoff_continuity_issues
     df_out["flow_continuity_error_exceeds_threshold"] = flow_continuity_issues
     df_out["total_system_flooding_rpt_m3"] = tot_flood_losses_rpt_system_m3
-    df_out["total_flooding_from_nodes_rpt_m3"] = total_flooding_nodes_rpt
+    df_out["total_flooding_from_nodes_rpt_m3"] = tot_flood_losses_rpt_nodes_m3
     df_out["frac_diff_node_minus_system_flood_rpt"] = frac_diff_node_minus_system_flood_rpt
     df_out["problem"] = problem
     df_out["runtime_min"] = sim_runtime_min
