@@ -292,25 +292,26 @@ for idx, row in df_strms.iterrows():
     lst_total_flooding_system_rpt.append(tot_flood_losses_rpt_system_m3)
     lst_total_flooding_nodes_rpt.append(tot_flood_losses_rpt_nodes_m3)
     lst_frac_diff_node_minus_system_flood_rpt.append(frac_diff_node_minus_system_flood_rpt)
-    # benchmarking export netcdf
     export_dataset_times_min.append(create_dataset_time_min)
-    mean_export_ds_time_min = round(np.nanmean(export_dataset_times_min), 1)
-    # benchmarking simulations
-    runtimes.append(sim_runtime_min)
-    mean_sim_time_min = round(np.nanmean(runtimes), 1)
-    # benchmarking entire loop and script
-    ## estimating time remaining assuming successes
-    estimated_loop_time = (mean_sim_time_min+mean_export_ds_time_min)
-    expected_tot_runtime_hr = round(estimated_loop_time*s_tot_sims/60, 1)
-    tot_elapsed_time_hr = round((datetime.now() - script_start_time).seconds / 60 / 60, 1)
-    # tot_loop_time_hr = round((datetime.now() - loop_start_time).seconds / 60 / 60, 1)
-    expected_remaining_time_hr = round((expected_tot_runtime_hr - tot_elapsed_time_hr), 1)
+    # benchmarking
+    tot_loop_time_hr = round((datetime.now() - loop_start_time).seconds / 60 / 60, 1)
     if success == True:
-        print("Sim runtime (min): {}, Mean sim runtime (min): {}, Time to create dataset (min): {}, Total script time (hr): {}, Expected total time (hr): {}, Estimated time remaining (hr): {}".format(
-            sim_runtime_min, mean_sim_time_min,create_dataset_time_min,tot_elapsed_time_hr, expected_tot_runtime_hr, expected_remaining_time_hr)) 
+        # benchmarking entire loop and script
+        ## benchmarking export time
+        mean_export_ds_time_min = round(np.nanmean(export_dataset_times_min), 1)
+        ## benchmarking simulations
+        runtimes.append(sim_runtime_min)
+        mean_sim_time_min = round(np.nanmean(runtimes), 1)
+        ## estimating time remaining assuming successes
+        estimated_loop_time = (mean_sim_time_min+mean_export_ds_time_min)
+        expected_tot_runtime_hr = round(estimated_loop_time*s_tot_sims/60, 1)
+        tot_elapsed_time_hr = round((datetime.now() - script_start_time).seconds / 60 / 60, 1)
+        expected_remaining_time_hr = round((expected_tot_runtime_hr - tot_elapsed_time_hr), 1)
+        print("Total loop time (hr): {}, Sim runtime (min): {}, Mean sim runtime (min): {}, Time to create dataset (min): {}, Total script time (hr): {}, Expected total time (hr): {}, Estimated time remaining (hr): {}".format(
+            tot_loop_time_hr, sim_runtime_min, mean_sim_time_min,create_dataset_time_min,tot_elapsed_time_hr, expected_tot_runtime_hr, expected_remaining_time_hr)) 
     else: 
-        print("Simulation failed after {} minutes.".format(sim_runtime_min))
-    lst_outputs_converted_to_dataset.append(output_converted_to_dataset) # document success in processing outputs
+        print("Simulation failed. Attempt took {} hrs".format(tot_loop_time_hr))
+    lst_outputs_converted_to_dataset.append(output_converted_to_dataset)
     # if only running single simulation, stop the script here
     if which_models == "failed":
         break
