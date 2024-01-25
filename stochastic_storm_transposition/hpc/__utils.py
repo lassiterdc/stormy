@@ -120,6 +120,7 @@ norain_gage_name = "no_rain"
 max_runtime_min = 20 # maximum minutes of runtime allowable for each SWMM simulation
 lst_alternative_routing_tsteps = [5,2,1,0.5] # these are the routing timesteps to try
 continuity_error_thresh = 1 # (%) i want the flow routing continuity error to be less than this 
+min_improvement_to_warrant_another_sim = 0.1 # if the improvement to flow continuity error is less than this times the previous flow continuity error, don't bother running another simulation 
 cubic_meters_per_gallon = 0.00378541
 
 # # c6b
