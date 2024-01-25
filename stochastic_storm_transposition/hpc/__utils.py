@@ -122,7 +122,6 @@ lst_alternative_routing_tsteps = [5,2,1,0.5] # these are the routing timesteps t
 continuity_error_thresh = 1 # (%) i want the flow routing continuity error to be less than this 
 cubic_meters_per_gallon = 0.00378541
 
-
 # # c6b
 f_model_perf_summary = dir_swmm_sst_scenarios + "model_performance_summary.csv"
 f_events_summary = dir_swmm_sst_scenarios + "event_summaries.csv"
