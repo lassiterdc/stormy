@@ -12,7 +12,8 @@
 declare -A assar_dirs
 
 # populate associative array with folder and filepaths; this should be the only thing that has to be changed
-assar_dirs[repo]="/scratch/dcl3nd/stormy/"
+# assar_dirs[repo]="/scratch/dcl3nd/stormy/"
+assar_dirs[repo]="/project/quinnlab/dcl3nd/norfolk/stormy/"
 assar_dirs[sst]=${assar_dirs[repo]}"stochastic_storm_transposition/"
 assar_dirs[hpc_scripts]=${assar_dirs[sst]}"hpc/"
 assar_dirs[rainyday]=${assar_dirs[sst]}"RainyDay2/Source/"

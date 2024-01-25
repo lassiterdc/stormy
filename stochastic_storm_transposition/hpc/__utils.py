@@ -1,16 +1,16 @@
 #%% import libraries
 from glob import glob
 # filenames, paths, and directories
-# dir_repo = "/project/quinnlab/dcl3nd/norfolk/stormy/" 
-dir_repo = "/scratch/dcl3nd/stormy/" # MODIFICATION TO RUN ON SCRATCH
+dir_repo = "/project/quinnlab/dcl3nd/norfolk/stormy/" 
+dir_highres_repo = "/project/quinnlab/dcl3nd/norfolk/highres-radar-rainfall-processing/"
+# dir_repo = "/scratch/dcl3nd/stormy/" # MODIFICATION TO RUN ON SCRATCH
+# dir_highres_repo = "/scratch/dcl3nd/highres-radar-rainfall-processing/"# MODIFICATION TO RUN ON SCRATCH
 dir_sst = dir_repo + "stochastic_storm_transposition/"
 dir_sst_nrflk = dir_sst + "norfolk/"
 # dir_sst_nrflk_hrly = dir_sst_nrflk + "sst_mrms_hourly/"
 dir_mrms = dir_sst_nrflk + "sst_mrms/"
 # dir_home = "/home/dcl3nd/stormy/"
 # dir_home_sst = dir_home + "sst/"
-# dir_scratch_sst = "/scratch/dcl3nd/stormy/"
-dir_highres_repo = "/scratch/dcl3nd/highres-radar-rainfall-processing/"
 
 
 
@@ -34,7 +34,6 @@ lst_template_keys = ["START_DATE", "START_TIME", "REPORT_START_DATE", "REPORT_ST
 # c4
 # BEGIN WORK
 # dir_swmm_sst_scenarios_proj = dir_swmm_model + "swmm_scenarios_sst/"
-# dir_swmm_sst_scenarios_scratch = dir_scratch_sst + "swmm_sst/"
 # dir_swmm_sst_scenarios_home = dir_home_sst + "swmm_sst/"
 # dir_time_series = dir_swmm_sst_scenarios_home + "time_series/"
 # f_key_subnames_gridind = dir_time_series + "_key_subnames_and_grid-indices.csv"
@@ -73,7 +72,6 @@ dir_fullres_rain = dir_highres_repo + "data/mrms_nc_preciprate_fullres_dailyfile
 #d4
 fldr_realizations = dir_mrms + "mrms_combined/Realizations/"
 dir_swmm_sst_scenarios = dir_swmm_model + "swmm_scenarios_sst/"
-# dir_swmm_sst_scenarios_scratch = dir_scratch_sst + "swmm_sst_hourly/"
 # dir_swmm_sst_scenarios_hrly_home = dir_home_sst + "swmm_sst_hourly/"
 dir_time_series = "/home/dcl3nd/stormy/sst/" + "swmm_time_series/"
 f_key_subnames_gridind = dir_time_series + "_key_subnames_and_grid-indices.csv"
@@ -107,7 +105,6 @@ dir_swmm_sst_models = dir_swmm_sst_scenarios_scratch + "models/"
 
 # c5
 # # dir_swmm_sst_models_hrly = dir_swmm_sst_scenarios_hrly_proj + "models/"
-# dir_swmm_sst_models_hrly = dir_swmm_sst_scenarios_hrly_scratch + "models/"
 
 # f_inp_base_hrly = dir_swmm_sst_scenarios_hrly_proj + "hague_sst_model_template.inp"
 
