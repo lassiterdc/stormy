@@ -26,3 +26,4 @@ export PYTHONPATH=$DIR/lib/python3.11/site-packages:$PATH
 
 # running script
 python ${assar_dirs[hpc_d5_py]} ${SLURM_ARRAY_TASK_ID}
+# python ${assar_dirs[hpc_d5_py]} 764
