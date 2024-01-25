@@ -133,6 +133,8 @@ lst_total_flooding_system_rpt = []
 lst_total_flooding_nodes_rpt = []
 lst_frac_diff_node_minus_system_flood_rpt = []
 
+lst_runoff_continuity_issues = []
+lst_flow_continuity_issues = []
 # export_dataset_times = []
 successes = []
 problems = []
@@ -185,9 +187,10 @@ for idx, row in df_strms.iterrows():
         with open(f_inp, 'w') as file:
             file.writelines(lines)
         # run simulation
+        runoff_continuity_issues = np.nan
+        flow_continuity_issues = np.nan
         runoff_error_pyswmm = -9999
         flow_routing_error_pyswmm = -9999
-
         runoff_error_rpt = -9999
         flow_routing_error_rpt = -9999
         total_flooding_system_rpt = -9999
@@ -215,19 +218,29 @@ for idx, row in df_strms.iterrows():
         # if the run was succesful and the flow routing and runoff routing errors are below the prespecified threshold,
         # there is no need to run the simulation again with a smaller timestep
         if success:
+            # record runoff error
+            if (abs(runoff_error_pyswmm) <= continuity_error_thresh):
+                runoff_continuity_issues = False
+            else:
+                runoff_continuity_issues = True
             if (abs(flow_routing_error_pyswmm) <= continuity_error_thresh): # and (abs(runoff_error_pyswmm) <= continuity_error_thresh):
                 print("Simulation succesfully completed with continuity errors within prespecified threshold of {}% using a routing timestep of {}. Flow routing and runoff errors are {} and {}".format(
                     continuity_error_thresh, routing_tstep, flow_routing_error_pyswmm, runoff_error_pyswmm
                 ))
+                flow_continuity_issues = False
                 break
             else:
+                flow_continuity_issues = True
                 print("The simulation was run with a routing timestep of {}. Runoff and flow continuity errors were {} and {}. Re-running simulation.".format(
                     routing_tstep, runoff_error_pyswmm, flow_routing_error_pyswmm))
+
     # DCL WORK
     # print(f_inp) # printing input file path so I can make sure the routing time step is being updated
     # END DCL WORK
     problems.append(problem)
     successes.append(success)
+    lst_runoff_continuity_issues.append(runoff_continuity_issues)
+    lst_flow_continuity_issues.append(flow_continuity_issues)
     # record flow and runoff errors
     lst_flow_errors_frompyswmm.append(flow_routing_error_pyswmm)
     lst_runoff_errors_frompyswmm.append(runoff_error_pyswmm)
@@ -248,7 +261,7 @@ for idx, row in df_strms.iterrows():
             flow_routing_error_rpt,frac_diff_node_minus_system_flood_rpt = return_flood_losses_and_continuity_errors(rpt_path)
         
         if units["system"] == "US":
-            tot_flood_losses_rpt_system_m3 = total_flooding_system_rpt * 10e6 * cubic_meters_per_gallon # default units are in millions of gallons
+            tot_flood_losses_rpt_system_m3 = total_flooding_system_rpt * 10e6 * cubic_meters_per_gallon # Million gallons * gallons per million gallons * cubic meters per gallon
             node_flooding_m3 = s_node_flooding * 10e6 * cubic_meters_per_gallon # default units are in millions of gallons
         else:
             print('UNITS NOT RECOGNIZED; NEED TO BE UPDATED FOR METRIC PROBABLY')
@@ -277,7 +290,7 @@ for idx, row in df_strms.iterrows():
     # recording stuff that would be gotten from rpt
     lst_flow_errors_fromrpt.append(flow_routing_error_rpt)
     lst_runoff_errors_fromrpt.append(runoff_error_rpt)
-    lst_total_flooding_system_rpt.append(total_flooding_system_rpt)
+    lst_total_flooding_system_rpt.append(tot_flood_losses_rpt_system_m3)
     lst_total_flooding_nodes_rpt.append(total_flooding_nodes_rpt)
     lst_frac_diff_node_minus_system_flood_rpt.append(frac_diff_node_minus_system_flood_rpt)
     # benchmarking export netcdf
@@ -314,14 +327,16 @@ if which_models == "failed":
     # export performance info
     df_out = row_with_failed_run.to_frame().T
     df_out["run_completed"] = success
-    df_out["routing_timestep"] = lst_routing_timestep_used
-    df_out["flow_continuity_error_pyswmm"] = lst_flow_errors_frompyswmm
-    df_out["runoff_continuity_error_pyswmm"] = lst_runoff_errors_frompyswmm
-    df_out["flow_continuity_error_rpt"] = lst_flow_errors_fromrpt
-    df_out["runoff_continuity_error_rpt"] = lst_runoff_errors_fromrpt
-    df_out["total_system_flooding_rpt"] = lst_total_flooding_system_rpt
-    df_out["total_flooding_from_nodes_rpt"] = lst_total_flooding_nodes_rpt
-    df_out["frac_diff_node_minus_system_flood_rpt"] = lst_frac_diff_node_minus_system_flood_rpt
+    df_out["routing_timestep"] = routing_tstep
+    df_out["flow_continuity_error_pyswmm"] = flow_routing_error_pyswmm
+    df_out["runoff_continuity_error_pyswmm"] = runoff_error_pyswmm
+    df_out["flow_continuity_error_rpt"] = flow_routing_error_rpt
+    df_out["runoff_continuity_error_rpt"] = runoff_error_rpt
+    df_out["runoff_continuity_error_exceeds_threshold"] = runoff_continuity_issues
+    df_out["flow_continuity_error_exceeds_threshold"] = flow_continuity_issues
+    df_out["total_system_flooding_rpt_m3"] = tot_flood_losses_rpt_system_m3
+    df_out["total_flooding_from_nodes_rpt_m3"] = total_flooding_nodes_rpt
+    df_out["frac_diff_node_minus_system_flood_rpt"] = frac_diff_node_minus_system_flood_rpt
     df_out["problem"] = problem
     df_out["runtime_min"] = sim_runtime_min
     df_out["export_dataset_min"] = create_dataset_time_min
@@ -342,8 +357,10 @@ else:
     df_strms["runoff_continuity_error_pyswmm"] = lst_runoff_errors_frompyswmm
     df_strms["flow_continuity_error_rpt"] = lst_flow_errors_fromrpt
     df_strms["runoff_continuity_error_rpt"] = lst_runoff_errors_fromrpt
-    df_strms["total_system_flooding_rpt"] = lst_total_flooding_system_rpt
-    df_strms["total_flooding_from_nodes_rpt"] = lst_total_flooding_nodes_rpt
+    df_strms["runoff_continuity_error_exceeds_threshold"] = lst_runoff_continuity_issues
+    df_strms["flow_continuity_error_exceeds_threshold"] = lst_flow_continuity_issues
+    df_strms["total_system_flooding_rpt_m3"] = lst_total_flooding_system_rpt
+    df_strms["total_flooding_from_nodes_rpt_m3"] = lst_total_flooding_nodes_rpt
     df_strms["frac_diff_node_minus_system_flood_rpt"] = lst_frac_diff_node_minus_system_flood_rpt
     df_strms["problem"] = problems
     df_strms["runtime_min"] = runtimes
