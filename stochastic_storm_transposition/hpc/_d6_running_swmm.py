@@ -311,7 +311,7 @@ for idx, row in df_strms.iterrows():
         runtimes.append(sim_runtime_min)
         mean_sim_time_min = round(np.nanmean(runtimes), 1)
         ## estimating time remaining assuming successes
-        estimated_loop_time = max([mean_sim_time_min+mean_export_ds_time_min], mean_loop_time_hr)
+        estimated_loop_time = max([mean_sim_time_min+mean_export_ds_time_min, mean_loop_time_hr])
         expected_tot_runtime_hr = round(estimated_loop_time*len(df_strms)/60, 1)
         tot_elapsed_time_hr = round((datetime.now() - script_start_time).seconds / 60 / 60, 1)
         expected_remaining_time_hr = round((expected_tot_runtime_hr - tot_elapsed_time_hr), 1)
