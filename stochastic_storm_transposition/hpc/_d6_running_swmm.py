@@ -96,30 +96,24 @@ def create_all_nan_dataset(a_fld_reshaped, rz, yr, storm_id, freebndry, norain, 
 #%% loading data
 df_strms = pd.read_csv(f_swmm_scenarios_catalog.format(sim_year))
 
-# DCL WORK - SUBSET TO USE ONLY 1 REALIZATION
-# df_strms = df_strms[df_strms["realization"]==1]
-# df_strms = df_strms[df_strms.storm_id.isin([1])]
-# END DCL WORK
-
-# if "storm_num" in df_strms.columns: # this should become irrelevant, this was just so I didn't have to re-run previous script with desired column names
-#     df_strms = df_strms.rename(columns=dict(storm_num = "storm_id"))
-
 df_strms = df_strms.sort_values(["realization", "year", "storm_id"])
 
 df_strms.drop(columns = "simulation_index", inplace = True)
 
 df_strms.reset_index(drop=True, inplace=True)
 
-# s_tot_rz = int(df_strms.realization.max())
-# s_strms_per_year = int(df_strms.storm_id.max())
-s_tot_sims = len(df_strms)
+# subset the df_strms table:
+if realization_to_run is not None:
+    df_strms = df_strms[df_strms.realization == realization_to_run]
+if storm_id_to_run is not None:
+    df_strms = df_strms[df_strms.storm_id == storm_id_to_run]
+if which_models == "failed":
+    df_strms = df_strms[df_strms["swmm_inp"] == failed_inp_to_rerun]
+    print("Re-running failed simulation {} which failed due to problem {}".format(failed_inp_to_rerun, failed_inp_problem))
 
 #%% run simulations
-# DCL WORK - incorporating processing of outputs into the script
 lst_ds_node_fld = []
-# lst_f_outputs_converted_to_netcdf = [] # for removing ones that are processed
 lst_outputs_converted_to_dataset = [] # to track success
-# END DCL WORK
 runtimes = []
 export_dataset_times_min = []
 lst_tot_loop_time_hr = []
@@ -149,22 +143,8 @@ for idx, row in df_strms.iterrows():
     rz = int(row["realization"])
     yr = int(row["year"])
     storm_id = int(row["storm_id"])
-    # if a certain storm is being run, skip all simulations but those for that storm
-    if storm_id_to_run is not None:
-        if storm_id != storm_id_to_run:
-            continue
-    # if certain realizations are being run, skip sims but those for that realization
-    if realization_to_run is not None:
-        if rz != realization_to_run:
-            continue
-    # if only running a single failed simulation, set the loop to continue until the correct simulation is reached
-    if which_models == "failed":
-        if f_inp != failed_inp_to_rerun:
-            continue
-        print("Re-running failed simulation {} which failed due to problem {}".format(f_inp, failed_inp_problem))
-        s_tot_sims = 1
     count += 1
-    print("Running simulation for realization {} year {} storm {}. {} out of {} simulations complete.".format(rz, yr, storm_id, count, s_tot_sims))
+    print("Running simulation for realization {} year {} storm {}. {} out of {} simulations complete.".format(rz, yr, storm_id, count, len(df_strms)))
     success = True
     output_converted_to_dataset = False
     loop_start_time = sim_time = datetime.now()
@@ -332,7 +312,7 @@ for idx, row in df_strms.iterrows():
         mean_sim_time_min = round(np.nanmean(runtimes), 1)
         ## estimating time remaining assuming successes
         estimated_loop_time = max([mean_sim_time_min+mean_export_ds_time_min], mean_loop_time_hr)
-        expected_tot_runtime_hr = round(estimated_loop_time*s_tot_sims/60, 1)
+        expected_tot_runtime_hr = round(estimated_loop_time*len(df_strms)/60, 1)
         tot_elapsed_time_hr = round((datetime.now() - script_start_time).seconds / 60 / 60, 1)
         expected_remaining_time_hr = round((expected_tot_runtime_hr - tot_elapsed_time_hr), 1)
         print("Total loop time (hr): {}, Sim runtime (min): {}, Mean sim runtime (min): {}, Time to create dataset (min): {}, Total script time (hr): {}, Expected total time (hr): {}, Estimated time remaining (hr): {}".format(
@@ -344,59 +324,33 @@ for idx, row in df_strms.iterrows():
     if which_models == "failed":
         break
 
-#%% export model runtimes to a file
+#%% export results and model summaries
 if which_models == "failed":
-    # export netcdf
     ds_all_node_fld = ds # single output only
-    ds_all_node_fld_loaded = ds_all_node_fld.load()
-    ds_all_node_fld_loaded.to_netcdf(f_out_modelresults, encoding= {"node_flooding_cubic_meters":{"zlib":True}})
-    tot_elapsed_time_min = round((datetime.now() - script_start_time).seconds / 60, 1)
-    print("exported " + f_out_modelresults)
-    # export performance info
-    df_out = row_with_failed_run.to_frame().T
-    df_out["run_completed"] = success
-    df_out["routing_timestep"] = routing_tstep
-    df_out["flow_continuity_error_pyswmm"] = flow_routing_error_pyswmm
-    df_out["runoff_continuity_error_pyswmm"] = runoff_error_pyswmm
-    df_out["flow_continuity_error_rpt"] = flow_routing_error_rpt
-    df_out["runoff_continuity_error_rpt"] = runoff_error_rpt
-    df_out["runoff_continuity_error_exceeds_threshold"] = runoff_continuity_issues
-    df_out["flow_continuity_error_exceeds_threshold"] = flow_continuity_issues
-    df_out["total_system_flooding_rpt_m3"] = tot_flood_losses_rpt_system_m3
-    df_out["total_flooding_from_nodes_rpt_m3"] = tot_flood_losses_rpt_nodes_m3
-    df_out["frac_diff_node_minus_system_flood_rpt"] = frac_diff_node_minus_system_flood_rpt
-    df_out["problem"] = problem
-    df_out["notes"] = note
-    df_out["runtime_min"] = sim_runtime_min
-    df_out["export_dataset_min"] = create_dataset_time_min
-    df_out["lst_outputs_converted_to_netcdf"] = output_converted_to_dataset
-    df_out.to_csv(f_out_runtimes, index=False)
-    print('Exported ' + f_out_runtimes)
 else:
-    # export netcdf
     ds_all_node_fld = xr.combine_by_coords(lst_ds_node_fld)
-    ds_all_node_fld_loaded = ds_all_node_fld.load()
-    ds_all_node_fld_loaded.to_netcdf(f_out_modelresults, encoding= {"node_flooding_cubic_meters":{"zlib":True}}, engine = "h5netcdf")
-    tot_elapsed_time_min = round((datetime.now() - script_start_time).seconds / 60, 1)
-    print("exported " + f_out_modelresults)
-    # export performance info
-    df_strms["run_completed"] = successes
-    df_strms["routing_timestep"] = lst_routing_timestep_used
-    df_strms["flow_continuity_error_pyswmm"] = lst_flow_errors_frompyswmm
-    df_strms["runoff_continuity_error_pyswmm"] = lst_runoff_errors_frompyswmm
-    df_strms["flow_continuity_error_rpt"] = lst_flow_errors_fromrpt
-    df_strms["runoff_continuity_error_rpt"] = lst_runoff_errors_fromrpt
-    df_strms["runoff_continuity_error_exceeds_threshold"] = lst_runoff_continuity_issues
-    df_strms["flow_continuity_error_exceeds_threshold"] = lst_flow_continuity_issues
-    df_strms["total_system_flooding_rpt_m3"] = lst_total_flooding_system_rpt
-    df_strms["total_flooding_from_nodes_rpt_m3"] = lst_total_flooding_nodes_rpt
-    df_strms["frac_diff_node_minus_system_flood_rpt"] = lst_frac_diff_node_minus_system_flood_rpt
-    df_strms["problem"] = problems
-    df_strms["notes"] = notes
-    df_strms["runtime_min"] = runtimes
-    df_strms["export_dataset_min"] = export_dataset_times_min
-    df_strms["lst_outputs_converted_to_netcdf"] = lst_outputs_converted_to_dataset
-    df_strms.to_csv(f_out_runtimes, index=False)
-    print('Exported ' + f_out_runtimes)
+ds_all_node_fld_loaded = ds_all_node_fld.load()
+ds_all_node_fld_loaded.to_netcdf(f_out_modelresults, encoding= {"node_flooding_cubic_meters":{"zlib":True}}, engine = "h5netcdf")
+tot_elapsed_time_min = round((datetime.now() - script_start_time).seconds / 60, 1)
+print("exported " + f_out_modelresults)
+# export performance info
+df_strms["run_completed"] = successes
+df_strms["routing_timestep"] = lst_routing_timestep_used
+df_strms["flow_continuity_error_pyswmm"] = lst_flow_errors_frompyswmm
+df_strms["runoff_continuity_error_pyswmm"] = lst_runoff_errors_frompyswmm
+df_strms["flow_continuity_error_rpt"] = lst_flow_errors_fromrpt
+df_strms["runoff_continuity_error_rpt"] = lst_runoff_errors_fromrpt
+df_strms["runoff_continuity_error_exceeds_threshold"] = lst_runoff_continuity_issues
+df_strms["flow_continuity_error_exceeds_threshold"] = lst_flow_continuity_issues
+df_strms["total_system_flooding_rpt_m3"] = lst_total_flooding_system_rpt
+df_strms["total_flooding_from_nodes_rpt_m3"] = lst_total_flooding_nodes_rpt
+df_strms["frac_diff_node_minus_system_flood_rpt"] = lst_frac_diff_node_minus_system_flood_rpt
+df_strms["problem"] = problems
+df_strms["notes"] = notes
+df_strms["runtime_min"] = runtimes
+df_strms["export_dataset_min"] = export_dataset_times_min
+df_strms["lst_outputs_converted_to_netcdf"] = lst_outputs_converted_to_dataset
+df_strms.to_csv(f_out_runtimes, index=False)
+print('Exported ' + f_out_runtimes)
 
 print("Total script runtime (min): {}".format(tot_elapsed_time_min))
