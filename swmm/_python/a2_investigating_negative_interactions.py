@@ -15,6 +15,7 @@ fldr_models_neg_rivanna_dec2023 = fldr_models_neg_rivanna_jan2024 + "original_re
 fldr_models_neg_local_pyswmm = fldr_models_neg + "running_using_pyswmm/"
 fldr_models_neg_local_PCSWMM = fldr_models_neg + "running_locally/"
 nc_models_neg_rerun_1srouting_jan23_2024 = fldr_models_neg + "re-run_on_rivanna_smaller_routing_tstep/model_outputs_consolidated.nc"
+nc_year764_jan24_2024 = fldr_models_neg + "re-run_on_rivanna_reporting_from_rpt/_model_outputs_year764.nc"
 
 
 # isolate events with negative interaction
@@ -75,6 +76,12 @@ df_watershed_flood_attribution_neg_inter_rerun = df_watershed_flood_attribution_
 
 df_inter_compare = df_watershed_flood_attribution_neg_inter.join(df_watershed_flood_attribution_1srouting, rsuffix="_rerun")
 df_inter_compare.to_csv("_scratch/attribution_comparison.csv")
+#%% comparing with re-run on 1/24 that used the rpt to calculate flooding and had instability resolved
+ds_sst_rerun_1_24_2024 = xr.open_dataset(nc_year764_jan24_2024)
+df_sst_rerun_1_24_2024 = ds_sst_rerun_1_24_2024.to_dataframe().reset_index()
+
+df_watershed_flood_attribution_1_24_2024, df_total_floodin_1_24_2024 = compute_wshed_scale_attribution(ds_sst_rerun_1_24_2024)
+
 
 #%% work - trying to figure out how to compute errors
 # when run on PCSWMM, this has a routing continuity error of 85.6%
@@ -108,7 +115,6 @@ for routing_tstep in alt_routing_steps:
     with open(f_model_with_instability, 'r') as file:
         # Read all lines from the file
         lines = file.readlines()
-
     for i, line in enumerate(lines):
         if "ROUTING_STEP" in line:
             line_of_interest = line
@@ -161,13 +167,16 @@ pd.DataFrame(dict(
     runoff_error = lst_runoff_errors,
     sim_runtime = lst_sim_runtimes_s
 ))
-#%%
-with Output(f_model_with_instability.split(".inp")[0] + ".out") as out:
-    last_tstep = out.times[-1]
-    data = out.system_result(last_tstep)
+#%% figuring out alternative ways to compute flooding
 
-model = swmmio.Model(f_model_with_instability)
 
+# compute flooding from node time series
+
+
+#%% work troubleshooting function
+f_swmm_out = f_model_with_instability.split(".inp")[0] + ".out"
+
+df_total_flooding_instability_testing = compute_total_node_flooding([f_swmm_out])
 
 #%% (takes a minute or two) processing the local simulations
 df_total_flooding_pcswmm = compute_total_node_flooding(lst_pcswmm_out_path)
@@ -176,7 +185,7 @@ df_total_flooding_pcswmm = compute_total_node_flooding(lst_pcswmm_out_path)
 # run simulations using pyswmm
 from datetime import datetime
 max_runtime_min = 15
-run_sims = True
+run_sims = False
 run_compound_only = True
 lst_runoff_error = []
 lst_flow_error = []
