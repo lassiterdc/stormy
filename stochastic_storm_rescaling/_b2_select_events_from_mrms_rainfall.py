@@ -18,15 +18,15 @@ s_mean_rainfall = df_rainfall.mrms_mean.fillna(0)
 
 # convert data to the same -minute timestep
 ## first convert to 1 minute, using fill forward (assuming a FOLLOWING time interval)
-s_mean_rainfall_1min = s_mean_rainfall.resample('1min').mean().fillna(method = 'ffill')
+s_mean_rainfall_1min = s_mean_rainfall.resample('1min').mean().ffill()
 ## convert to 5 min
 s_mean_rainfall_5min = s_mean_rainfall_1min.resample('5min').mean()
 
 # create a timeseries with depths in mm (converting from mm/hr to mm)
-s_mean_rainfall_5min_mm = s_mean_rainfall_5min / 30 # mm / hour / (timesteps per hour) = mm/timestep
+s_mean_rainfall_5min_mm = s_mean_rainfall_5min * (5/60) # mm per --hour-- * 5 --min-- per tstep / (60 --min-- per --hour--) = mm per tstep
 
-# compute a rolling sum of rainfall depth at a time interval equal to the min. interevent time
-s_rain_rollingsum_mm = s_mean_rainfall_5min_mm.rolling('{}h'.format(min_interevent_time), min_periods = 1).sum()
+# compute a rolling sum of rainfall depth at a time interval equal to the sst event duration
+s_rain_rollingsum_mm = s_mean_rainfall_5min_mm.rolling('{}h'.format(sst_event_duration), min_periods = 1).sum()
 
 # s_rain_rollingsum_eventlen_mm = s_mean_rainfall_5min_mm.rolling('{}h'.format(max_event_length), min_periods = 1).sum()
 
@@ -40,7 +40,7 @@ sr_times = sr_times.diff()
 # convert the min. interevent time and max storm length to TimeDelta datatype
 min_tdif = pd.Timedelta('{} hours'.format(min_interevent_time))
 ## rolling sum is PREceding so subtract min_tdif from the max storm event length
-max_strm_len = pd.Timedelta('{} hours'.format(max_event_length)) - min_tdif 
+max_strm_len = pd.Timedelta('{} hours'.format(sst_event_duration)) - min_tdif 
 
 #%% perform event selection
 # define lists
@@ -108,8 +108,32 @@ df_event_summaries = pd.DataFrame(dict(event_id = event_ids, start = event_start
                               mean_mm_per_hr = mean_intensities, max_mm_per_hour = max_intensities,
                               max_intensity_tstep = max_intensity_tsteps))
 
+df_event_summaries["year"] = df_event_summaries.start.dt.year
+df_event_summaries = df_event_summaries.sort_values("depth_mm", ascending = False)
+df_event_summaries = df_event_summaries.groupby("year").head(sst_storms_per_year)
+df_event_summaries = df_event_summaries.sort_values(["year", "depth_mm"], ascending = [True, False])
+old_event_id = list(df_event_summaries.event_id.values)
+df_event_summaries["old_event_id"] = old_event_id
+df_event_summaries.reset_index(drop=True, inplace=True)
+df_event_summaries.drop(["year", "event_id"], axis = 1, inplace=True)
+df_event_summaries.index.rename("event_id", inplace = True)
+new_event_id = list(df_event_summaries.index.values)
+
+# process time series data
 df_event_tseries = pd.concat(lst_s_intensities, keys=event_ids).reset_index()
 df_event_tseries = df_event_tseries.rename(columns = {"level_0":"event_id"})
+## update event id's in time series to match the event summaries
+df_event_tseries = df_event_tseries[df_event_tseries.event_id.isin(old_event_id)]
 
-df_event_summaries.to_csv(f_mrms_event_summaries, index=False)
-df_event_tseries.to_csv(f_mrms_event_timeseries, index = False)
+df_event_id_mapping = pd.DataFrame(dict(new_event_id = new_event_id, event_id = old_event_id))
+df_event_id_mapping = df_event_id_mapping.set_index("event_id")
+df_event_tseries = df_event_tseries.set_index(["event_id", "time"])
+df_event_tseries = df_event_tseries.join(df_event_id_mapping, how = "left", on = "event_id").reset_index()
+df_event_tseries.drop("event_id", inplace=True, axis = 1)
+df_event_tseries.rename(dict(new_event_id = "event_id"), axis = 1, inplace=True)
+df_event_tseries.sort_values(["event_id", "time"], inplace=True)
+df_event_tseries.set_index(["event_id", "time"], inplace=True)
+
+# export to csv
+df_event_summaries.to_csv(f_mrms_event_summaries, index=True)
+df_event_tseries.to_csv(f_mrms_event_timeseries, index = True)

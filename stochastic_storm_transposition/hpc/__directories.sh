@@ -12,7 +12,7 @@
 declare -A assar_dirs
 
 # populate associative array with folder and filepaths; this should be the only thing that has to be changed
-assar_dirs[repo]="/project/quinnlab/dcl3nd/norfolk/stormy/"
+assar_dirs[repo]="/scratch/dcl3nd/stormy/"
 assar_dirs[sst]=${assar_dirs[repo]}"stochastic_storm_transposition/"
 assar_dirs[hpc_scripts]=${assar_dirs[sst]}"hpc/"
 assar_dirs[rainyday]=${assar_dirs[sst]}"RainyDay2/Source/"
@@ -24,23 +24,21 @@ assar_dirs[hpc_rainyday_py]=${assar_dirs[sst]}"RainyDay2/Source/RainyDay_Py3.py"
 # assar_dirs[hpc_c1_py]=${assar_dirs[hpc_scripts]}"_c1_combining_storm_catalogs.py"
 # assar_dirs[hpc_c3a_py]=${assar_dirs[hpc_scripts]}"_c3a_creating_reformatted_catalog_for_xarray.py"
 # assar_dirs[hpc_c3b_py]=${assar_dirs[hpc_scripts]}"_c3b_creating_reformatted_realizations_for_xarray.py"
-
-assar_dirs[hpc_d2_py]=${assar_dirs[hpc_scripts]}"_d2_combining_realizations.py"
 assar_dirs[hpc_d4_py]=${assar_dirs[hpc_scripts]}"_d4_creating_rainfall_timeseries.py"
-
-
-assar_dirs[hpc_d4b_py]=${assar_dirs[hpc_scripts]}"_d4b_creating_waterlevel_timeseries.py"
-# assar_dirs[hpc_d4c1a_py]=${assar_dirs[hpc_scripts]}"_d4c1a_analyzing_weather_consolidation.py"
-assar_dirs[hpc_d4c1b_py]=${assar_dirs[hpc_scripts]}"_d4c1b_analyzing_weather_consolidation.py"
+assar_dirs[hpc_d42_py]=${assar_dirs[hpc_scripts]}"_d4-2_combining_realizations.py"
+assar_dirs[hpc_d4b1_py]=${assar_dirs[hpc_scripts]}"_d4b1_waterlevel_sim.py"
+assar_dirs[hpc_d4b2_py]=${assar_dirs[hpc_scripts]}"_d4b2_writing_waterlevel_timeseries.py"
+assar_dirs[hpc_d4c_py]=${assar_dirs[hpc_scripts]}"_d4c_combining_wlevels.py"
 assar_dirs[hpc_d4c2_py]=${assar_dirs[hpc_scripts]}"_d4c2_analyzing_weather.py"
 assar_dirs[hpc_d5_py]=${assar_dirs[hpc_scripts]}"_d5_creating_inps.py"
 assar_dirs[hpc_d6_py]=${assar_dirs[hpc_scripts]}"_d6_running_swmm.py"
 assar_dirs[hpc_d6b_py]=${assar_dirs[hpc_scripts]}"_d6b_analyzing_swmm_runs.py"
 assar_dirs[hpc_d7_py]=${assar_dirs[hpc_scripts]}"_d7_consolidating_swmm_outputs.py"
 assar_dirs[hpc_d7b_py]=${assar_dirs[hpc_scripts]}"_d7b_consolidating_swmm_outputs.py"
-assar_dirs[hpc_8_py]=${assar_dirs[hpc_scripts]}"_d8_bootstrapping_results.py"
-assar_dirs[hpc_8b_py]=${assar_dirs[hpc_scripts]}"_d8b_consolidating_bs_samples.py"
-assar_dirs[hpc_d_py]=${assar_dirs[hpc_scripts]}"_d_running_rainyday_mrms.py"
+assar_dirs[hpc_d8_py]=${assar_dirs[hpc_scripts]}"_d8_bootstrapping_results.py"
+assar_dirs[hpc_d8b_py]=${assar_dirs[hpc_scripts]}"_d8b_consolidating_bs_samples.py"
+assar_dirs[hpc_d_py]=${assar_dirs[hpc_scripts]}"_d1_running_rainyday_mrms.py"
+assar_dirs[hpc_d1b_py]=${assar_dirs[hpc_scripts]}"_d1b_creating_fullres_storm_catalog.py"
 
 # RainyDay Inputs
 ## for actual runs

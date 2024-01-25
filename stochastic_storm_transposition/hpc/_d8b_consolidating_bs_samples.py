@@ -4,9 +4,7 @@ from datetime import datetime
 from glob import glob
 from tqdm import tqdm
 import shutil
-from __utils import c8b_bootstrapping
-
-f_bootstrapped_consolidated, f_bootstrapped_consolidated_hrly_raw, dir_swmm_sst_models_hrly, f_bootstrapped_quant_estimates, sst_recurrence_intervals, export_raw_bs_samps = c8b_bootstrapping()
+from __utils import *
 
 f_out_bs_results = f_bootstrapped_quant_estimates + "return_pds_btstrp_{}.nc".format("*")
 lst_f_bsresults = glob(f_out_bs_results)
@@ -31,7 +29,7 @@ if export_raw_bs_samps == True:
     ds.attrs = attrs
 
     # WORK
-    fl_out_zar = f_bootstrapped_consolidated_hrly_raw+".zarr"
+    fl_out_zar = f_bootstrapped_consolidated_raw+".zarr"
     # verify chunking
     # ds = ds.chunk(chunks={"longitude":chnk_lon, "latitude":chnk_lat, "time":1})
     ds.to_zarr(fl_out_zar, mode="w")
@@ -40,7 +38,7 @@ if export_raw_bs_samps == True:
     # Load zarr and export to netcdf file
     # bm_time = time.time()
     ds_from_zarr = xr.open_zarr(store=fl_out_zar, chunks={'resample_id':"10000MB"})
-    ds_from_zarr.to_netcdf(f_bootstrapped_consolidated_hrly_raw, encoding= {"node_flooding_cubic_meters":{"zlib":True}})
+    ds_from_zarr.to_netcdf(f_bootstrapped_consolidated_raw, encoding= {"node_flooding_cubic_meters":{"zlib":True}})
     # print("Created netcdf: {}".format(time.time() - bm_time))
 
     # delete zarr file

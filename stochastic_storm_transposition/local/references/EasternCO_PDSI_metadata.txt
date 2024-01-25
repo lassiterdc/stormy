@@ -1,0 +1,70 @@
+Retrieved from: https://www1.ncdc.noaa.gov/pub/data/paleo/treering/reconstructions/colorado/east_colo_pdsi.txt
+2/25/19
+
+Eastern Colorado Palmer Drought Severity Index Reconstruction
+---------------------------------------------------------------------
+              World Data Center for Paleoclimatology, Boulder
+                                and 
+                   NOAA Paleoclimatology Program
+---------------------------------------------------------------------
+NOTE: PLEASE CITE ORIGINAL REFERENCES WHEN USING THIS DATA!!!!!
+
+CONTRIBUTOR: Connie Woodhouse, NOAA Paleoclimatology Program.
+
+NAME OF DATA SET: Eastern Colorado Palmer Drought Severity Index Reconstruction
+LAST UPDATE: 12/2002 (Original receipt by WDC Paleo)
+
+IGBP PAGES/WDCA CONTRIBUTION SERIES NUMBER: 2002-083
+
+SUGGESTED DATA CITATION:  Woodhouse, C., et al., 2002, 
+Eastern Colorado Palmer Drought Severity Index Reconstruction. 
+International Tree-Ring Data Bank.  
+IGBP PAGES/World Data Center for Paleoclimatology 
+Data Contribution Series #2002-083.
+NOAA/NGDC Paleoclimatology Program, Boulder CO, USA.
+
+ORIGINAL REFERENCES: Woodhouse, C.A., J.J. Lukas, and P.M. Brown, 2002,
+Drought in the Western Great Plains, 1845-56: Impacts and Implications
+Bulletin of the American Meteorological Society, 83, 10, 1485-1493.
+
+Woodhouse, C.A. and P.M. Brown, 2001,
+Tree-ring evidence for Great Plains drought.
+Tree-Ring Research, 59, 89-103.
+
+
+GEOGRAPHIC REGION: USA Great Plains, eastern Colorado
+PERIOD OF RECORD:  1550-1990 AD
+
+FUNDING SOURCE: U.S. National Science Foundation grant ATM-9729751.
+
+
+DESCRIPTION:   
+Eastern Colorado May/June/July Palmer Drought Severity Index Reconstruction 
+based on tree ring chronologies in the western Great Plains and Front Range.
+
+
+ABSTRACT:
+A sustained mid-19th century drought in the western Great Plains has been 
+indicated by a tree-ring analysis of trees flanking the western Great Plains, 
+and in tree-ring reconstructions of drought and streamflow for eastern Colorado 
+and the Colorado Front Range. The development of new tree-ring chronologies for 
+the western Great Plains, in combination with existing chronologies, now enables 
+a more detailed assessment of the spatial and temporal characteristics of this 
+drought.  The analysis of a set of drought-sensitive tree-ring chronologies 
+ranging from the northwestern Great Plains to central New Mexico indicates a 
+core area of drought from south-central Wyoming to northeastern New Mexico for 
+the years 1845-56.  Drought was particularly severe in the years 1845-48, 1851, 
+and 1854-56, contracting and affecting smaller regions in intervening years.  
+The impact of this drought on natural ecosystems and human activities is difficult 
+to gauge because of the paucity of historical documents and the confounding effects 
+of land use changes occurring over the same period.  However, it is probable that 
+this drought played a role in the decimation of bison herds in the second half 
+of the 19th century.  Were it to occur today, this relatively small but persistent 
+drought would have significant impacts on the Colorado Front Range metropolitan 
+area and the agricultural regions of eastern Colorado.
+
+
+DATA:
+
+
+Eastern CO May-June-July PDSI

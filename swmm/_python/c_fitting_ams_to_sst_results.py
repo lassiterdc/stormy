@@ -19,7 +19,6 @@ from _inputs import c_ams_with_sst
 
 f_sst_annual_max_volumes, ks_alpha, bootstrap_iterations, volume_units, f_sst_recurrence_intervals, sst_ams_conf_interval, recurrence_intervals = c_ams_with_sst()
 
-
 df_annual_maxima = pd.read_csv(f_sst_annual_max_volumes)["total_flooding_1e+06m3"]
 
 df_annual_maxima = pd.DataFrame(dict(year = np.arange(0, 1000))).join(df_annual_maxima)
@@ -186,11 +185,6 @@ lp3 = {"function":fit_3_param_pdf,
 
 fxs = [gev, loggev, weibull, logweibull, gumbel, loggumbel, lognormal, p3, lp3]
 
-# fxs = [weibull, p3]
-
-# fxs = [p3]
-
-# fxs = [lp3]
 lst_df_perf = []
 df_perf = pd.DataFrame()
 # fit each pdf to the data and store the performance metrics in a .csv
@@ -233,11 +227,8 @@ idx_ks_pval = df_perf_pass_ks.loc[:, ["ks_pval"]].idxmax()["ks_pval"]
 df_perf_pass_ks_msdi = df_perf.iloc[idx_msdi, :]
 df_perf_pass_ks_madi = df_perf.iloc[idx_madi, :]
 df_perf_pass_ks_ks = df_perf.iloc[idx_ks_pval, :]
-
-
 #%% plotting two best 
 # df_annual_maxima_scaled = df_annual_maxima / volume_units
-
 out_w = fit_3_param_pdf(df_annual_maxima, weibull_min, recurrence_intervals,
                  xlab = "Flood Volume ($10^6m^3$)")
 
