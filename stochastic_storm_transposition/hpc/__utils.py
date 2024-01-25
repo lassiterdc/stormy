@@ -304,7 +304,10 @@ def return_flood_losses_and_continuity_errors(swmm_rpt):
 
     # return system flood losses
     system_flooding = float(system_flood_loss_line.split(" ")[-1].split("\n")[0])
-    frac_diff_node_minus_system_flood = (s_node_flooding.sum() - system_flooding)/system_flooding
+    if (s_node_flooding.sum() > 0) and (system_flooding > 0):
+        frac_diff_node_minus_system_flood = (s_node_flooding.sum() - system_flooding)/system_flooding
+    else:
+        frac_diff_node_minus_system_flood = np.nan
 
     return s_node_flooding,system_flooding,runoff_continuity_error_perc,flow_continuity_error_perc,frac_diff_node_minus_system_flood
 
