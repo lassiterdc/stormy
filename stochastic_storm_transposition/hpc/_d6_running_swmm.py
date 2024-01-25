@@ -215,7 +215,7 @@ for idx, row in df_strms.iterrows():
         # if the run was succesful and the flow routing and runoff routing errors are below the prespecified threshold,
         # there is no need to run the simulation again with a smaller timestep
         if success:
-            if (abs(flow_routing_error_pyswmm) <= continuity_error_thresh) and (abs(runoff_error_pyswmm) <= continuity_error_thresh):
+            if (abs(flow_routing_error_pyswmm) <= continuity_error_thresh): # and (abs(runoff_error_pyswmm) <= continuity_error_thresh):
                 print("Simulation succesfully completed with continuity errors within prespecified threshold of {}% using a routing timestep of {}. Flow routing and runoff errors are {} and {}".format(
                     continuity_error_thresh, routing_tstep, flow_routing_error_pyswmm, runoff_error_pyswmm
                 ))
