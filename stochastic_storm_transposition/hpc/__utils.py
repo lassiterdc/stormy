@@ -288,14 +288,21 @@ def return_flood_losses_and_continuity_errors(swmm_rpt):
         node_ids.append(node_id)
         flood_volumes.append(flooding)
 
-    df_node_flooding_subset = pd.DataFrame(dict(
-        node_id = node_ids,
-        flood_volume = flood_volumes
-    ))
-    df_node_flooding_subset.set_index("node_id", inplace = True)
-    df_node_flooding = df_allnodes.join(df_node_flooding_subset)
-    # for the nodes not in the rpt, assign them a flood volume of 0
-    df_node_flooding = df_node_flooding.fillna(0)
+    if len(flood_volumes) > 0: # if there is flooding in the model
+        df_node_flooding_subset = pd.DataFrame(dict(
+            node_id = node_ids,
+            flood_volume = flood_volumes
+        ))
+        df_node_flooding_subset.set_index("node_id", inplace = True)
+        df_node_flooding = df_allnodes.join(df_node_flooding_subset)
+        # for the nodes not in the rpt, assign them a flood volume of 0
+        df_node_flooding = df_node_flooding.fillna(0)
+    else: # if there is no flooding in the model
+        df_node_flooding = pd.DataFrame(dict(
+            node_id = lst_nodes,
+            flood_volume = np.zeros(len(lst_nodes))
+        ))
+
     s_node_flooding = df_node_flooding.flood_volume
 
     # return runoff and flow continuity
