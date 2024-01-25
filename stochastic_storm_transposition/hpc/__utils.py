@@ -118,8 +118,9 @@ norain_gage_name = "no_rain"
 
 # # c6
 max_runtime_min = 20 # maximum minutes of runtime allowable for each SWMM simulation
-lst_alternative_routing_tsteps = [20,5,2,1,0.5] # these are the routing timesteps to try
+lst_alternative_routing_tsteps = [5,2,1,0.5] # these are the routing timesteps to try
 continuity_error_thresh = 1.5 # (%) i want the runoff and flow routing continuity error to be less than this 
+cubic_meters_per_gallon = 0.00378541
 
 
 # # c6b
@@ -217,6 +218,98 @@ def return_rzs_for_yr(fldr_realizations, yr):
             lst_f_ncs.append(f)
     lst_f_ncs.sort()
     return lst_f_ncs
+
+def return_flood_losses_and_continuity_errors(swmm_rpt):
+    from pyswmm import Simulation, Nodes
+    with open(swmm_rpt, 'r', encoding='latin-1') as file:
+        # Read all lines from the file
+        lines = file.readlines()
+    line_num = -1
+    lst_node_fld_summary = []
+    encountered_header_of_node_flooding_summary = False
+    encountered_end_of_node_flooding_summary = False
+    # encountered_runoff_quantity_continuity = False
+    encountered_flow_routing_continuity = False
+    for line in lines:
+        line_num += 1
+        # if "Runoff Quantity Continuity" in line:
+        #     encountered_runoff_quantity_continuity = True
+        if "Flow Routing Continuity" in line:
+            encountered_flow_routing_continuity = True
+        if "Continuity Error (%) ....." in line:
+            # runoff routing is reported BEFORE flow routing
+            if encountered_flow_routing_continuity == False:
+                runoff_continuity_error_line = line
+            else:
+                flow_continuity_error_line = line
+        # return system flood statistic
+        if "Flooding Loss" in line:
+            system_flood_loss_line = line
+        # return node flooding summaries
+        if "Node Flooding Summary" in line:
+            node_fld_sum_1st_line = line_num
+            encountered_header_of_node_flooding_summary = True
+        if encountered_header_of_node_flooding_summary == False:
+            continue
+        if line_num < node_fld_sum_1st_line + 5: # skip the header line and the next 4 lines
+            continue
+        if "******" in line:
+            encountered_end_of_node_flooding_summary = True
+        if encountered_end_of_node_flooding_summary == False:
+            lst_node_fld_summary.append(line)
+
+    # the rpt file only has nodes with nonzero flooding but I need to account for all nodes
+    # create pandas series of node flood summaries
+    # return ids of all nodes
+    lst_nodes = []
+    with Simulation(swmm_rpt.split(".rpt")[0] + ".inp") as sim:
+       for node in Nodes(sim):
+           lst_nodes.append(node.nodeid)
+
+    df_allnodes = pd.DataFrame(dict(
+        node_id = lst_nodes,
+        # dummy = np.zeros(len(lst_nodes))
+    ))
+    df_allnodes = df_allnodes.set_index("node_id")
+
+    n_header_rows = 5
+    node_ids = []
+    flood_volumes = []
+    for i in np.arange(n_header_rows, len(lst_node_fld_summary)):
+        line = lst_node_fld_summary[i]
+        lst_values = []
+        if len(line.split("  ")) == 2:
+            continue
+        for item in line.split("  "):
+            if item == "":
+                continue
+            lst_values.append(item)
+        node_id = lst_values[0]
+        flooding = float(lst_values[5])
+        node_ids.append(node_id)
+        flood_volumes.append(flooding)
+
+    df_node_flooding_subset = pd.DataFrame(dict(
+        node_id = node_ids,
+        flood_volume = flood_volumes
+    ))
+    df_node_flooding_subset.set_index("node_id", inplace = True)
+    df_node_flooding = df_allnodes.join(df_node_flooding_subset)
+    # for the nodes not in the rpt, assign them a flood volume of 0
+    df_node_flooding = df_node_flooding.fillna(0)
+    s_node_flooding = df_node_flooding.flood_volume
+
+    # return runoff and flow continuity
+    runoff_continuity_error_perc = float(runoff_continuity_error_line.split(" ")[-1].split("\n")[0])
+    flow_continuity_error_perc = float(flow_continuity_error_line.split(" ")[-1].split("\n")[0])
+
+    # return system flood losses
+    system_flooding = float(system_flood_loss_line.split(" ")[-1].split("\n")[0])
+    frac_diff_node_minus_system_flood = (s_node_flooding.sum() - system_flooding)/system_flooding
+
+    return s_node_flooding,system_flooding,runoff_continuity_error_perc,flow_continuity_error_perc,frac_diff_node_minus_system_flood
+
+
 
 
 
