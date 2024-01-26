@@ -228,6 +228,12 @@ for idx, row in df_strms.iterrows():
                         if frac_improvement < 0:
                             print("The simulation was run with a routing timestep of {}. Flow continuity error was {} which was actually WORSE than the previous run so I won't be trying a smaller routing timestep. Sim runtime was {}.".format(
                                 routing_tstep, flow_routing_error_pyswmm, sim_runtime_min))
+                            print("abs(previous_flow_routing_error_pyswmm)")
+                            print(abs(previous_flow_routing_error_pyswmm))
+                            print("abs(flow_routing_error_pyswmm)")
+                            print(abs(flow_routing_error_pyswmm))
+                            print("net_improvement = abs(previous_flow_routing_error_pyswmm) - abs(flow_routing_error_pyswmm) = {}".format(net_improvement))
+                            print("frac_improvement = net_improvement / abs(previous_flow_routing_error_pyswmm) = {}".format(frac_improvement))
                             note = note + "This routing timestep actually did {}% worse than *{}*s which resulted in a flow continuity error of {}%;".format(
                                 round(frac_improvement*100,1), previous_routing_tstep, previous_flow_routing_error_pyswmm
                             )
