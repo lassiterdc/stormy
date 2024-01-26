@@ -216,27 +216,27 @@ for idx, row in df_strms.iterrows():
                 flow_continuity_issues = True
                 # is this the first simulation attempt?
                 if routing_tstep == lst_alternative_routing_tsteps[0]: # first sim attempt
-                    previous_runoff_error_pyswmm = runoff_error_pyswmm
+                    previous_flow_routing_error_pyswmm = flow_routing_error_pyswmm
                     previous_routing_tstep = routing_tstep
                     print("The simulation was run with a routing timestep of {}. Runoff and flow continuity errors were {} and {}. Sim runtime was {}. Re-running simulation.".format(
                         routing_tstep, runoff_error_pyswmm, flow_routing_error_pyswmm, sim_runtime_min))
                 else: # not first sim attempt
                     # compute the improvement between the last two attempts
-                    net_improvement = abs(previous_runoff_error_pyswmm) - abs(runoff_error_pyswmm)
-                    frac_improvement = net_improvement / abs(previous_runoff_error_pyswmm)
+                    net_improvement = abs(previous_flow_routing_error_pyswmm) - abs(flow_routing_error_pyswmm)
+                    frac_improvement = net_improvement / abs(previous_flow_routing_error_pyswmm)
                     if frac_improvement < min_improvement_to_warrant_another_sim:
                         if frac_improvement < 0:
                             print("The simulation was run with a routing timestep of {}. Flow continuity error was {} which was actually WORSE than the previous run so I won't be trying a smaller routing timestep. Sim runtime was {}.".format(
                                 routing_tstep, flow_routing_error_pyswmm, sim_runtime_min))
                             note = note + "This routing timestep actually did {}% worse than *{}*s which resulted in a flow continuity error of {}%;".format(
-                                round(frac_improvement*100,1), previous_routing_tstep, previous_runoff_error_pyswmm
+                                round(frac_improvement*100,1), previous_routing_tstep, previous_flow_routing_error_pyswmm
                             )
                         else:
                             print("The simulation was run with a routing timestep of {}. Flow continuity error was {} which is less than {}% better than the previous run. This does not warrant another simulation. Sim runtime was {}.".format(
                                 routing_tstep, flow_routing_error_pyswmm, min_improvement_to_warrant_another_sim*100, sim_runtime_min))
                         break
                     else:
-                        previous_runoff_error_pyswmm = runoff_error_pyswmm
+                        previous_flow_routing_error_pyswmm = flow_routing_error_pyswmm
                         previous_routing_tstep = routing_tstep
     # DCL WORK
     # print(f_inp) # printing input file path so I can make sure the routing time step is being updated
