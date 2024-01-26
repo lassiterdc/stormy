@@ -198,9 +198,7 @@ for idx, row in df_strms.iterrows():
             print("Simulation failed due to error: {}".format(e))
             problem = e
             success = False
-        # if the run was succesful and the flow routing and runoff routing errors are below the prespecified threshold,
-        # there is no need to run the simulation again with a smaller timestep
-        if success:
+        if success: # check continuity error and re-run if it is worse than a threshold target
             # record runoff error
             if (abs(runoff_error_pyswmm) <= continuity_error_thresh):
                 runoff_continuity_issues = False
@@ -244,6 +242,8 @@ for idx, row in df_strms.iterrows():
                     else:
                         previous_flow_routing_error_pyswmm = flow_routing_error_pyswmm
                         previous_routing_tstep = routing_tstep
+        else: # if simulation was not succesful, don't bother trying smaller routing timesteps
+            break
     # DCL WORK
     # print(f_inp) # printing input file path so I can make sure the routing time step is being updated
     # END DCL WORK
@@ -261,8 +261,6 @@ for idx, row in df_strms.iterrows():
     create_dataset_time_min = np.nan
     # if the run was succesful, process the results
     if success == True:
-        # print("Simulation runtime (min): {}, Mean simulation runtime (min): {}, Total elapsed time (hr): {}, Expected total time (hr): {}, Estimated time remaining (hr): {}".format(sim_runtime_min, mean_sim_time, tot_elapsed_time_hr, expected_tot_runtime_hr, expected_remaining_time_hr)) 
-        # print("Exporting node flooding as netcdfs....")
         __, __, __, freebndry, norain = parse_inp(f_inp) # this function also returns rz, yr, storm_id which are not needed since they were determined earlier
         f_swmm_out = f_inp.split('.inp')[0] + '.out'
         with Output(f_swmm_out) as out:
@@ -309,12 +307,12 @@ for idx, row in df_strms.iterrows():
     tot_loop_time_hr = round((datetime.now() - loop_start_time).seconds / 60 / 60, 1)
     lst_tot_loop_time_hr.append(tot_loop_time_hr)
     mean_loop_time_hr = np.nanmean(lst_tot_loop_time_hr)
+    runtimes.append(sim_runtime_min)
     if success == True:
         # benchmarking entire loop and script
         ## benchmarking export time
         mean_export_ds_time_min = round(np.nanmean(export_dataset_times_min), 1)
         ## benchmarking simulations
-        runtimes.append(sim_runtime_min)
         mean_sim_time_min = round(np.nanmean(runtimes), 1)
         ## estimating time remaining assuming successes
         estimated_loop_time = max([mean_sim_time_min+mean_export_ds_time_min, mean_loop_time_hr])
