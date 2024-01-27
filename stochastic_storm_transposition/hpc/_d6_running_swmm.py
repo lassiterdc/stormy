@@ -286,6 +286,8 @@ for idx, row in df_strms.iterrows():
                                         norain = np.atleast_1d(norain),
                                         node_id = node_flooding_m3.index.values
                                         ))
+        # sort
+        ds = ds.sortby(['realization', 'year', 'storm_id', 'freeboundary', 'norain', 'node_id'])
         lst_ds_node_fld.append(ds)
         # lst_f_outputs_converted_to_netcdf.append(f_swmm_out)
         output_converted_to_dataset = True
@@ -329,14 +331,19 @@ for idx, row in df_strms.iterrows():
         break
 
 #%% export results and model summaries
+if len(lst_ds_node_fld) > 0:
+    at_least_1_sim_was_succesfull = True
+else:
+    at_least_1_sim_was_succesfull = False
 if which_models == "failed":
     ds_all_node_fld = ds # single output only
 else:
     ds_all_node_fld = xr.combine_by_coords(lst_ds_node_fld)
-ds_all_node_fld_loaded = ds_all_node_fld.load()
-ds_all_node_fld_loaded.to_netcdf(f_out_modelresults, encoding= {"node_flooding_cubic_meters":{"zlib":True}}, engine = "h5netcdf")
-tot_elapsed_time_min = round((datetime.now() - script_start_time).seconds / 60, 1)
-print("exported " + f_out_modelresults)
+if at_least_1_sim_was_succesfull:
+    ds_all_node_fld_loaded = ds_all_node_fld.load()
+    ds_all_node_fld_loaded.to_netcdf(f_out_modelresults, encoding= {"node_flooding_cubic_meters":{"zlib":True}}, engine = "h5netcdf")
+    tot_elapsed_time_min = round((datetime.now() - script_start_time).seconds / 60, 1)
+    print("exported " + f_out_modelresults)
 # export performance info
 df_strms["run_completed"] = successes
 df_strms["routing_timestep"] = lst_routing_timestep_used
