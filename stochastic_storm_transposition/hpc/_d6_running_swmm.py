@@ -107,10 +107,8 @@ if realization_to_run is not None:
     df_strms = df_strms[df_strms.realization == realization_to_run]
 if storm_id_to_run is not None:
     df_strms = df_strms[df_strms.storm_id == storm_id_to_run]
-if which_models == "failed":
-    df_strms = df_strms[df_strms["swmm_inp"] == failed_inp_to_rerun]
-    print("Re-running failed simulation {} which failed due to problem {}".format(failed_inp_to_rerun, failed_inp_problem))
-
+if storm_id_to_run is not None:
+    df_strms = df_strms[df_strms.storm_id == storm_id_to_run]
 #%% run simulations
 lst_ds_node_fld = []
 lst_outputs_converted_to_dataset = [] # to track success
@@ -194,6 +192,9 @@ for idx, row in df_strms.iterrows():
                 sim._model.swmm_end()
                 runoff_error_pyswmm = sim.runoff_error
                 flow_routing_error_pyswmm = sim.flow_routing_error
+                # write report file
+                sim.report()
+                sim.close()
         except Exception as e:
             print("Simulation failed due to error: {}".format(e))
             problem = e
@@ -266,6 +267,7 @@ for idx, row in df_strms.iterrows():
         __, __, __, freebndry, norain = parse_inp(f_inp) # this function also returns rz, yr, storm_id which are not needed since they were determined earlier
         with Output(f_swmm_out) as out:
             units = out.units
+            out.close()
         s_node_flooding,total_flooding_system_rpt,runoff_error_rpt,\
             flow_routing_error_rpt,frac_diff_node_minus_system_flood_rpt = return_flood_losses_and_continuity_errors(rpt_path)
         
