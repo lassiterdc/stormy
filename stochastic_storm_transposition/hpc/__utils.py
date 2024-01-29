@@ -258,7 +258,7 @@ def return_flood_losses_and_continuity_errors(swmm_rpt):
         if encountered_end_of_node_flooding_summary == False:
             lst_node_fld_summary.append(line)
     if encountered_flow_routing_continuity == False:
-        sys.exit("RPT file does not contain necessary fields")
+        print("WARNING: RPT file does not contain necessary fields")
     # the rpt file only has nodes with nonzero flooding but I need to account for all nodes
     # create pandas series of node flood summaries
     # return ids of all nodes
