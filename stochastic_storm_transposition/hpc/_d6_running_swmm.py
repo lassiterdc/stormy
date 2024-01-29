@@ -260,12 +260,12 @@ for idx, row in df_strms.iterrows():
     start_create_dataset = datetime.now()
     create_dataset_time_min = np.nan
     # if the run was succesful, process the results
+    f_swmm_out = f_inp.split('.inp')[0] + '.out'
+    rpt_path = f_swmm_out.split(".out")[0] + ".rpt"
     if success == True:
         __, __, __, freebndry, norain = parse_inp(f_inp) # this function also returns rz, yr, storm_id which are not needed since they were determined earlier
-        f_swmm_out = f_inp.split('.inp')[0] + '.out'
         with Output(f_swmm_out) as out:
             units = out.units
-        rpt_path = f_swmm_out.split(".out")[0] + ".rpt"
         s_node_flooding,total_flooding_system_rpt,runoff_error_rpt,\
             flow_routing_error_rpt,frac_diff_node_minus_system_flood_rpt = return_flood_losses_and_continuity_errors(rpt_path)
         
@@ -297,6 +297,16 @@ for idx, row in df_strms.iterrows():
         # delete output file after it's been processed
         if delete_swmm_outputs:
             os.remove(f_swmm_out)
+    # if not succesful , remove partial results
+    else:
+        try:
+            os.remove(f_swmm_out)
+        except:
+            pass
+        try:
+            os.remove(rpt_path)
+        except:
+            pass
             # print("Deleted file {}".format(f_swmm_out))
     # recording stuff that would be gotten from rpt
     lst_flow_errors_fromrpt.append(flow_routing_error_rpt)
