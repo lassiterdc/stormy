@@ -6488,9 +6488,10 @@ water_level      FILE "${water_level}"
 ;;Reporting Options
 INPUT      YES
 CONTROLS   NO
-SUBCATCHMENTS ALL
-NODES ALL
-LINKS ALL
+AVERAGES   YES
+SUBCATCHMENTS NONE
+NODES NONE
+LINKS NONE
 
 [TAGS]
 Subcatch   S10              flowpath_drawn  
