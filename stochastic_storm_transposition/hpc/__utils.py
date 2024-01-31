@@ -103,7 +103,7 @@ f_sims_wlevel_tseries = dir_scenario_weather + "simulated_wlevel_timeseries.csv"
 
 # d5
 f_inp_base = dir_swmm_sst_scenarios + "hague_sst_model_template.inp"
-dir_swmm_sst_models = dir_swmm_sst_scenarios_scratch + "models/"
+dir_swmm_sst_models = dir_sst + "swmm_scenarios/"
 
 # c5
 # # dir_swmm_sst_models_hrly = dir_swmm_sst_scenarios_hrly_proj + "models/"
