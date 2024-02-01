@@ -224,6 +224,7 @@ def return_flood_losses_and_continuity_errors(swmm_rpt):
     with open(swmm_rpt, 'r', encoding='latin-1') as file:
         # Read all lines from the file
         lines = file.readlines()
+        file.close()
     line_num = -1
     lst_node_fld_summary = []
     encountered_header_of_node_flooding_summary = False

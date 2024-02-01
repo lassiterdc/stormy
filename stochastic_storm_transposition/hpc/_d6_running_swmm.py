@@ -143,12 +143,14 @@ for idx, row in df_strms.iterrows():
     storm_id = int(row["storm_id"])
     count += 1
     print("Running simulation for realization {} year {} storm {}. {} out of {} simulations complete.".format(rz, yr, storm_id, count, len(df_strms)))
-    success = True
     output_converted_to_dataset = False
     loop_start_time = sim_time = datetime.now()
     sim_runtime_min = np.nan
+    f_inp_torun = f_inp
     for routing_tstep in lst_alternative_routing_tsteps:
         # modify inp file with routing timestep
+        ## define filepath to new inp file
+        f_inp_torun = f_inp_torun.split(".inp")[0] + str(routing_tstep) + ".inp"
         with open(f_inp, 'r') as file:
             # Read all lines from the file
             lines = file.readlines()
@@ -166,7 +168,7 @@ for idx, row in df_strms.iterrows():
                 # write the full line to replace the original with
                 newline = first_part + str(routing_tstep) + "\n"
                 lines[i] = line.replace(line_of_interest, newline)
-        with open(f_inp, 'w') as file:
+        with open(f_inp_torun, 'w') as file:
             file.writelines(lines)
             file.close()
         # run simulation
@@ -179,8 +181,9 @@ for idx, row in df_strms.iterrows():
         tot_flood_losses_rpt_system_m3 = -9999
         tot_flood_losses_rpt_nodes_m3 = -9999
         frac_diff_node_minus_system_flood_rpt = -9999
+        success = True
         try:
-            with Simulation(f_inp) as sim:
+            with Simulation(f_inp_torun) as sim:
                 sim_start_time = datetime.now()
                 for step in sim:
                     sim_time = datetime.now()
@@ -245,11 +248,8 @@ for idx, row in df_strms.iterrows():
                     else:
                         previous_flow_routing_error_pyswmm = flow_routing_error_pyswmm
                         previous_routing_tstep = routing_tstep
-        else: # if simulation was not succesful, don't bother trying smaller routing timesteps
+        else: # if simulation didn't run because of an error or the time limit, don't re-run the sim
             break
-    # DCL WORK
-    # print(f_inp) # printing input file path so I can make sure the routing time step is being updated
-    # END DCL WORK
     notes.append(note)
     problems.append(problem)
     successes.append(success)
@@ -263,7 +263,7 @@ for idx, row in df_strms.iterrows():
     start_create_dataset = datetime.now()
     create_dataset_time_min = np.nan
     # if the run was succesful, process the results
-    f_swmm_out = f_inp.split('.inp')[0] + '.out'
+    f_swmm_out = f_inp_torun.split('.inp')[0] + '.out'
     rpt_path = f_swmm_out.split(".out")[0] + ".rpt"
     if success == True:
         __, __, __, freebndry, norain = parse_inp(f_inp) # this function also returns rz, yr, storm_id which are not needed since they were determined earlier
