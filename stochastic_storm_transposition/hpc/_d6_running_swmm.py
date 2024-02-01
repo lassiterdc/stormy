@@ -195,8 +195,8 @@ for idx, row in df_strms.iterrows():
                 runoff_error_pyswmm = sim.runoff_error
                 flow_routing_error_pyswmm = sim.flow_routing_error
                 # write report file
-                sim.report()
-                sim.close()
+                # sim.report()
+                # sim.close()
         except Exception as e:
             print("Simulation failed due to error: {}".format(e))
             problem = e
