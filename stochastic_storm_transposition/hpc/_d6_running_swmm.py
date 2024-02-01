@@ -198,7 +198,7 @@ for idx, row in df_strms.iterrows():
                 runoff_error_pyswmm = sim.runoff_error
                 flow_routing_error_pyswmm = sim.flow_routing_error
                 # write report file
-                # sim.report()
+                sim.report()
                 # sim.close()
         except Exception as e:
             print("Simulation failed due to error: {}".format(e))
@@ -301,16 +301,16 @@ for idx, row in df_strms.iterrows():
         # delete output file after it's been processed
         if delete_swmm_outputs:
             os.remove(f_swmm_out)
-    # if not succesful , remove partial results
-    # else:
-    #     try:
-    #         os.remove(f_swmm_out)
-    #     except:
-    #         pass
-    #     try:
-    #         os.remove(rpt_path)
-    #     except:
-    #         pass
+    # remove output files since they aren't being used by anything; keeping rpt files 
+    try:
+        os.remove(f_swmm_out)
+    except:
+        pass
+    else:
+        try:
+            os.remove(rpt_path)
+        except:
+            pass
             # print("Deleted file {}".format(f_swmm_out))
     # recording stuff that would be gotten from rpt
     lst_flow_errors_fromrpt.append(flow_routing_error_rpt)
