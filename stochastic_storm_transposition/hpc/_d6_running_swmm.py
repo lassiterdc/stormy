@@ -150,11 +150,11 @@ for idx, row in df_strms.iterrows():
     for routing_tstep in lst_alternative_routing_tsteps:
         # modify inp file with routing timestep
         ## define filepath to new inp file
-        f_inp_torun = f_inp_torun.split(".inp")[0] + str(routing_tstep) + ".inp"
+        f_inp_torun = f_inp_torun.split(".inp")[0] + "_rt" + str(routing_tstep) + ".inp"
         with open(f_inp, 'r') as file:
             # Read all lines from the file
             lines = file.readlines()
-            file.close()
+            # file.close()
         for i, line in enumerate(lines):
             if "ROUTING_STEP" in line:
                 line_of_interest = line
@@ -170,7 +170,7 @@ for idx, row in df_strms.iterrows():
                 lines[i] = line.replace(line_of_interest, newline)
         with open(f_inp_torun, 'w') as file:
             file.writelines(lines)
-            file.close()
+            # file.close()
         # run simulation
         runoff_continuity_issues = np.nan
         flow_continuity_issues = np.nan
@@ -192,8 +192,8 @@ for idx, row in df_strms.iterrows():
                         problem = "User-defined maximum simulation time limit of {} minutes reached, so simulation was halted.".format(max_runtime_min)
                         print(problem)
                         success = False
-                        break
-                    pass
+                        sim.terminate_simulation()
+                        sim.save_hotstart(f_inp_torun+".hot") # saving hotstart file so we can resume it when running failed models
                 sim._model.swmm_end()
                 runoff_error_pyswmm = sim.runoff_error
                 flow_routing_error_pyswmm = sim.flow_routing_error
@@ -269,7 +269,7 @@ for idx, row in df_strms.iterrows():
         __, __, __, freebndry, norain = parse_inp(f_inp) # this function also returns rz, yr, storm_id which are not needed since they were determined earlier
         with Output(f_swmm_out) as out:
             units = out.units
-            out.close()
+            # out.close()
         s_node_flooding,total_flooding_system_rpt,runoff_error_rpt,\
             flow_routing_error_rpt,frac_diff_node_minus_system_flood_rpt = return_flood_losses_and_continuity_errors(rpt_path)
         
