@@ -152,6 +152,7 @@ for idx, row in df_strms.iterrows():
         with open(f_inp, 'r') as file:
             # Read all lines from the file
             lines = file.readlines()
+            file.close()
         for i, line in enumerate(lines):
             if "ROUTING_STEP" in line:
                 line_of_interest = line
@@ -167,6 +168,7 @@ for idx, row in df_strms.iterrows():
                 lines[i] = line.replace(line_of_interest, newline)
         with open(f_inp, 'w') as file:
             file.writelines(lines)
+            file.close()
         # run simulation
         runoff_continuity_issues = np.nan
         flow_continuity_issues = np.nan
