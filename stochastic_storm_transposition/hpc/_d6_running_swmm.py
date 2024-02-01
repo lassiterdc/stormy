@@ -300,15 +300,15 @@ for idx, row in df_strms.iterrows():
         if delete_swmm_outputs:
             os.remove(f_swmm_out)
     # if not succesful , remove partial results
-    else:
-        try:
-            os.remove(f_swmm_out)
-        except:
-            pass
-        try:
-            os.remove(rpt_path)
-        except:
-            pass
+    # else:
+    #     try:
+    #         os.remove(f_swmm_out)
+    #     except:
+    #         pass
+    #     try:
+    #         os.remove(rpt_path)
+    #     except:
+    #         pass
             # print("Deleted file {}".format(f_swmm_out))
     # recording stuff that would be gotten from rpt
     lst_flow_errors_fromrpt.append(flow_routing_error_rpt)
