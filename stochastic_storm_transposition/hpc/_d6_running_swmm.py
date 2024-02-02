@@ -144,7 +144,7 @@ print("Running SWMM models in folder: {}".format(swmm_fldr))
 if remove_previous_runs == True:
     files_in_swmm_folder = glob(swmm_fldr + "*")
     for f in files_in_swmm_folder:
-        if f not in df_strms.swmm_inp:
+        if f not in list(df_strms.swmm_inp.values):
             os.remove(f)
 
 for idx, row in df_strms.iterrows():
