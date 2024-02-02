@@ -15,8 +15,10 @@ which_models = str(sys.argv[2]) # either all or failed or an integer
 realizations_to_use = str(sys.argv[3])
 if which_models == "all":
     print("Running {} storms for year {}".format(which_models, sim_year))
+    remove_previous_runs = True # if rerunning all, remove old simulations and results
 else:
     print("Running models for storm {} of year {}".format(which_models, sim_year))
+    remove_previous_runs = False
 delete_swmm_outputs = int(sys.argv[4])
 if delete_swmm_outputs == 1:
     delete_swmm_outputs = True
@@ -134,6 +136,17 @@ problems = []
 notes = []
 count = -1
 
+# return folder of SWMM models
+f_inp_name = df_strms.swmm_inp[0].split("/")[-1]
+swmm_fldr = df_strms.swmm_inp[0].split(f_inp_name)[0]
+print("Running SWMM models in folder: {}".format(swmm_fldr))
+
+if remove_previous_runs == True:
+    files_in_swmm_folder = glob(swmm_fldr + "*")
+    for f in files_in_swmm_folder:
+        if f not in df_strms.swmm_inp:
+            os.remove(f)
+
 for idx, row in df_strms.iterrows():
     note = ""
     problem = "None"
@@ -142,19 +155,22 @@ for idx, row in df_strms.iterrows():
     yr = int(row["year"])
     storm_id = int(row["storm_id"])
     count += 1
-    print("Running simulation for realization {} year {} storm {}. {} out of {} simulations complete.".format(rz, yr, storm_id, count, len(df_strms)))
+    f_inp_name = df_strms.swmm_inp[0].split("/")[-1]
+    print("################################################################################")
+    # print("Running sims for {}. {} out of {} simulations complete.".format(f_inp_name, count, len(df_strms)))
     output_converted_to_dataset = False
     loop_start_time = sim_time = datetime.now()
     sim_runtime_min = np.nan
-    f_inp_torun = f_inp
     for routing_tstep in lst_alternative_routing_tsteps:
+        routing_tstep_to_report = routing_tstep
         # modify inp file with routing timestep
         ## define filepath to new inp file
-        f_inp_torun = f_inp_torun.split(".inp")[0] + "_rt" + str(routing_tstep) + ".inp"
+        f_inp_torun = f_inp.split(".inp")[0] + "_rt" + str(routing_tstep) + ".inp"
+        f_inp_name = f_inp_torun.split("/")[-1]
+        print("Running {}".format(f_inp_name))
         with open(f_inp, 'r') as file:
             # Read all lines from the file
             lines = file.readlines()
-            # file.close()
         for i, line in enumerate(lines):
             if "ROUTING_STEP" in line:
                 line_of_interest = line
@@ -170,7 +186,6 @@ for idx, row in df_strms.iterrows():
                 lines[i] = line.replace(line_of_interest, newline)
         with open(f_inp_torun, 'w') as file:
             file.writelines(lines)
-            # file.close()
         # run simulation
         runoff_continuity_issues = np.nan
         flow_continuity_issues = np.nan
@@ -192,17 +207,17 @@ for idx, row in df_strms.iterrows():
                         problem = "User-defined maximum simulation time limit of {} minutes reached, so simulation was halted.".format(max_runtime_min)
                         print(problem)
                         success = False
-                        sim.terminate_simulation()
                         sim.save_hotstart(f_inp_torun+".hot") # saving hotstart file so we can resume it when running failed models
-                sim._model.swmm_end()
+                        sim.terminate_simulation()
+                sim._model.swmm_end() # must call this to accurately report the continuity errors
                 runoff_error_pyswmm = sim.runoff_error
                 flow_routing_error_pyswmm = sim.flow_routing_error
                 # write report file
-                sim.report()
+                # sim.report()
                 # sim.close()
         except Exception as e:
             print("Simulation failed due to error: {}".format(e))
-            problem = e
+            # problem = e
             success = False
         if success: # check continuity error and re-run if it is worse than a threshold target
             # record runoff error
@@ -221,6 +236,7 @@ for idx, row in df_strms.iterrows():
                 # is this the first simulation attempt?
                 if routing_tstep == lst_alternative_routing_tsteps[0]: # first sim attempt
                     previous_flow_routing_error_pyswmm = flow_routing_error_pyswmm
+                    previous_runoff_error_pyswmm = runoff_error_pyswmm
                     previous_routing_tstep = routing_tstep
                     print("The simulation was run with a routing timestep of {}. Runoff and flow continuity errors were {} and {}. Sim runtime was {}. Re-running simulation.".format(
                         routing_tstep, runoff_error_pyswmm, flow_routing_error_pyswmm, sim_runtime_min))
@@ -232,21 +248,19 @@ for idx, row in df_strms.iterrows():
                         if frac_improvement < 0:
                             print("The simulation was run with a routing timestep of {}. Flow continuity error was {} which was actually WORSE than the previous run so I won't be trying a smaller routing timestep. Sim runtime was {}.".format(
                                 routing_tstep, flow_routing_error_pyswmm, sim_runtime_min))
-                            # print("abs(previous_flow_routing_error_pyswmm)")
-                            # print(abs(previous_flow_routing_error_pyswmm))
-                            # print("abs(flow_routing_error_pyswmm)")
-                            # print(abs(flow_routing_error_pyswmm))
-                            # print("net_improvement = abs(previous_flow_routing_error_pyswmm) - abs(flow_routing_error_pyswmm) = {}".format(net_improvement))
-                            # print("frac_improvement = net_improvement / abs(previous_flow_routing_error_pyswmm) = {}".format(frac_improvement))
                             note = note + "This routing timestep actually did {}% worse than *{}*s which resulted in a flow continuity error of {}%;".format(
                                 round(frac_improvement*100,1), previous_routing_tstep, previous_flow_routing_error_pyswmm
                             )
+                            routing_tstep_to_report = previous_routing_tstep
+                            flow_routing_error_pyswmm = previous_flow_routing_error_pyswmm
+                            runoff_error_pyswmm = previous_runoff_error_pyswmm
                         else:
                             print("The simulation was run with a routing timestep of {}. Flow continuity error was {} which is less than {}% better than the previous run. This does not warrant another simulation. Sim runtime was {}.".format(
                                 routing_tstep, flow_routing_error_pyswmm, min_improvement_to_warrant_another_sim*100, sim_runtime_min))
                         break
                     else:
                         previous_flow_routing_error_pyswmm = flow_routing_error_pyswmm
+                        previous_runoff_error_pyswmm = runoff_error_pyswmm
                         previous_routing_tstep = routing_tstep
         else: # if simulation didn't run because of an error or the time limit, don't re-run the sim
             break
@@ -258,12 +272,13 @@ for idx, row in df_strms.iterrows():
     # record flow and runoff errors
     lst_flow_errors_frompyswmm.append(flow_routing_error_pyswmm)
     lst_runoff_errors_frompyswmm.append(runoff_error_pyswmm)
-    lst_routing_timestep_used.append(routing_tstep)
+    lst_routing_timestep_used.append(routing_tstep_to_report)
     # benchmarking write netcdf
     start_create_dataset = datetime.now()
     create_dataset_time_min = np.nan
     # if the run was succesful, process the results
-    f_swmm_out = f_inp_torun.split('.inp')[0] + '.out'
+    f_inp_to_report = f_inp.split(".inp")[0] + "_rt" + str(routing_tstep_to_report) + ".inp"
+    f_swmm_out = f_inp_to_report.split('.inp')[0] + '.out'
     rpt_path = f_swmm_out.split(".out")[0] + ".rpt"
     if success == True:
         __, __, __, freebndry, norain = parse_inp(f_inp) # this function also returns rz, yr, storm_id which are not needed since they were determined earlier
@@ -301,17 +316,17 @@ for idx, row in df_strms.iterrows():
         # delete output file after it's been processed
         if delete_swmm_outputs:
             os.remove(f_swmm_out)
-    # remove output files since they aren't being used by anything; keeping rpt files 
-    try:
-        os.remove(f_swmm_out)
-    except:
-        pass
-    else:
+    else: # only remove rpt files if simulation failed
         try:
             os.remove(rpt_path)
         except:
-            pass
+            print("Removing report failed. Error message: {}".format(e))
             # print("Deleted file {}".format(f_swmm_out))
+    # remove output files since they aren't being used by anything
+    try:
+        os.remove(f_swmm_out)
+    except Exception as e:
+        print("Removing output file failed. Error message: {}".format(e))
     # recording stuff that would be gotten from rpt
     lst_flow_errors_fromrpt.append(flow_routing_error_rpt)
     lst_runoff_errors_fromrpt.append(runoff_error_rpt)
@@ -352,12 +367,18 @@ else:
 if which_models == "failed":
     ds_all_node_fld = ds # single output only
 else:
-    ds_all_node_fld = xr.combine_by_coords(lst_ds_node_fld)
-if at_least_1_sim_was_succesfull:
-    ds_all_node_fld_loaded = ds_all_node_fld.load()
-    ds_all_node_fld_loaded.to_netcdf(f_out_modelresults, encoding= {"node_flooding_cubic_meters":{"zlib":True}}, engine = "h5netcdf")
-    tot_elapsed_time_min = round((datetime.now() - script_start_time).seconds / 60, 1)
-    print("exported " + f_out_modelresults)
+    try:
+        ds_all_node_fld = xr.combine_by_coords(lst_ds_node_fld)
+        if at_least_1_sim_was_succesfull:
+            ds_all_node_fld_loaded = ds_all_node_fld.load()
+            ds_all_node_fld_loaded.to_netcdf(f_out_modelresults, encoding= {"node_flooding_cubic_meters":{"zlib":True}}, engine = "h5netcdf")
+            tot_elapsed_time_min = round((datetime.now() - script_start_time).seconds / 60, 1)
+            print("exported " + f_out_modelresults)
+    except Exception as e:
+        print("Failed to export node flooding datasets due to error: {}")
+        print("Looping through datasets to see if the issue can be spotted: ")
+        for ds in lst_ds_node_fld:
+            print(ds)
 # export performance info
 df_strms["run_completed"] = successes
 df_strms["routing_timestep"] = lst_routing_timestep_used
