@@ -27,5 +27,5 @@ source activate running_swmm
 # running swmm
 python ${assar_dirs[hpc_d6_py]} ${SLURM_ARRAY_TASK_ID} "all" 1 1 # arguments: year, which models to run (failed, all, or specific storm number), which realizations to run, and whether to delete swmm .out files
 # python ${assar_dirs[hpc_d6_py]} 764 "all" 2 0
-# python ${assar_dirs[hpc_d6_py]} 251 "all" 1 1
+# python ${assar_dirs[hpc_d6_py]} 99999 "all" 1 0 # this is a duplicate of year 251 that has been causing problems
 # python ${assar_dirs[hpc_d6_py]} 252 "all" 1 0
