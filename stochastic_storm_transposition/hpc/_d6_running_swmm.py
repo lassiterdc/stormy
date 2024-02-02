@@ -9,6 +9,7 @@ from datetime import datetime
 import os
 from glob import glob
 from __utils import *
+import shutil
 
 sim_year = int(sys.argv[1])
 which_models = str(sys.argv[2]) # either all or failed or an integer
@@ -155,7 +156,7 @@ if remove_previous_runs == True:
             files_to_remove.append(f_compare)
     for f_to_remove in files_to_remove:
         os.remove(f_to_remove)
-        
+
 for idx, row in df_strms.iterrows():
     note = ""
     problem = "None"
@@ -229,6 +230,14 @@ for idx, row in df_strms.iterrows():
             # problem = e
             success = False
         if success: # check continuity error and re-run if it is worse than a threshold target
+            # save the rpt file to another directory to see if i can figure out what's going on with the dumping thing
+            rpt_path = f_inp_torun.split('.inp')[0] + ".rpt"
+            # rpt_name = rpt_path.split("/")[-1]
+            rpt_copy_fldr = swmm_fldr + "rpt_backup/"
+            source_file_path = Path(rpt_path)
+            destination_directory = Path(rpt_copy_fldr)
+            destination_directory.mkdir(parents=True, exist_ok=True)
+            shutil.copy(source_file_path, destination_directory)
             # record runoff error
             if (abs(runoff_error_pyswmm) <= continuity_error_thresh):
                 runoff_continuity_issues = False
