@@ -141,12 +141,21 @@ f_inp_name = df_strms.swmm_inp[0].split("/")[-1]
 swmm_fldr = df_strms.swmm_inp[0].split(f_inp_name)[0]
 print("Running SWMM models in folder: {}".format(swmm_fldr))
 
+
 if remove_previous_runs == True:
     files_in_swmm_folder = glob(swmm_fldr + "*")
-    for f in files_in_swmm_folder:
-        if f not in list(df_strms.swmm_inp.values):
-            os.remove(f)
-
+    files_to_remove = []
+    for f_compare in files_in_swmm_folder:
+        keeper = False
+        for f_swmm_to_keep in df_strms.swmm_inp:
+            # if the file is one of the core swmm files, keep it
+            if os.path.samefile(f_swmm_to_keep, f_compare):
+                keeper = True
+        if keeper == False:
+            files_to_remove.append(f_compare)
+    for f_to_remove in files_to_remove:
+        os.remove(f_to_remove)
+        
 for idx, row in df_strms.iterrows():
     note = ""
     problem = "None"
