@@ -11,7 +11,7 @@
 #SBATCH --mail-type=ALL   
 # SBATCH --exclude=udc-ba26-18,udc-ba27-14,udc-ba26-16,udc-ba26-17
 
-# ijob -c 1 -A quinnlab_paid -p standard --time=0-06:00:00 --mem-per-cpu=64000
+# ijob -c 1 -A quinnlab_paid -p standard --time=0-06:00:00 --mem-per-cpu=16000
 
 source __directories.sh
 module purge
