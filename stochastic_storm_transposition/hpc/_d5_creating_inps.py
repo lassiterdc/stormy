@@ -157,7 +157,7 @@ for outfall_type in lst_outfall_types:
                     elif key == "END_DATE":
                         d_fields[key] = df_single_event.event_end.dt.strftime('%m/%d/%Y')[0]
                     elif key == "END_TIME":
-                        d_fields[key] = df_single_event.event_start.dt.strftime("%H:%M:%S")[0]
+                        d_fields[key] = df_single_event.event_end.dt.strftime("%H:%M:%S")[0]
                     else:
                         sys.exit("SCRIPT FAILED: {} was not found for filling out the SWMM template.".format(key))
                 new_in = template.safe_substitute(d_fields)
