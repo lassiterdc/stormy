@@ -144,7 +144,8 @@ print("Running SWMM models in folder: {}".format(swmm_fldr))
 
 
 if remove_previous_runs == True:
-    files_in_swmm_folder = glob(swmm_fldr + "*")
+    contents_in_swmm_folder = glob(swmm_fldr + "*")
+    files_in_swmm_folder = [path for path in contents_in_swmm_folder if os.path.isfile(path)]
     files_to_remove = []
     for f_compare in files_in_swmm_folder:
         keeper = False
