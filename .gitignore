@@ -189,3 +189,4 @@ data/geospatial/imagery.*
 stochastic_storm_transposition/_scratch/models/*
 stochastic_storm_transposition/_scratch/models/most_negative_interaction/running_locally/rz1_yr764_strm5.inp
 stochastic_storm_transposition/_scratch/models/most_negative_interaction/running_using_pyswmm/rz1_yr764_strm5.inp
+swmm/_python/_troubleshooting/*
