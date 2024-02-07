@@ -112,7 +112,7 @@ if storm_id_to_run is not None:
     df_strms = df_strms[df_strms.storm_id == storm_id_to_run]
 if storm_id_to_run is not None:
     df_strms = df_strms[df_strms.storm_id == storm_id_to_run]
-#%% run simulations
+#%% run simulations 
 lst_ds_node_fld = []
 lst_outputs_converted_to_dataset = [] # to track success
 runtimes = []
@@ -131,6 +131,9 @@ lst_frac_diff_node_minus_system_flood_rpt = []
 
 lst_runoff_continuity_issues = []
 lst_flow_continuity_issues = []
+
+lst_inp_files_to_keep = []
+lst_rpt_files_to_keep = []
 # export_dataset_times = []
 successes = []
 problems = []
@@ -141,7 +144,10 @@ count = -1
 f_inp_name = df_strms.swmm_inp[0].split("/")[-1]
 swmm_fldr = df_strms.swmm_inp[0].split(f_inp_name)[0]
 print("Running SWMM models in folder: {}".format(swmm_fldr))
-
+# make sure directory is set up for rpt backups
+rpt_copy_fldr = swmm_fldr + "rpt_backup/"
+rpt_copy_directory = Path(rpt_copy_fldr)
+rpt_copy_directory.mkdir(parents=True, exist_ok=True)
 
 if remove_previous_runs == True:
     contents_in_swmm_folder = glob(swmm_fldr + "*")
@@ -234,11 +240,8 @@ for idx, row in df_strms.iterrows():
             # save the rpt file to another directory to see if i can figure out what's going on with the dumping thing
             rpt_path = f_inp_torun.split('.inp')[0] + ".rpt"
             # rpt_name = rpt_path.split("/")[-1]
-            rpt_copy_fldr = swmm_fldr + "rpt_backup/"
             source_file_path = Path(rpt_path)
-            destination_directory = Path(rpt_copy_fldr)
-            destination_directory.mkdir(parents=True, exist_ok=True)
-            shutil.copy(source_file_path, destination_directory)
+            shutil.copy(source_file_path, rpt_copy_directory)
             # record runoff error
             if (abs(runoff_error_pyswmm) <= continuity_error_thresh):
                 runoff_continuity_issues = False
@@ -298,7 +301,11 @@ for idx, row in df_strms.iterrows():
     # if the run was succesful, process the results
     f_inp_to_report = f_inp.split(".inp")[0] + "_rt" + str(routing_tstep_to_report) + ".inp"
     f_swmm_out = f_inp_to_report.split('.inp')[0] + '.out'
-    rpt_path = f_swmm_out.split(".out")[0] + ".rpt"
+    # use the rpt file that was copied to the backup folder
+    rpt_name = f_swmm_out.split("/")[-1].split(".out")[0] + ".rpt"
+    rpt_path = rpt_copy_fldr + rpt_name
+    lst_rpt_files_to_keep.append(rpt_path)
+    lst_inp_files_to_keep.append(f_inp_to_report)
     if success == True:
         __, __, __, freebndry, norain = parse_inp(f_inp) # this function also returns rz, yr, storm_id which are not needed since they were determined earlier
         with Output(f_swmm_out) as out:
@@ -335,17 +342,6 @@ for idx, row in df_strms.iterrows():
         # delete output file after it's been processed
         if delete_swmm_outputs:
             os.remove(f_swmm_out)
-    else: # only remove rpt files if simulation failed
-        try:
-            os.remove(rpt_path)
-        except:
-            print("Removing report failed. Error message: {}".format(e))
-            # print("Deleted file {}".format(f_swmm_out))
-    # remove output files since they aren't being used by anything
-    try:
-        os.remove(f_swmm_out)
-    except Exception as e:
-        print("Removing output file failed. Error message: {}".format(e))
     # recording stuff that would be gotten from rpt
     lst_flow_errors_fromrpt.append(flow_routing_error_rpt)
     lst_runoff_errors_fromrpt.append(runoff_error_rpt)
@@ -378,6 +374,29 @@ for idx, row in df_strms.iterrows():
     if which_models == "failed":
         break
 
+# remove all files but swmm input files, rpt files, and .hot files
+## define list of all files
+contents_in_swmm_folder = glob(swmm_fldr + "*")
+### do not include directories in the list
+files_in_swmm_folder = [path for path in contents_in_swmm_folder if os.path.isfile(path)]
+files_in_rpt_backup_folder = glob(rpt_copy_fldr + "*")
+lst_all_files = files_in_swmm_folder + files_in_rpt_backup_folder
+## define list of all files to keep
+lst_hotstarts = glob(swmm_fldr + "*.hot")
+original_swmm_files = list(df_strms.swmm_inp)
+lst_to_keep = lst_hotstarts + original_swmm_files + lst_rpt_files_to_keep + lst_inp_files_to_keep
+
+files_to_remove = []
+for f_compare in lst_all_files:
+    keeper = False
+    for f_keeper in lst_to_keep:
+        # if the file is one of the core swmm files, keep it
+        if os.path.samefile(f_keeper, f_compare):
+            keeper = True
+    if keeper == False:
+        files_to_remove.append(f_compare)
+for f_to_remove in files_to_remove:
+    os.remove(f_to_remove)
 #%% export results and model summaries
 if len(lst_ds_node_fld) > 0:
     at_least_1_sim_was_succesfull = True
