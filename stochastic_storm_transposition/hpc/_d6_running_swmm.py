@@ -315,8 +315,8 @@ for idx, row in df_strms.iterrows():
             flow_routing_error_rpt,frac_diff_node_minus_system_flood_rpt = return_flood_losses_and_continuity_errors(rpt_path)
         
         if units["system"] == "US":
-            tot_flood_losses_rpt_system_m3 = total_flooding_system_rpt * 10e6 * cubic_meters_per_gallon # Million gallons * gallons per million gallons * cubic meters per gallon
-            node_flooding_m3 = s_node_flooding * 10e6 * cubic_meters_per_gallon # default units are in millions of gallons
+            tot_flood_losses_rpt_system_m3 = total_flooding_system_rpt * 1e6 * cubic_meters_per_gallon # Million gallons * gallons per million gallons * cubic meters per gallon
+            node_flooding_m3 = s_node_flooding * 1e6 * cubic_meters_per_gallon # default units are in millions of gallons
         else:
             print('UNITS NOT RECOGNIZED; NEED TO BE UPDATED FOR METRIC PROBABLY')
         tot_flood_losses_rpt_nodes_m3 = node_flooding_m3.sum()
