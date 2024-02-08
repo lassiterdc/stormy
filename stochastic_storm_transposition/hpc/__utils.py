@@ -219,7 +219,7 @@ def return_rzs_for_yr(fldr_realizations, yr):
     lst_f_ncs.sort()
     return lst_f_ncs
 
-def return_flood_losses_and_continuity_errors(swmm_rpt):
+def return_flood_losses_and_continuity_errors(swmm_rpt, f_inp):
     from pyswmm import Simulation, Nodes
     with open(swmm_rpt, 'r', encoding='latin-1') as file:
         # Read all lines from the file
@@ -233,8 +233,6 @@ def return_flood_losses_and_continuity_errors(swmm_rpt):
             break
     if valid == False:
         sys.exit("The RPT file seems to not contain any information: {}".format(swmm_rpt))
-        
-    
     line_num = -1
     lst_node_fld_summary = []
     encountered_header_of_node_flooding_summary = False
@@ -272,16 +270,14 @@ def return_flood_losses_and_continuity_errors(swmm_rpt):
     # create pandas series of node flood summaries
     # return ids of all nodes
     lst_nodes = []
-    with Simulation(swmm_rpt.split(".rpt")[0] + ".inp") as sim:
+    with Simulation(f_inp) as sim:
        for node in Nodes(sim):
            lst_nodes.append(node.nodeid)
-
     df_allnodes = pd.DataFrame(dict(
         node_id = lst_nodes,
         # dummy = np.zeros(len(lst_nodes))
     ))
     df_allnodes = df_allnodes.set_index("node_id")
-
     n_header_rows = 5
     node_ids = []
     flood_volumes = []
@@ -298,7 +294,6 @@ def return_flood_losses_and_continuity_errors(swmm_rpt):
         flooding = float(lst_values[5])
         node_ids.append(node_id)
         flood_volumes.append(flooding)
-
     if len(flood_volumes) > 0: # if there is flooding in the model
         df_node_flooding_subset = pd.DataFrame(dict(
             node_id = node_ids,
@@ -313,20 +308,16 @@ def return_flood_losses_and_continuity_errors(swmm_rpt):
             node_id = lst_nodes,
             flood_volume = np.zeros(len(lst_nodes))
         ))
-
     s_node_flooding = df_node_flooding.flood_volume
-
     # return runoff and flow continuity
     runoff_continuity_error_perc = float(runoff_continuity_error_line.split(" ")[-1].split("\n")[0])
     flow_continuity_error_perc = float(flow_continuity_error_line.split(" ")[-1].split("\n")[0])
-
     # return system flood losses
     system_flooding = float(system_flood_loss_line.split(" ")[-1].split("\n")[0])
     if (s_node_flooding.sum() > 0) and (system_flooding > 0):
         frac_diff_node_minus_system_flood = (s_node_flooding.sum() - system_flooding)/system_flooding
     else:
         frac_diff_node_minus_system_flood = np.nan
-
     return s_node_flooding,system_flooding,runoff_continuity_error_perc,flow_continuity_error_perc,frac_diff_node_minus_system_flood
 
 
