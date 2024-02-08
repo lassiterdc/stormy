@@ -11,6 +11,14 @@ from glob import glob
 from __utils import *
 import shutil
 
+#%% work
+# sim_year = 251
+# which_models = "all"
+# realizations_to_use = "all"
+# delete_swmm_outputs = False
+# realization_to_run = None
+#%% end work
+
 sim_year = int(sys.argv[1])
 which_models = str(sys.argv[2]) # either all or failed or an integer
 realizations_to_use = str(sys.argv[3])
@@ -150,6 +158,7 @@ rpt_copy_directory = Path(rpt_copy_fldr)
 rpt_copy_directory.mkdir(parents=True, exist_ok=True)
 
 if remove_previous_runs == True:
+    old_rpt_files = glob(rpt_copy_fldr + "*")
     contents_in_swmm_folder = glob(swmm_fldr + "*")
     files_in_swmm_folder = [path for path in contents_in_swmm_folder if os.path.isfile(path)]
     files_to_remove = []
@@ -161,7 +170,7 @@ if remove_previous_runs == True:
                 keeper = True
         if keeper == False:
             files_to_remove.append(f_compare)
-    for f_to_remove in files_to_remove:
+    for f_to_remove in (files_to_remove + old_rpt_files):
         os.remove(f_to_remove)
 
 for idx, row in df_strms.iterrows():
@@ -312,7 +321,7 @@ for idx, row in df_strms.iterrows():
             units = out.units
             # out.close()
         s_node_flooding,total_flooding_system_rpt,runoff_error_rpt,\
-            flow_routing_error_rpt,frac_diff_node_minus_system_flood_rpt = return_flood_losses_and_continuity_errors(rpt_path)
+            flow_routing_error_rpt,frac_diff_node_minus_system_flood_rpt = return_flood_losses_and_continuity_errors(rpt_path, f_inp_to_report)
         
         if units["system"] == "US":
             tot_flood_losses_rpt_system_m3 = total_flooding_system_rpt * 1e6 * cubic_meters_per_gallon # Million gallons * gallons per million gallons * cubic meters per gallon
