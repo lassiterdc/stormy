@@ -313,9 +313,9 @@ for idx, row in df_strms.iterrows():
     # use the rpt file that was copied to the backup folder
     rpt_name = f_swmm_out.split("/")[-1].split(".out")[0] + ".rpt"
     rpt_path = rpt_copy_fldr + rpt_name
-    lst_rpt_files_to_keep.append(rpt_path)
-    lst_inp_files_to_keep.append(f_inp_to_report)
     if success == True:
+        lst_inp_files_to_keep.append(f_inp_to_report)
+        lst_rpt_files_to_keep.append(rpt_path)
         __, __, __, freebndry, norain = parse_inp(f_inp) # this function also returns rz, yr, storm_id which are not needed since they were determined earlier
         with Output(f_swmm_out) as out:
             units = out.units
