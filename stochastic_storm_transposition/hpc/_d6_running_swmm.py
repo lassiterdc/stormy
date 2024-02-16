@@ -31,9 +31,9 @@ else:
 delete_swmm_outputs = int(sys.argv[4])
 if delete_swmm_outputs == 1:
     delete_swmm_outputs = True
+    print("Deleting SWMM .out files is set to {}".format(delete_swmm_outputs))
 else:
     delete_swmm_outputs = False
-print("Deleting SWMM .out files is set to {}".format(delete_swmm_outputs))
 f_out_runtimes = dir_swmm_sst_models + "_model_performance_year{}.csv".format(sim_year)
 f_out_modelresults = dir_swmm_sst_models + "_model_outputs_year{}.nc".format(sim_year)
 storm_id_to_run = None
@@ -149,8 +149,8 @@ notes = []
 count = -1
 
 # return folder of SWMM models
-f_inp_name = df_strms.swmm_inp[0].split("/")[-1]
-swmm_fldr = df_strms.swmm_inp[0].split(f_inp_name)[0]
+f_inp_name = df_strms.swmm_inp.iloc[0].split("/")[-1]
+swmm_fldr = df_strms.swmm_inp.iloc[0].split(f_inp_name)[0]
 print("Running SWMM models in folder: {}".format(swmm_fldr))
 # make sure directory is set up for rpt backups
 rpt_copy_fldr = swmm_fldr + "rpt_backup/"
