@@ -419,7 +419,6 @@ else:
         if at_least_1_sim_was_succesfull:
             ds_all_node_fld_loaded = ds_all_node_fld.load()
             ds_all_node_fld_loaded.to_netcdf(f_out_modelresults, encoding= {"node_flooding_cubic_meters":{"zlib":True}}, engine = "h5netcdf")
-            tot_elapsed_time_min = round((datetime.now() - script_start_time).seconds / 60, 1)
             print("exported " + f_out_modelresults)
     except Exception as e:
         print("Failed to export node flooding datasets due to error: {}")
@@ -445,5 +444,5 @@ df_strms["export_dataset_min"] = export_dataset_times_min
 df_strms["lst_outputs_converted_to_netcdf"] = lst_outputs_converted_to_dataset
 df_strms.to_csv(f_out_runtimes, index=False)
 print('Exported ' + f_out_runtimes)
-
+tot_elapsed_time_min = round((datetime.now() - script_start_time).seconds / 60, 1)
 print("Total script runtime (hr): {}".format(tot_elapsed_time_min/60))
