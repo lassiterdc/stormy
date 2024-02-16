@@ -181,7 +181,7 @@ for idx, row in df_strms.iterrows():
     yr = int(row["year"])
     storm_id = int(row["storm_id"])
     count += 1
-    f_inp_name = df_strms.swmm_inp[0].split("/")[-1]
+    f_inp_name = f_inp.split("/")[-1]
     print("################################################################################")
     # print("Running sims for {}. {} out of {} simulations complete.".format(f_inp_name, count, len(df_strms)))
     output_converted_to_dataset = False
