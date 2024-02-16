@@ -174,9 +174,9 @@ def parse_inp(f_inp):
     storm_id = lst_name_comp[2].split(".")[0].split('strm')[-1]
     freebndry = False
     norain = False
-    if "freebndry" in lst_name_comp[-1]:
+    if "freebndry" in lst_name_comp:
         freebndry = True
-    if "norain" in lst_name_comp[-1]:
+    if "norain" in lst_name_comp:
         norain = True
     return int(rz), int(yr), int(storm_id), str(freebndry), str(norain)
 
@@ -220,7 +220,8 @@ def return_rzs_for_yr(fldr_realizations, yr):
     return lst_f_ncs
 
 def return_flood_losses_and_continuity_errors(swmm_rpt, f_inp):
-    from pyswmm import Simulation, Nodes
+    # from pyswmm import Nodes
+    import swmmio
     with open(swmm_rpt, 'r', encoding='latin-1') as file:
         # Read all lines from the file
         lines = file.readlines()
@@ -268,14 +269,11 @@ def return_flood_losses_and_continuity_errors(swmm_rpt, f_inp):
             lst_node_fld_summary.append(line)
     # the rpt file only has nodes with nonzero flooding but I need to account for all nodes
     # create pandas series of node flood summaries
-    # return ids of all nodes
-    lst_nodes = []
-    with Simulation(f_inp) as sim:
-       for node in Nodes(sim):
-           lst_nodes.append(node.nodeid)
+    ## return ids of all nodes
+    model = swmmio.Model(f_inp)
+    ar_nodes = model.nodes.dataframe.index.values
     df_allnodes = pd.DataFrame(dict(
-        node_id = lst_nodes,
-        # dummy = np.zeros(len(lst_nodes))
+        node_id = ar_nodes,
     ))
     df_allnodes = df_allnodes.set_index("node_id")
     n_header_rows = 5
@@ -305,9 +303,10 @@ def return_flood_losses_and_continuity_errors(swmm_rpt, f_inp):
         df_node_flooding = df_node_flooding.fillna(0)
     else: # if there is no flooding in the model
         df_node_flooding = pd.DataFrame(dict(
-            node_id = lst_nodes,
-            flood_volume = np.zeros(len(lst_nodes))
+            node_id = ar_nodes,
+            flood_volume = np.zeros(len(ar_nodes))
         ))
+        df_node_flooding = df_node_flooding.set_index("node_id")
     s_node_flooding = df_node_flooding.flood_volume
     # return runoff and flow continuity
     runoff_continuity_error_perc = float(runoff_continuity_error_line.split(" ")[-1].split("\n")[0])
