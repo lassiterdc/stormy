@@ -11,7 +11,7 @@
 #SBATCH --mail-type=ALL   
 # SBATCH --exclude=udc-ba26-18,udc-ba27-14,udc-ba26-16,udc-ba26-17
 
-# ijob -c 1 -A quinnlab_paid -p standard --time=0-09:00:00 --mem-per-cpu=32000
+# ijob -c 1 -A quinnlab_paid -p standard --time=0-09:00:00 --mem-per-cpu=16000
 
 source __directories.sh
 module purge
@@ -25,4 +25,5 @@ source activate running_swmm
 # echo "Running SWMM for year ${SLURM_ARRAY_TASK_ID}..."
 
 # running swmm
-python ${assar_dirs[hpc_d6_py]} ${SLURM_ARRAY_TASK_ID} "all" "1" 0 # arguments: year, which models to run (failed, all, or specific storm number), which realizations to run, and whether to delete swmm .out files
+# warning: this script will only tackle all models if n_failed <= 1000; otherwise this will need to be run multiple times
+python ${assar_dirs[hpc_d6_py]} ${SLURM_ARRAY_TASK_ID} "failed" 1 1 # arguments: year, which models to run (failed, all, or specific storm number), which realizations to run, and whether to delete swmm .out files
