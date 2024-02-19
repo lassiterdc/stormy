@@ -63,18 +63,18 @@ df_perf.to_csv(f_model_perf_summary, index=False)
 print("Exported file {}".format(f_model_perf_summary))
 
 #%% load event summaries
-lst_f_events = glob(f_summaries)
-lst_dfs_events = []
-for f in lst_f_events:
-    df = pd.read_csv(f)
-    lst_dfs_events.append(df)
+# lst_f_events = glob(f_summaries)
+# lst_dfs_events = []
+# for f in lst_f_events:
+#     df = pd.read_csv(f)
+#     lst_dfs_events.append(df)
 
-df_events = pd.concat(lst_dfs_events)
+# df_events = pd.concat(lst_dfs_events)
 
 # df_events.rename(columns=dict(realization_id = "realization"), inplace=True)
 
 # df_events_and_perf = df_perf.merge(df_events, on = ["realization", "year", "storm_id"])
 
 # export eventsormance dataframe
-df_events.to_csv(f_events_summary, index=False)
-print("Exported file {}".format(f_events_summary))
+# df_events.to_csv(f_events_summary, index=False)
+# print("Exported file {}".format(f_events_summary))
