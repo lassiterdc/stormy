@@ -196,6 +196,9 @@ for idx, row in df_strms.iterrows():
             # if attempting the routing timestep that ran into the runtime limit is the one up for trial, use the hotstart trial
             if idx_routing_tstep == idx_of_routing_tstep_of_last_attempted_sim:
                 use_hotstart = True
+                first_sim_attempt = True
+        else:
+            first_sim_attempt = routing_tstep == lst_alternative_routing_tsteps[0]
         # modify inp file with routing timestep
         ## define filepath to new inp file
         f_inp_torun = f_inp.split(".inp")[0] + "_rt" + str(routing_tstep) + ".inp"
@@ -236,6 +239,7 @@ for idx, row in df_strms.iterrows():
                 f_hotpath = f_inp_torun+".hot"
                 if use_hotstart:
                     sim.use_hotstart(f_hotpath)
+                    print("Using hotstart file to save some time on a previously incomplete run.....")
                 for step in sim:
                     sim_time = datetime.now()
                     sim_runtime_min = round((sim_time - sim_start_time).seconds / 60, 1)
@@ -275,7 +279,7 @@ for idx, row in df_strms.iterrows():
             else:
                 flow_continuity_issues = True
                 # is this the first simulation attempt?
-                if routing_tstep == lst_alternative_routing_tsteps[0]: # first sim attempt
+                if first_sim_attempt: # first sim attempt
                     previous_flow_routing_error_pyswmm = flow_routing_error_pyswmm
                     previous_runoff_error_pyswmm = runoff_error_pyswmm
                     previous_routing_tstep = routing_tstep
