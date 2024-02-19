@@ -201,6 +201,7 @@ for idx, row in df_strms.iterrows():
                 f_inp_prevrun = f_inp.split(".inp")[0] + "_rt" + str(previous_routing_tstep) + ".inp"
                 f_out_prevrun = f_inp.split(".inp")[0] + "_rt" + str(previous_routing_tstep) + ".out"
                 f_rpt_prevrun = rpt_copy_fldr + f_inp_prevrun.split("/")[-1].split(".inp")[0] + ".rpt"
+                prev_rpt_file_exists = os.path.exists(f_rpt_prevrun)
                 continue
             # if attempting the routing timestep that ran into the runtime limit is the one up for trial, use the hotstart trial
             if idx_routing_tstep == idx_of_routing_tstep_of_last_attempted_sim:
@@ -209,7 +210,7 @@ for idx, row in df_strms.iterrows():
             if use_hotstart_override:
                 use_hotstart = hotstart_override_val
             ## if first sim for failed model AND there has already been a succesful run at a previous timestep
-            if first_sim_attempt and previous_sim_run:
+            if first_sim_attempt and previous_sim_run and prev_rpt_file_exists:
                 __,__,previous_runoff_error_pyswmm,\
                     previous_flow_routing_error_pyswmm,__ = return_flood_losses_and_continuity_errors(f_rpt_prevrun, f_inp_prevrun)
         else:
@@ -437,17 +438,18 @@ lst_hotstarts = glob(swmm_fldr + "*.hot")
 original_swmm_files = list(df_strms.swmm_inp)
 lst_to_keep = lst_hotstarts + original_swmm_files + lst_rpt_files_to_keep + lst_inp_files_to_keep + lst_out_files_to_keep
 
-files_to_remove = []
-for f_compare in lst_all_files:
-    keeper = False
-    for f_keeper in lst_to_keep:
-        # if the file is one of the core swmm files, keep it
-        if os.path.samefile(f_keeper, f_compare):
-            keeper = True
-    if keeper == False:
-        files_to_remove.append(f_compare)
-for f_to_remove in files_to_remove:
-    os.remove(f_to_remove)
+if which_models == "all": # only remove files if running all models
+    files_to_remove = []
+    for f_compare in lst_all_files:
+        keeper = False
+        for f_keeper in lst_to_keep:
+            # if the file is one of the core swmm files, keep it
+            if os.path.samefile(f_keeper, f_compare):
+                keeper = True
+        if keeper == False:
+            files_to_remove.append(f_compare)
+    for f_to_remove in files_to_remove:
+        os.remove(f_to_remove)
 #%% export results and model summaries
 if len(lst_ds_node_fld) > 0:
     at_least_1_sim_was_succesfull = True
