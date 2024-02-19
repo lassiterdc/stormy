@@ -213,6 +213,7 @@ for idx, row in df_strms.iterrows():
             if first_sim_attempt and previous_sim_run and prev_rpt_file_exists:
                 __,__,previous_runoff_error_pyswmm,\
                     previous_flow_routing_error_pyswmm,__ = return_flood_losses_and_continuity_errors(f_rpt_prevrun, f_inp_prevrun)
+                first_sim_attempt = False
         else:
             first_sim_attempt = routing_tstep == lst_alternative_routing_tsteps[0]
         # modify inp file with routing timestep
@@ -304,7 +305,7 @@ for idx, row in df_strms.iterrows():
                 flow_continuity_issues = True
                 # is this the first simulation attempt?
                 ## if normal simulation run for all models or specific storms
-                if first_sim_attempt and (which_models != "failed"):
+                if first_sim_attempt:
                     previous_flow_routing_error_pyswmm = flow_routing_error_pyswmm
                     previous_runoff_error_pyswmm = runoff_error_pyswmm
                     print("The simulation was run with a routing timestep of {}. Runoff and flow continuity errors were {} and {}. Sim runtime was {}. Re-running simulation.".format(
