@@ -19,14 +19,14 @@ import shutil
 # realization_to_run = None
 #%% end work
 
-sim_year = int(sys.argv[1])
+sim_year = int(sys.argv[1]) # this is used as the row index of the failed model to run if which_models = "failed" (so there's only 1 simulation per node)
 which_models = str(sys.argv[2]) # either all or failed or an integer
 realizations_to_use = str(sys.argv[3])
 if which_models == "all":
     print("Running {} storms for year {}".format(which_models, sim_year))
     remove_previous_runs = True # if rerunning all, remove old simulations and results
 else:
-    print("Running models for storm {} of year {}".format(which_models, sim_year))
+    print("Running a failed simulation for year {}".format(sim_year))
     remove_previous_runs = False
 delete_swmm_outputs = int(sys.argv[4])
 if delete_swmm_outputs == 1:
@@ -89,28 +89,25 @@ except:
 script_start_time = datetime.now()
 
 #%% define functions
-def create_all_nan_dataset(a_fld_reshaped, rz, yr, storm_id, freebndry, norain, lst_keys):
-    # create dataset with na values with same shape as the flood data
-    a_zeros = np.empty(a_fld_reshaped.shape)
-    a_zeros[:] = np.nan
-    # create dataset with those na values
-    ds = xr.Dataset(data_vars=dict(node_flooding_cubic_meters = (['realization', 'year', 'storm_id', 'freeboundary', 'norain', 'node_id'], a_zeros)),
-                    coords = dict(realization = np.atleast_1d(rz),
-                                    year = np.atleast_1d(yr),
-                                    storm_id = np.atleast_1d(storm_id),
-                                    freeboundary = np.atleast_1d(freebndry),
-                                    norain = np.atleast_1d(norain),
-                                    node_id = lst_keys
-                                    ))
-    return ds
+# def create_all_nan_dataset(a_fld_reshaped, rz, yr, storm_id, freebndry, norain, lst_keys):
+#     # create dataset with na values with same shape as the flood data
+#     a_zeros = np.empty(a_fld_reshaped.shape)
+#     a_zeros[:] = np.nan
+#     # create dataset with those na values
+#     ds = xr.Dataset(data_vars=dict(node_flooding_cubic_meters = (['realization', 'year', 'storm_id', 'freeboundary', 'norain', 'node_id'], a_zeros)),
+#                     coords = dict(realization = np.atleast_1d(rz),
+#                                     year = np.atleast_1d(yr),
+#                                     storm_id = np.atleast_1d(storm_id),
+#                                     freeboundary = np.atleast_1d(freebndry),
+#                                     norain = np.atleast_1d(norain),
+#                                     node_id = lst_keys
+#                                     ))
+#     return ds
 
 #%% loading data
 df_strms = pd.read_csv(f_swmm_scenarios_catalog.format(sim_year))
-
 df_strms = df_strms.sort_values(["realization", "year", "storm_id"])
-
 df_strms.drop(columns = "simulation_index", inplace = True)
-
 df_strms.reset_index(drop=True, inplace=True)
 
 # subset the df_strms table:
@@ -118,8 +115,9 @@ if realization_to_run is not None:
     df_strms = df_strms[df_strms.realization == realization_to_run]
 if storm_id_to_run is not None:
     df_strms = df_strms[df_strms.storm_id == storm_id_to_run]
-if storm_id_to_run is not None:
-    df_strms = df_strms[df_strms.storm_id == storm_id_to_run]
+
+if which_models == "failed":
+    df_strms = df_strms[df_strms.swmm_inp == row_with_failed_run.swmm_inp]
 #%% run simulations 
 lst_ds_node_fld = []
 lst_outputs_converted_to_dataset = [] # to track success
@@ -188,6 +186,16 @@ for idx, row in df_strms.iterrows():
     sim_runtime_min = np.nan
     for routing_tstep in lst_alternative_routing_tsteps:
         routing_tstep_to_report = routing_tstep
+        use_hotstart = False
+        if which_models == "failed":
+            idx_routing_tstep = lst_alternative_routing_tsteps.index(routing_tstep)
+            idx_of_routing_tstep_of_last_attempted_sim = lst_alternative_routing_tsteps.index(row_with_failed_run.routing_timestep)
+            # if a simulation has already been completed previously and was rejected due to high continuity errors, skip it
+            if idx_of_routing_tstep_of_last_attempted_sim > idx_routing_tstep:
+                continue
+            # if attempting the routing timestep that ran into the runtime limit is the one up for trial, use the hotstart trial
+            if idx_routing_tstep == idx_of_routing_tstep_of_last_attempted_sim:
+                use_hotstart = True
         # modify inp file with routing timestep
         ## define filepath to new inp file
         f_inp_torun = f_inp.split(".inp")[0] + "_rt" + str(routing_tstep) + ".inp"
@@ -225,6 +233,9 @@ for idx, row in df_strms.iterrows():
         try:
             with Simulation(f_inp_torun) as sim:
                 sim_start_time = datetime.now()
+                f_hotpath = f_inp_torun+".hot"
+                if use_hotstart:
+                    sim.use_hotstart(f_hotpath)
                 for step in sim:
                     sim_time = datetime.now()
                     sim_runtime_min = round((sim_time - sim_start_time).seconds / 60, 1)
@@ -232,7 +243,7 @@ for idx, row in df_strms.iterrows():
                         problem = "User-defined maximum simulation time limit of {} minutes reached, so simulation was halted.".format(max_runtime_min)
                         print(problem)
                         success = False
-                        sim.save_hotstart(f_inp_torun+".hot") # saving hotstart file so we can resume it when running failed models
+                        sim.save_hotstart(f_hotpath) # saving hotstart file so we can resume it when running failed models
                         sim.terminate_simulation()
                 sim._model.swmm_end() # must call this to accurately report the continuity errors
                 runoff_error_pyswmm = sim.runoff_error
