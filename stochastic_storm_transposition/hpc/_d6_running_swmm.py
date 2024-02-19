@@ -207,6 +207,8 @@ for idx, row in df_strms.iterrows():
             if idx_routing_tstep == idx_of_routing_tstep_of_last_attempted_sim:
                 use_hotstart = True
                 first_sim_attempt = True
+            else:
+                first_sim_attempt = False
             if use_hotstart_override:
                 use_hotstart = hotstart_override_val
             ## if first sim for failed model AND there has already been a succesful run at a previous timestep
@@ -215,7 +217,7 @@ for idx, row in df_strms.iterrows():
                     previous_flow_routing_error_pyswmm,__ = return_flood_losses_and_continuity_errors(f_rpt_prevrun, f_inp_prevrun)
                 first_sim_attempt = False
         else:
-            first_sim_attempt = routing_tstep == lst_alternative_routing_tsteps[0]
+            first_sim_attempt = (routing_tstep == lst_alternative_routing_tsteps[0])
         # modify inp file with routing timestep
         ## define filepath to new inp file
         f_inp_torun = f_inp.split(".inp")[0] + "_rt" + str(routing_tstep) + ".inp"
