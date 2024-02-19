@@ -11,6 +11,9 @@ from glob import glob
 from __utils import *
 import shutil
 
+use_hotstart_override = True
+hotstart_override_val = False
+
 #%% work
 # sim_year = 251
 # which_models = "all"
@@ -195,11 +198,16 @@ for idx, row in df_strms.iterrows():
             if idx_of_routing_tstep_of_last_attempted_sim > idx_routing_tstep:
                 previous_sim_run = True
                 previous_routing_tstep = routing_tstep
+                f_inp_prevrun = f_inp.split(".inp")[0] + "_rt" + str(previous_routing_tstep) + ".inp"
+                f_out_prevrun = f_inp.split(".inp")[0] + "_rt" + str(previous_routing_tstep) + ".out"
+                f_rpt_prevrun = rpt_copy_fldr + f_inp_torun.split("/")[-1].split(".inp")[0] + ".rpt"
                 continue
             # if attempting the routing timestep that ran into the runtime limit is the one up for trial, use the hotstart trial
             if idx_routing_tstep == idx_of_routing_tstep_of_last_attempted_sim:
                 use_hotstart = True
                 first_sim_attempt = True
+            if use_hotstart_override:
+                use_hotstart = hotstart_override_val
         else:
             first_sim_attempt = routing_tstep == lst_alternative_routing_tsteps[0]
         # modify inp file with routing timestep
@@ -294,8 +302,6 @@ for idx, row in df_strms.iterrows():
                         routing_tstep, runoff_error_pyswmm, flow_routing_error_pyswmm, sim_runtime_min))
                 ## if first sim for failed model AND there has already been a succesful run at a previous timestep AND output files exist (param hotstart_used)
                 if first_sim_attempt and (which_models == "failed") and previous_sim_run and hotstart_used:
-                    f_inp_prevrun = f_inp.split(".inp")[0] + "_rt" + str(previous_routing_tstep) + ".inp"
-                    f_rpt_prevrun = rpt_copy_fldr + f_inp_torun.split("/")[-1].split(".inp")[0] + ".rpt"
                     __,__,previous_runoff_error_pyswmm,\
                         previous_flow_routing_error_pyswmm,__ = return_flood_losses_and_continuity_errors(f_rpt_prevrun, f_inp_prevrun)
                 else: # not first sim attempt
