@@ -200,7 +200,7 @@ for idx, row in df_strms.iterrows():
                 previous_routing_tstep = routing_tstep
                 f_inp_prevrun = f_inp.split(".inp")[0] + "_rt" + str(previous_routing_tstep) + ".inp"
                 f_out_prevrun = f_inp.split(".inp")[0] + "_rt" + str(previous_routing_tstep) + ".out"
-                f_rpt_prevrun = rpt_copy_fldr + f_inp_torun.split("/")[-1].split(".inp")[0] + ".rpt"
+                f_rpt_prevrun = rpt_copy_fldr + f_inp_prevrun.split("/")[-1].split(".inp")[0] + ".rpt"
                 continue
             # if attempting the routing timestep that ran into the runtime limit is the one up for trial, use the hotstart trial
             if idx_routing_tstep == idx_of_routing_tstep_of_last_attempted_sim:
