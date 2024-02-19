@@ -11,7 +11,7 @@ from glob import glob
 from __utils import *
 import shutil
 
-use_hotstart_override = True
+use_hotstart_override = False
 hotstart_override_val = False
 
 #%% work
@@ -251,6 +251,7 @@ for idx, row in df_strms.iterrows():
                 # check to make sure output files exist before using hotstart
                 f_out = f_inp_torun.split('.inp')[0] + '.out'
                 f_out_exists = os.path.exists(f_out)
+                f_hotstart_exists = os.path.exists(f_hotpath)
                 if use_hotstart and f_out_exists:
                     hotstart_used = True
                     sim.use_hotstart(f_hotpath)
@@ -275,6 +276,9 @@ for idx, row in df_strms.iterrows():
             # problem = e
             success = False
         if success: # check continuity error and re-run if it is worse than a threshold target
+            # remove hotstart file if the simulation completes succesfully
+            if hotstart_used:
+                os.remove(f_hotpath)
             # save the rpt file to another directory to see if i can figure out what's going on with the dumping thing
             rpt_path = f_inp_torun.split('.inp')[0] + ".rpt"
             # rpt_name = rpt_path.split("/")[-1]
