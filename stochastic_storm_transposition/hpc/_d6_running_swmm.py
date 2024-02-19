@@ -140,6 +140,7 @@ lst_flow_continuity_issues = []
 
 lst_inp_files_to_keep = []
 lst_rpt_files_to_keep = []
+lst_out_files_to_keep = [] # these are for resuming runs from existing hotstarts
 # export_dataset_times = []
 successes = []
 problems = []
@@ -237,7 +238,10 @@ for idx, row in df_strms.iterrows():
             with Simulation(f_inp_torun) as sim:
                 sim_start_time = datetime.now()
                 f_hotpath = f_inp_torun+".hot"
-                if use_hotstart:
+                # check to make sure output files exist before using hotstart
+                f_out = f_inp_torun.split('.inp')[0] + '.out'
+                f_out_exists = os.path.exists(f_out)
+                if use_hotstart and f_out_exists:
                     sim.use_hotstart(f_hotpath)
                     print("Using hotstart file to save some time on a previously incomplete run.....")
                 for step in sim:
@@ -323,8 +327,8 @@ for idx, row in df_strms.iterrows():
     create_dataset_time_min = np.nan
     # if the run was succesful, process the results
     f_inp_to_report = f_inp.split(".inp")[0] + "_rt" + str(routing_tstep_to_report) + ".inp"
-    f_swmm_out = f_inp_to_report.split('.inp')[0] + '.out'
     # use the rpt file that was copied to the backup folder
+    f_swmm_out = f_inp_to_report.split('.inp')[0] + '.out'
     rpt_name = f_swmm_out.split("/")[-1].split(".out")[0] + ".rpt"
     rpt_path = rpt_copy_fldr + rpt_name
     if success == True:
@@ -365,6 +369,11 @@ for idx, row in df_strms.iterrows():
         # delete output file after it's been processed
         if delete_swmm_outputs:
             os.remove(f_swmm_out)
+    else:
+        # keep all simulation files for failed runs
+        lst_rpt_files_to_keep.append(rpt_path)
+        lst_out_files_to_keep.append(f_swmm_out)
+        lst_inp_files_to_keep.append(f_inp_to_report)
     # recording stuff that would be gotten from rpt
     lst_flow_errors_fromrpt.append(flow_routing_error_rpt)
     lst_runoff_errors_fromrpt.append(runoff_error_rpt)
@@ -407,7 +416,7 @@ lst_all_files = files_in_swmm_folder + files_in_rpt_backup_folder
 ## define list of all files to keep
 lst_hotstarts = glob(swmm_fldr + "*.hot")
 original_swmm_files = list(df_strms.swmm_inp)
-lst_to_keep = lst_hotstarts + original_swmm_files + lst_rpt_files_to_keep + lst_inp_files_to_keep
+lst_to_keep = lst_hotstarts + original_swmm_files + lst_rpt_files_to_keep + lst_inp_files_to_keep + lst_out_files_to_keep
 
 files_to_remove = []
 for f_compare in lst_all_files:
