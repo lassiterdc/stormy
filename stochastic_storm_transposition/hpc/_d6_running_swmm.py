@@ -252,7 +252,7 @@ for idx, row in df_strms.iterrows():
                 f_out = f_inp_torun.split('.inp')[0] + '.out'
                 f_out_exists = os.path.exists(f_out)
                 f_hotstart_exists = os.path.exists(f_hotpath)
-                if use_hotstart and f_out_exists:
+                if use_hotstart and f_out_exists and f_hotstart_exists:
                     hotstart_used = True
                     sim.use_hotstart(f_hotpath)
                     print("Using hotstart file to save some time on a previously incomplete run.....")
