@@ -27,3 +27,4 @@ source activate running_swmm
 # running swmm
 # warning: this script will only tackle all models if n_failed <= 1000; otherwise this will need to be run multiple times
 python ${assar_dirs[hpc_d6_py]} ${SLURM_ARRAY_TASK_ID} "failed" 1 1 # arguments: year, which models to run (failed, all, or specific storm number), which realizations to run, and whether to delete swmm .out files
+# python ${assar_dirs[hpc_d6_py]} 8 "failed" 1 1
