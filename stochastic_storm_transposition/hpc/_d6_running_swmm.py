@@ -208,6 +208,10 @@ for idx, row in df_strms.iterrows():
                 first_sim_attempt = True
             if use_hotstart_override:
                 use_hotstart = hotstart_override_val
+            ## if first sim for failed model AND there has already been a succesful run at a previous timestep
+            if first_sim_attempt and previous_sim_run:
+                __,__,previous_runoff_error_pyswmm,\
+                    previous_flow_routing_error_pyswmm,__ = return_flood_losses_and_continuity_errors(f_rpt_prevrun, f_inp_prevrun)
         else:
             first_sim_attempt = routing_tstep == lst_alternative_routing_tsteps[0]
         # modify inp file with routing timestep
@@ -304,10 +308,6 @@ for idx, row in df_strms.iterrows():
                     previous_runoff_error_pyswmm = runoff_error_pyswmm
                     print("The simulation was run with a routing timestep of {}. Runoff and flow continuity errors were {} and {}. Sim runtime was {}. Re-running simulation.".format(
                         routing_tstep, runoff_error_pyswmm, flow_routing_error_pyswmm, sim_runtime_min))
-                ## if first sim for failed model AND there has already been a succesful run at a previous timestep AND output files exist (param hotstart_used)
-                if first_sim_attempt and (which_models == "failed") and previous_sim_run and hotstart_used:
-                    __,__,previous_runoff_error_pyswmm,\
-                        previous_flow_routing_error_pyswmm,__ = return_flood_losses_and_continuity_errors(f_rpt_prevrun, f_inp_prevrun)
                 else: # not first sim attempt
                     # compute the improvement between the last two attempts
                     net_improvement = abs(previous_flow_routing_error_pyswmm) - abs(flow_routing_error_pyswmm)
