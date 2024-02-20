@@ -196,6 +196,7 @@ for idx, row in df_strms.iterrows():
             idx_routing_tstep = lst_alternative_routing_tsteps.index(routing_tstep)
             idx_of_routing_tstep_of_last_attempted_sim = lst_alternative_routing_tsteps.index(row_with_failed_run.routing_timestep)
             # if a simulation has already been completed previously and was rejected due to high continuity errors, skip it
+            previous_sim_run = False
             if idx_of_routing_tstep_of_last_attempted_sim > idx_routing_tstep:
                 previous_sim_run = True
                 previous_routing_tstep = routing_tstep
