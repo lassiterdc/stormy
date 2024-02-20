@@ -23,6 +23,7 @@ hotstart_override_val = False
 #%% end work
 
 sim_year = int(sys.argv[1]) # this is used as the row index of the failed model to run if which_models = "failed" (so there's only 1 simulation per node)
+print("Slurm Job Number: {}".format(sim_year))
 which_models = str(sys.argv[2]) # either all or failed or an integer
 realizations_to_use = str(sys.argv[3])
 if which_models == "all":
