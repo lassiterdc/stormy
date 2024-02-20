@@ -446,14 +446,20 @@ if which_models == "all": # only remove files if running all models
     files_to_remove = []
     for f_compare in lst_all_files:
         keeper = False
-        for f_keeper in lst_to_keep:
-            # if the file is one of the core swmm files, keep it
-            if os.path.samefile(f_keeper, f_compare):
-                keeper = True
+        try:
+            for f_keeper in lst_to_keep:
+                # if the file is one of the core swmm files, keep it
+                if os.path.samefile(f_keeper, f_compare):
+                    keeper = True
+        except:
+            pass
         if keeper == False:
             files_to_remove.append(f_compare)
     for f_to_remove in files_to_remove:
-        os.remove(f_to_remove)
+        try:
+            os.remove(f_to_remove)
+        except:
+            pass
 #%% export results and model summaries
 if len(lst_ds_node_fld) > 0:
     at_least_1_sim_was_succesfull = True
