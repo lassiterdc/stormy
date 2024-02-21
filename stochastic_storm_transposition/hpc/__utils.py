@@ -12,8 +12,6 @@ dir_mrms = dir_sst_nrflk + "sst_mrms/"
 # dir_scratch_sst = "/scratch/dcl3nd/stormy/"
 dir_highres_repo = "/scratch/dcl3nd/highres-radar-rainfall-processing/"
 
-
-
 # WORK
 # f_sst_nrflk_hrly_parameterfile = dir_sst_nrflk_hrly + "mrms_hourly_combined.sst"
 # f_sst_nrflk_hrly_parameterfile = dir_sst_nrflk_hrly + "mrms_hourly_combined_test.sst"
@@ -244,6 +242,8 @@ def return_flood_losses_and_continuity_errors(swmm_rpt, f_inp):
         line_num += 1
         # if "Runoff Quantity Continuity" in line:
         #     encountered_runoff_quantity_continuity = True
+        if "Flow Units" in line:
+            line_flw_untits = line
         if "Flow Routing Continuity" in line:
             encountered_flow_routing_continuity = True
         if "Continuity Error (%) ....." in line:
@@ -267,6 +267,7 @@ def return_flood_losses_and_continuity_errors(swmm_rpt, f_inp):
             encountered_end_of_node_flooding_summary = True
         if encountered_end_of_node_flooding_summary == False:
             lst_node_fld_summary.append(line)
+    flow_units = line_flw_untits.split(".")[-1].split("\n")[0].split(" ")[-1].lower()
     # the rpt file only has nodes with nonzero flooding but I need to account for all nodes
     # create pandas series of node flood summaries
     ## return ids of all nodes
@@ -317,7 +318,7 @@ def return_flood_losses_and_continuity_errors(swmm_rpt, f_inp):
         frac_diff_node_minus_system_flood = (s_node_flooding.sum() - system_flooding)/system_flooding
     else:
         frac_diff_node_minus_system_flood = np.nan
-    return s_node_flooding,system_flooding,runoff_continuity_error_perc,flow_continuity_error_perc,frac_diff_node_minus_system_flood
+    return s_node_flooding,system_flooding,runoff_continuity_error_perc,flow_continuity_error_perc,frac_diff_node_minus_system_flood,flow_units
 
 
 

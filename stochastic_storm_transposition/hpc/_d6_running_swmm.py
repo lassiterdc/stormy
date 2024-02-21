@@ -361,13 +361,11 @@ for idx, row in df_strms.iterrows():
         lst_inp_files_to_keep.append(f_inp_to_report)
         lst_rpt_files_to_keep.append(rpt_path)
         __, __, __, freebndry, norain = parse_inp(f_inp) # this function also returns rz, yr, storm_id which are not needed since they were determined earlier
-        with Output(f_swmm_out) as out:
-            units = out.units
-            # out.close()
+
         s_node_flooding,total_flooding_system_rpt,runoff_error_rpt,\
-            flow_routing_error_rpt,frac_diff_node_minus_system_flood_rpt = return_flood_losses_and_continuity_errors(rpt_path, f_inp_to_report)
+            flow_routing_error_rpt,frac_diff_node_minus_system_flood_rpt,flow_units = return_flood_losses_and_continuity_errors(rpt_path, f_inp_to_report)
         
-        if units["system"] == "US":
+        if flow_units == "cfs":
             tot_flood_losses_rpt_system_m3 = total_flooding_system_rpt * 1e6 * cubic_meters_per_gallon # Million gallons * gallons per million gallons * cubic meters per gallon
             node_flooding_m3 = s_node_flooding * 1e6 * cubic_meters_per_gallon # default units are in millions of gallons
         else:
