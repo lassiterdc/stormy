@@ -369,7 +369,8 @@ for idx, row in df_strms.iterrows():
             tot_flood_losses_rpt_system_m3 = total_flooding_system_rpt * 1e6 * cubic_meters_per_gallon # Million gallons * gallons per million gallons * cubic meters per gallon
             node_flooding_m3 = s_node_flooding * 1e6 * cubic_meters_per_gallon # default units are in millions of gallons
         else:
-            print('UNITS NOT RECOGNIZED; NEED TO BE UPDATED FOR METRIC PROBABLY')
+            sys.exit('UNITS NOT RECOGNIZED; NEED TO BE UPDATED FOR METRIC PROBABLY')
+
         tot_flood_losses_rpt_nodes_m3 = node_flooding_m3.sum()
         # create array of flooded values with the correct shape for placing in xarray dataset
         a_fld_reshaped = np.reshape(np.array(node_flooding_m3), (1,1,1,1,1,len(node_flooding_m3))) # rz, yr, storm, node_id, freeboundary, norain
