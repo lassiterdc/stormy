@@ -3,7 +3,7 @@
 #SBATCH -e _script_errors/%x/%A_%a_%N.out
 #SBATCH --ntasks=1				# Number of tasks per serial job (must be 1)
 #SBATCH -p standard				# Queue name "standard" (serial)
-#SBATCH -A quinnlab_paid				# allocation name # can use dev for testing
+#SBATCH -A quinnlab				# allocation name # can use dev for testing
 #SBATCH -t 32:00:00				# Run time per serial job (hh:mm:ss)
 #SBATCH --array=1-1000 # Array of jobs, 1 for each of 1000 years (1-1000)
 #SBATCH --mem-per-cpu=16000
@@ -27,4 +27,4 @@ source activate running_swmm
 # running swmm
 # warning: this script will only tackle all models if n_failed <= 1000; otherwise this will need to be run multiple times
 python ${assar_dirs[hpc_d6_py]} ${SLURM_ARRAY_TASK_ID} "failed" 1 1 # arguments: year, which models to run (failed, all, or specific storm number), which realizations to run, and whether to delete swmm .out files
-# python ${assar_dirs[hpc_d6_py]} 3 "failed" 1 1
+# python ${assar_dirs[hpc_d6_py]} 164 "failed" 1 1
