@@ -5,7 +5,7 @@
 #SBATCH -p standard				# Queue name "standard" (serial)
 #SBATCH -A quinnlab_paid				# allocation name # can use dev for testing
 #SBATCH -t 15:00:00				# Run time per serial job (hh:mm:ss)
-#SBATCH --array=37	# Array of jobs, 1 for each of 1000 years (1-1000)
+#SBATCH --array=1-1000	# Array of jobs, 1 for each of 1000 years (1-1000)
 #SBATCH --mem-per-cpu=16000
 #SBATCH --mail-user=dcl3nd@virginia.edu          # address for email notification
 #SBATCH --mail-type=ALL   
@@ -29,4 +29,4 @@ python ${assar_dirs[hpc_d6_py]} ${SLURM_ARRAY_TASK_ID} "all" 1 1 # arguments: ye
 # python ${assar_dirs[hpc_d6_py]} 764 "all" 2 0
 # python ${assar_dirs[hpc_d6_py]} 99999 "all" 1 0 # this is a duplicate of year 251 that has been causing problems
 # python ${assar_dirs[hpc_d6_py]} 252 "all" 1 0
-# python ${assar_dirs[hpc_d6_py]} 268 2 1 0
+# python ${assar_dirs[hpc_d6_py]} 115 2 1 0
