@@ -316,6 +316,8 @@ for idx, row in df_strms.iterrows():
                     previous_runoff_error_pyswmm = runoff_error_pyswmm
                     print("The simulation was run with a routing timestep of {}. Runoff and flow continuity errors were {} and {}. Sim runtime was {}. Re-running simulation.".format(
                         routing_tstep, runoff_error_pyswmm, flow_routing_error_pyswmm, sim_runtime_min))
+                    previous_routing_tstep = routing_tstep
+                    routing_tstep_to_report = previous_routing_tstep
                 else: # not first sim attempt
                     # compute the improvement between the last two attempts
                     net_improvement = abs(previous_flow_routing_error_pyswmm) - abs(flow_routing_error_pyswmm)
@@ -340,6 +342,7 @@ for idx, row in df_strms.iterrows():
                         previous_flow_routing_error_pyswmm = flow_routing_error_pyswmm
                         previous_runoff_error_pyswmm = runoff_error_pyswmm
                         previous_routing_tstep = routing_tstep
+                        routing_tstep_to_report = previous_routing_tstep
         else: # if simulation didn't run because of an error or the time limit, don't re-run the sim
             break
     notes.append(note)
