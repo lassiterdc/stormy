@@ -205,7 +205,8 @@ for idx, row in df_strms.iterrows():
                 f_rpt_prevrun = rpt_copy_fldr + f_inp_prevrun.split("/")[-1].split(".inp")[0] + ".rpt"
                 prev_rpt_file_exists = os.path.exists(f_rpt_prevrun)
                 continue
-            print("Previous simulation was run with a routing timestep of: {}".format(previous_routing_tstep))
+            if previous_sim_run:
+                print("Previous simulation was run with a routing timestep of: {}".format(previous_routing_tstep))
             # if attempting the routing timestep that ran into the runtime limit is the one up for trial, use the hotstart trial
             if idx_routing_tstep == idx_of_routing_tstep_of_last_attempted_sim:
                 use_hotstart = True
@@ -360,7 +361,7 @@ for idx, row in df_strms.iterrows():
     # if the run was succesful, process the results
     f_inp_to_report = f_inp.split(".inp")[0] + "_rt" + str(routing_tstep_to_report) + ".inp"
     # use the rpt file that was copied to the backup folder
-    # f_swmm_out = f_inp_to_report.split('.inp')[0] + '.out'
+    f_swmm_out = f_inp_to_report.split('.inp')[0] + '.out'
     rpt_name = f_inp_to_report.split("/")[-1].split(".inp")[0] + ".rpt"
     rpt_path = rpt_copy_fldr + rpt_name
     if success == True:
