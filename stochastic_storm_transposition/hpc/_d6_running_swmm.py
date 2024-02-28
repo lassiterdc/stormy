@@ -25,6 +25,9 @@ sim_year = int(sys.argv[1]) # this is used as the row index of the failed model 
 print("Slurm Job Number: {}".format(sim_year))
 which_models = str(sys.argv[2]) # either all or failed or an integer
 realizations_to_use = str(sys.argv[3])
+delete_swmm_outputs = int(sys.argv[4])
+if delete_swmm_outputs == 1:
+    delete_swmm_outputs = True
 if which_models == "all":
     print("Running {} storms for year {}".format(which_models, sim_year))
     remove_previous_runs = True # if rerunning all, remove old simulations and results
@@ -35,9 +38,7 @@ elif which_models == "previous":
     remove_previous_runs = False
     delete_swmm_outputs = False # no outputs to remove
     print("Generating output netcdfs from previously run SWMM models.")
-delete_swmm_outputs = int(sys.argv[4])
-if delete_swmm_outputs == 1:
-    delete_swmm_outputs = True
+if delete_swmm_outputs:
     print("Deleting SWMM .out files is set to {}".format(delete_swmm_outputs))
 else:
     delete_swmm_outputs = False
