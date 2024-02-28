@@ -32,6 +32,7 @@ elif which_models == "failed":
     print("Running a failed simulation for year {}".format(sim_year))
     remove_previous_runs = False
 elif which_models == "previous":
+    remove_previous_runs = False
     print("Generating output netcdfs from previously run SWMM models.")
 delete_swmm_outputs = int(sys.argv[4])
 if delete_swmm_outputs == 1:
