@@ -6,6 +6,7 @@ from tqdm import tqdm
 
 from __utils import *
 
+script_start_time = datetime.now()
 
 f_modelresults = dir_swmm_sst_models + "_model_outputs_year{}.nc".format("*")
 f_modelresults_rerun = dir_swmm_sst_models + "_model_outputs_year{}_failed_run_id{}.nc".format("*", "*")
@@ -36,5 +37,8 @@ for f in lst_f_modresults_rerun:
 # https://docs.xarray.dev/en/stable/user-guide/indexing.html#assigning-values-with-indexing
 ds_results_loaded.loc[dict_rerun_idx] = ds_results_rerun_loaded.sel(dict_rerun_idx)
 
-
 ds_results_loaded.to_netcdf(f_model_outputs_consolidated, encoding= {"node_flooding_cubic_meters":{"zlib":True}}, engine = "h5netcdf")
+
+tot_elapsed_time_min = round((datetime.now() - script_start_time).seconds / 60, 1)
+print("Created file: {}".format(f_model_outputs_consolidated))
+print("Total script runtime (hr): {}".format(tot_elapsed_time_min/60))
