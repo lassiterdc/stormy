@@ -4,9 +4,8 @@
 #SBATCH --ntasks=1				# Number of tasks per serial job (must be 1)
 #SBATCH -p standard				# Queue name "standard" (serial)
 #SBATCH -A quinnlab_paid				# allocation name # can use dev for testing
-#SBATCH -t 15:00:00				# Run time per serial job (hh:mm:ss)
+#SBATCH -t 0:20:00				# Run time per serial job (hh:mm:ss)
 #SBATCH --array=1-1000	# Array of jobs, 1 for each of 1000 years (1-1000)
-#SBATCH --mem-per-cpu=16000
 #SBATCH --mail-user=dcl3nd@virginia.edu          # address for email notification
 #SBATCH --mail-type=ALL   
 # SBATCH --exclude=udc-ba26-18,udc-ba27-14,udc-ba26-16,udc-ba26-17
