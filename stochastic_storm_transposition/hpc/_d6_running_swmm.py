@@ -197,7 +197,7 @@ for idx, row in df_strms.iterrows():
         lowest_error = -9999
         f_inp_name = f_inp.split("/")[-1]
         rpt_name_pattern = f_inp_name.split(".inp")[0] + "_rt*.rpt"
-        rpt_pattern = rpt_copy_fldr + rpt_name
+        rpt_pattern = rpt_copy_fldr + rpt_name_pattern
         lst_f_rpts = glob(rpt_pattern)
         # find the rpt output and routing timestep with the lowest error
         for rpt_path in lst_f_rpts:
