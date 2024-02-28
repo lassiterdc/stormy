@@ -176,7 +176,13 @@ def parse_inp(f_inp):
         freebndry = True
     if "norain" in lst_name_comp:
         norain = True
-    return int(rz), int(yr), int(storm_id), str(freebndry), str(norain)
+    if freebndry:
+        sim_type = "rain_only"
+    elif norain:
+        sim_type = "surge_only"
+    else:
+        sim_type = "compound"
+    return int(rz), int(yr), int(storm_id), str(freebndry), str(norain), sim_type
 
 # for loading RainyDay realizations
 def define_dims(ds):

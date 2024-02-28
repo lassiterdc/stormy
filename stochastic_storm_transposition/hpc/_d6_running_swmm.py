@@ -102,7 +102,7 @@ script_start_time = datetime.now()
 #     a_zeros = np.empty(a_fld_reshaped.shape)
 #     a_zeros[:] = np.nan
 #     # create dataset with those na values
-#     ds = xr.Dataset(data_vars=dict(node_flooding_cubic_meters = (['realization', 'year', 'storm_id', 'freeboundary', 'norain', 'node_id'], a_zeros)),
+#     ds = xr.Dataset(data_vars=dict(node_flooding_cubic_meters = (['realization', 'year', 'storm_id', 'sim_type', 'node_id'], a_zeros)),
 #                     coords = dict(realization = np.atleast_1d(rz),
 #                                     year = np.atleast_1d(yr),
 #                                     storm_id = np.atleast_1d(storm_id),
@@ -404,7 +404,7 @@ for idx, row in df_strms.iterrows():
     if success == True:
         lst_inp_files_to_keep.append(f_inp_to_report)
         lst_rpt_files_to_keep.append(rpt_path)
-        __, __, __, freebndry, norain = parse_inp(f_inp_to_report) # this function also returns rz, yr, storm_id which are not needed since they were determined earlier
+        __, __, __, __, __, sim_type = parse_inp(f_inp_to_report) # this function also returns rz, yr, storm_id which are not needed since they were determined earlier
         s_node_flooding,total_flooding_system_rpt,runoff_error_rpt,\
             flow_routing_error_rpt,frac_diff_node_minus_system_flood_rpt,flow_units = return_flood_losses_and_continuity_errors(rpt_path, f_inp_to_report)
         
@@ -416,26 +416,25 @@ for idx, row in df_strms.iterrows():
 
         tot_flood_losses_rpt_nodes_m3 = node_flooding_m3.sum()
         # create array of flooded values with the correct shape for placing in xarray dataset
-        a_fld_reshaped = np.reshape(np.array(node_flooding_m3), (1,1,1,1,1,len(node_flooding_m3))) # rz, yr, storm, freeboundary, norain, node_id
-        a_sys_flding = np.reshape(np.array(tot_flood_losses_rpt_system_m3), (1,1,1,1,1)) # rz, yr, storm, freeboundary, norain
-        a_tot_node_flding = np.reshape(np.array(tot_flood_losses_rpt_nodes_m3), (1,1,1,1,1)) # rz, yr, storm, freeboundary, norain
-        a_flow_routing_error = np.reshape(np.array(flow_routing_error_rpt), (1,1,1,1,1)) # rz, yr, storm, freeboundary, norain
-        a_runoff_error = np.reshape(np.array(runoff_error_rpt), (1,1,1,1,1)) # rz, yr, storm, freeboundary, norain
+        a_fld_reshaped = np.reshape(np.array(node_flooding_m3), (1,1,1,1,len(node_flooding_m3))) # rz, yr, storm, sim_type, node_id
+        a_sys_flding = np.reshape(np.array(tot_flood_losses_rpt_system_m3), (1,1,1,1)) # rz, yr, storm, sim_type
+        a_tot_node_flding = np.reshape(np.array(tot_flood_losses_rpt_nodes_m3), (1,1,1,1)) # rz, yr, storm, sim_type
+        a_flow_routing_error = np.reshape(np.array(flow_routing_error_rpt), (1,1,1,1)) # rz, yr, storm, sim_type
+        a_runoff_error = np.reshape(np.array(runoff_error_rpt), (1,1,1,1)) # rz, yr, storm, sim_type
         # create dataset with the flood values 
-        ds = xr.Dataset(data_vars=dict(node_flooding_cubic_meters = (['realization', 'year', 'storm_id', 'freeboundary', 'norain', 'node_id'], a_fld_reshaped),
-                                       sys_flding_cubic_meters = (['realization', 'year', 'storm_id', 'freeboundary', 'norain'], a_sys_flding),
-                                       tot_node_flding_cubic_meters = (['realization', 'year', 'storm_id', 'freeboundary', 'norain'], a_tot_node_flding),
-                                       flow_routing_error_percent = (['realization', 'year', 'storm_id', 'freeboundary', 'norain'], a_flow_routing_error),
-                                       runoff_error_percent = (['realization', 'year', 'storm_id', 'freeboundary', 'norain'], a_runoff_error)),
+        ds = xr.Dataset(data_vars=dict(node_flooding_cubic_meters = (['realization', 'year', 'storm_id', 'sim_type', 'node_id'], a_fld_reshaped),
+                                       sys_flding_cubic_meters = (['realization', 'year', 'storm_id', 'sim_type'], a_sys_flding),
+                                       tot_node_flding_cubic_meters = (['realization', 'year', 'storm_id', 'sim_type'], a_tot_node_flding),
+                                       flow_routing_error_percent = (['realization', 'year', 'storm_id', 'sim_type'], a_flow_routing_error),
+                                       runoff_error_percent = (['realization', 'year', 'storm_id', 'sim_type'], a_runoff_error)),
                         coords = dict(realization = np.atleast_1d(rz),
                                         year = np.atleast_1d(yr),
                                         storm_id = np.atleast_1d(storm_id),
-                                        freeboundary = np.atleast_1d(freebndry),
-                                        norain = np.atleast_1d(norain),
+                                        sim_type = np.atleast_1d(sim_type),
                                         node_id = node_flooding_m3.index.values
                                         ))
         # sort
-        ds = ds.sortby(['realization', 'year', 'storm_id', 'freeboundary', 'norain', 'node_id'])
+        ds = ds.sortby(['realization', 'year', 'storm_id', 'sim_type', 'node_id'])
         lst_ds_node_fld.append(ds)
         # lst_f_outputs_converted_to_netcdf.append(f_swmm_out)
         output_converted_to_dataset = True
