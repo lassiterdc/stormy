@@ -201,6 +201,9 @@ for idx, row in df_strms.iterrows():
         lst_f_rpts = glob(rpt_pattern)
         # find the rpt output and routing timestep with the lowest error
         for rpt_path in lst_f_rpts:
+            print("rpt_name_pattern")
+            print(rpt_name_pattern)
+            print("#########################")
             routing_tstep = int(rpt_name_pattern.split("_rt")[-1].split(".rpt")[0])
             s_node_flooding,total_flooding_system_rpt,runoff_error_rpt,\
                         flow_routing_error_rpt,frac_diff_node_minus_system_flood_rpt,flow_units = return_flood_losses_and_continuity_errors(rpt_path, f_inp)
