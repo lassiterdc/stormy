@@ -195,6 +195,7 @@ for idx, row in df_strms.iterrows():
     sim_runtime_min = np.nan
     # if using previous results:
     if which_models == "previous":
+        sim_runtime_min = -9999
         routing_tstep_to_report = -9999
         lowest_error = -9999
         f_inp_name = f_inp.split("/")[-1]
@@ -203,7 +204,7 @@ for idx, row in df_strms.iterrows():
         lst_f_rpts = glob(rpt_pattern)
         # find the rpt output and routing timestep with the lowest error
         for rpt_path in lst_f_rpts:
-            routing_tstep = int(rpt_path.split("_rt")[-1].split(".rpt")[0])
+            routing_tstep = float(rpt_path.split("_rt")[-1].split(".rpt")[0])
             s_node_flooding,total_flooding_system_rpt,runoff_error_rpt,\
                         flow_routing_error_rpt,frac_diff_node_minus_system_flood_rpt,flow_units = return_flood_losses_and_continuity_errors(rpt_path, f_inp)
             if abs(flow_routing_error_rpt) < abs(lowest_error):
