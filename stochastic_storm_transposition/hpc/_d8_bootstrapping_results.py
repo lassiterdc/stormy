@@ -23,7 +23,7 @@ ds_sst_all_outputs = xr.open_dataset(f_model_outputs_consolidated, engine = "h5n
 
 
 #%% preprocessing
-ds_sst_compound = ds_sst_all_outputs.sel(sim_type="compound")
+da_sst_compound = ds_sst_all_outputs.node_flooding_cubic_meters.sel(sim_type="compound")
 
 #%% compute quantiles
 def return_period_to_quantile(ds, return_pds):
@@ -36,21 +36,21 @@ def return_period_to_quantile(ds, return_pds):
         quants.append(1 - expected_num_events / total_events)
     return quants
 
-quants = return_period_to_quantile(ds_sst_compound, sst_recurrence_intervals)
+quants = return_period_to_quantile(da_sst_compound, sst_recurrence_intervals)
 #%% figuring out bootstrapping system
 # lst_ds_bootstrapped = []
-n_samples = len(ds_sst_compound.storm_id.values) * len(ds_sst_compound.realization.values) * len(ds_sst_compound.year.values)
+n_samples = len(da_sst_compound.storm_id.values) * len(da_sst_compound.realization.values) * len(da_sst_compound.year.values)
 lst_bs_quants = []
-lst_ds = []
+lst_da = []
 for j in np.arange(n_samples):
-    strm = np.random.choice(ds_sst_compound.storm_id.values)
-    rz = np.random.choice(ds_sst_compound.realization.values)
-    yr = np.random.choice(ds_sst_compound.year.values)
+    strm = np.random.choice(da_sst_compound.storm_id.values)
+    rz = np.random.choice(da_sst_compound.realization.values)
+    yr = np.random.choice(da_sst_compound.year.values)
     d_idx = dict(storm_id = strm, realization = rz, year = yr)
-    da_bs_smpl = ds_sst_compound.node_flooding_cubic_meters.sel(d_idx)
-    lst_ds.append(da_bs_smpl)
+    da_bs_smpl = da_sst_compound.sel(d_idx)
+    lst_da.append(da_bs_smpl)
 
-da_bs = xr.concat(lst_ds, dim = "resample_id")
+da_bs = xr.concat(lst_da, dim = "resample_id")
 da_bs_qaunts = da_bs.quantile(quants, dim = "resample_id")
 # lst_bs_quants.append(ds_bs_qaunts)
 #%% compute upper and lower bound 
