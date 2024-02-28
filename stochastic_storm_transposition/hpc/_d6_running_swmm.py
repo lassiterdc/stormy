@@ -404,10 +404,10 @@ for idx, row in df_strms.iterrows():
     if success == True:
         lst_inp_files_to_keep.append(f_inp_to_report)
         lst_rpt_files_to_keep.append(rpt_path)
-        __, __, __, freebndry, norain = parse_inp(f_inp) # this function also returns rz, yr, storm_id which are not needed since they were determined earlier
+        __, __, __, freebndry, norain = parse_inp(f_inp_to_report) # this function also returns rz, yr, storm_id which are not needed since they were determined earlier
         # DCL WORK
-        print("f_inp")
-        print(f_inp)
+        print("f_inp_to_report")
+        print(f_inp_to_report)
         print("Freebndry, norain = {}, {}".format(freebndry, norain))
         # END DCL WORK
         s_node_flooding,total_flooding_system_rpt,runoff_error_rpt,\
