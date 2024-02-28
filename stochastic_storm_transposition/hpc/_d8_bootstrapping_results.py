@@ -5,12 +5,13 @@ import pandas as pd
 # from swmm.toolkit.shared_enum import NodeAttribute
 from pathlib import Path
 import numpy as np
-# from datetime import datetime
+from datetime import datetime
 import sys
 # from tqdm import tqdm
 
 from __utils import *
 
+script_start_time = datetime.now()
 #%%
 bs_id = int(sys.argv[1]) # a number between 1 and 1000
 
@@ -22,7 +23,7 @@ ds_sst_all_outputs = xr.open_dataset(f_model_outputs_consolidated)
 
 
 #%% preprocessing
-ds_sst_compound = ds_sst_all_outputs.sel(freeboundary="False", norain = "False") # select all compound storm events with rainfall and storm surge
+ds_sst_compound = ds_sst_all_outputs.sel(sim_type="compound")
 
 #%% compute quantiles
 def return_period_to_quantile(ds, return_pds):
@@ -46,22 +47,27 @@ for j in np.arange(n_samples):
     rz = np.random.choice(ds_sst_compound.realization.values)
     yr = np.random.choice(ds_sst_compound.year.values)
     d_idx = dict(storm_id = strm, realization = rz, year = yr)
-    ds_bs_smpl = ds_sst_compound.sel(d_idx)
-    lst_ds.append(ds_bs_smpl)
+    da_bs_smpl = ds_sst_compound.node_flooding_cubic_meters.sel(d_idx)
+    lst_ds.append(da_bs_smpl)
 
-ds_bs = xr.concat(lst_ds, dim = "resample_id")
-ds_bs_qaunts = ds_bs.quantile(quants, dim = "resample_id")
+da_bs = xr.concat(lst_ds, dim = "resample_id")
+da_bs_qaunts = da_bs.quantile(quants, dim = "resample_id")
 # lst_bs_quants.append(ds_bs_qaunts)
 #%% compute upper and lower bound 
 # ds_bs_quants_all = xr.concat(lst_bs_quants, dim = "bootstrap_id")
-ds_bs_qaunts = ds_bs_qaunts.assign_coords(dict(quantile = sst_recurrence_intervals))
-ds_bs_qaunts = ds_bs_qaunts.rename((dict(quantile="flood_return_yrs")))
+da_bs_qaunts = da_bs_qaunts.assign_coords(dict(quantile = sst_recurrence_intervals))
+da_bs_qaunts = da_bs_qaunts.rename((dict(quantile="flood_return_yrs")))
 
-
-ds_bs_qaunts_loaded = ds_bs_qaunts.load()
+da_bs_qaunts_loaded = da_bs_qaunts.load()
 Path(f_bootstrapped_quant_estimates).mkdir(parents=True, exist_ok=True)
-ds_bs_qaunts_loaded.to_netcdf(f_out_bs_results, encoding= {"node_flooding_cubic_meters":{"zlib":True}})
+da_bs_qaunts_loaded.to_netcdf(f_out_bs_results, encoding= {"node_flooding_cubic_meters":{"zlib":True}}, engine = "h5netcdf")
+
+tot_elapsed_time_min = round((datetime.now() - script_start_time).seconds / 60, 1)
+print("Exported file: {}".format(f_out_bs_results))
+print("Total script runtime (hr): {}".format(tot_elapsed_time_min/60))
 
 if export_raw_bs_samps == True:
-    ds_bs_loaded = ds_bs.load()
-    ds_bs_loaded.to_netcdf(f_out_bs_results_raw, encoding= {"node_flooding_cubic_meters":{"zlib":True}})
+    da_bs_loaded = da_bs.load()
+    da_bs_loaded.to_netcdf(f_out_bs_results_raw, encoding= {"node_flooding_cubic_meters":{"zlib":True}}, engine = "h5netcdf")
+    tot_elapsed_time_min = round((datetime.now() - script_start_time).seconds / 60, 1)
+    print("Exported file: {}".format(f_out_bs_results_raw))
