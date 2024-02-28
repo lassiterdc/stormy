@@ -421,12 +421,32 @@ for idx, row in df_strms.iterrows():
         a_tot_node_flding = np.reshape(np.array(tot_flood_losses_rpt_nodes_m3), (1,1,1,1)) # rz, yr, storm, sim_type
         a_flow_routing_error = np.reshape(np.array(flow_routing_error_rpt), (1,1,1,1)) # rz, yr, storm, sim_type
         a_runoff_error = np.reshape(np.array(runoff_error_rpt), (1,1,1,1)) # rz, yr, storm, sim_type
-        # create dataset with the flood values 
+        a_inp_file = np.reshape(np.array(f_inp_to_report), (1,1,1,1)) # rz, yr, storm, sim_type
+        a_rpt_file = np.reshape(np.array(rpt_path), (1,1,1,1)) # rz, yr, storm, sim_type
+
+        a_rain0_file = np.reshape(np.array(row["rainfall_0"]), (1,1,1,1)) # rz, yr, storm, sim_type
+        a_rain1_file = np.reshape(np.array(row["rainfall_1"]), (1,1,1,1)) # rz, yr, storm, sim_type
+        a_rain2_file = np.reshape(np.array(row["rainfall_2"]), (1,1,1,1)) # rz, yr, storm, sim_type
+        a_rain3_file = np.reshape(np.array(row["rainfall_3"]), (1,1,1,1)) # rz, yr, storm, sim_type
+        a_rain4_file = np.reshape(np.array(row["rainfall_4"]), (1,1,1,1)) # rz, yr, storm, sim_type
+        a_rain5_file = np.reshape(np.array(row["rainfall_5"]), (1,1,1,1)) # rz, yr, storm, sim_type
+        a_waterlevel_file = np.reshape(np.array(row["water_level"]), (1,1,1,1)) # rz, yr, storm, sim_type
+
+        # create dataset with the flood values
         ds = xr.Dataset(data_vars=dict(node_flooding_cubic_meters = (['realization', 'year', 'storm_id', 'sim_type', 'node_id'], a_fld_reshaped),
                                        sys_flding_cubic_meters = (['realization', 'year', 'storm_id', 'sim_type'], a_sys_flding),
                                        tot_node_flding_cubic_meters = (['realization', 'year', 'storm_id', 'sim_type'], a_tot_node_flding),
                                        flow_routing_error_percent = (['realization', 'year', 'storm_id', 'sim_type'], a_flow_routing_error),
-                                       runoff_error_percent = (['realization', 'year', 'storm_id', 'sim_type'], a_runoff_error)),
+                                       runoff_error_percent = (['realization', 'year', 'storm_id', 'sim_type'], a_runoff_error),
+                                       file_inp = (['realization', 'year', 'storm_id', 'sim_type'], a_inp_file),
+                                       file_rpt = (['realization', 'year', 'storm_id', 'sim_type'], a_rpt_file),
+                                       file_rain0_file = (['realization', 'year', 'storm_id', 'sim_type'], a_rain0_file),
+                                       file_rain1_file = (['realization', 'year', 'storm_id', 'sim_type'], a_rain1_file),
+                                       file_rain2_file = (['realization', 'year', 'storm_id', 'sim_type'], a_rain2_file),
+                                       file_rain3_file = (['realization', 'year', 'storm_id', 'sim_type'], a_rain3_file),
+                                       file_rain4_file = (['realization', 'year', 'storm_id', 'sim_type'], a_rain4_file),
+                                       file_rain5_file = (['realization', 'year', 'storm_id', 'sim_type'], a_rain5_file),
+                                       file_waterlevel_file = (['realization', 'year', 'storm_id', 'sim_type'], a_waterlevel_file)),
                         coords = dict(realization = np.atleast_1d(rz),
                                         year = np.atleast_1d(yr),
                                         storm_id = np.atleast_1d(storm_id),
