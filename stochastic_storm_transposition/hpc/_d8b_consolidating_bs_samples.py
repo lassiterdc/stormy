@@ -5,6 +5,7 @@ from glob import glob
 from tqdm import tqdm
 import shutil
 from __utils import *
+script_start_time = datetime.now()
 
 f_out_bs_results = f_bootstrapped_quant_estimates + "return_pds_btstrp_{}.nc".format("*")
 lst_f_bsresults = glob(f_out_bs_results)
@@ -19,7 +20,11 @@ ds.attrs = attrs
 
 ds_loaded = ds.load() # this seems to speed up the writing of the netcdf file
 
-ds_loaded.to_netcdf(f_bootstrapped_consolidated, encoding= {"node_flooding_cubic_meters":{"zlib":True}})
+ds_loaded.to_netcdf(f_bootstrapped_consolidated, encoding= {"node_flooding_cubic_meters":{"zlib":True}}, engine="h5netcdf")
+
+tot_elapsed_time_min = round((datetime.now() - script_start_time).seconds / 60, 1)
+print("Exported file: {}".format(f_bootstrapped_consolidated))
+print("Total script runtime (hr): {}".format(tot_elapsed_time_min/60))
 
 #%% do the same for the raw bootstrapped samples
 if export_raw_bs_samps == True:
@@ -27,20 +32,17 @@ if export_raw_bs_samps == True:
     attrs = dict(date_created = str(datetime.now())
                 )
     ds.attrs = attrs
-
     # WORK
     fl_out_zar = f_bootstrapped_consolidated_raw+".zarr"
     # verify chunking
     # ds = ds.chunk(chunks={"longitude":chnk_lon, "latitude":chnk_lat, "time":1})
     ds.to_zarr(fl_out_zar, mode="w")
     # print("Created zarr: {}".format(time.time() - bm_time))
-
     # Load zarr and export to netcdf file
     # bm_time = time.time()
     ds_from_zarr = xr.open_zarr(store=fl_out_zar, chunks={'resample_id':"10000MB"})
     ds_from_zarr.to_netcdf(f_bootstrapped_consolidated_raw, encoding= {"node_flooding_cubic_meters":{"zlib":True}})
     # print("Created netcdf: {}".format(time.time() - bm_time))
-
     # delete zarr file
     # bm_time = time.time()
     shutil.rmtree(fl_out_zar)
