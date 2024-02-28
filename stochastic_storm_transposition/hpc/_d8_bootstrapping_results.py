@@ -19,7 +19,7 @@ f_out_bs_results = f_bootstrapped_quant_estimates + "return_pds_btstrp_{}.nc".fo
 f_out_bs_results_raw = f_bootstrapped_quant_estimates + "raw_btstrp_{}.nc".format(bs_id)
 
 #%%
-ds_sst_all_outputs = xr.open_dataset(f_model_outputs_consolidated)
+ds_sst_all_outputs = xr.open_dataset(f_model_outputs_consolidated, engine = "h5netcdf")
 
 
 #%% preprocessing
