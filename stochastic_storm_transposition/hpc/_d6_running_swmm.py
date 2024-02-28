@@ -421,6 +421,9 @@ for idx, row in df_strms.iterrows():
         a_tot_node_flding = np.reshape(np.array(tot_flood_losses_rpt_nodes_m3), (1,1,1,1)) # rz, yr, storm, sim_type
         a_flow_routing_error = np.reshape(np.array(flow_routing_error_rpt), (1,1,1,1)) # rz, yr, storm, sim_type
         a_runoff_error = np.reshape(np.array(runoff_error_rpt), (1,1,1,1)) # rz, yr, storm, sim_type
+
+        a_routing_timestep = np.reshape(np.array(float(routing_tstep_to_report)), (1,1,1,1)) # rz, yr, storm, sim_type
+
         a_inp_file = np.reshape(np.array(f_inp_to_report), (1,1,1,1)) # rz, yr, storm, sim_type
         a_rpt_file = np.reshape(np.array(rpt_path), (1,1,1,1)) # rz, yr, storm, sim_type
 
@@ -438,6 +441,7 @@ for idx, row in df_strms.iterrows():
                                        tot_node_flding_cubic_meters = (['realization', 'year', 'storm_id', 'sim_type'], a_tot_node_flding),
                                        flow_routing_error_percent = (['realization', 'year', 'storm_id', 'sim_type'], a_flow_routing_error),
                                        runoff_error_percent = (['realization', 'year', 'storm_id', 'sim_type'], a_runoff_error),
+                                       routing_timestep = (['realization', 'year', 'storm_id', 'sim_type'], a_routing_timestep),
                                        file_inp = (['realization', 'year', 'storm_id', 'sim_type'], a_inp_file),
                                        file_rpt = (['realization', 'year', 'storm_id', 'sim_type'], a_rpt_file),
                                        file_rain0_file = (['realization', 'year', 'storm_id', 'sim_type'], a_rain0_file),
