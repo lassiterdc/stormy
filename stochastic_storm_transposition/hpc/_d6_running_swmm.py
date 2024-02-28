@@ -405,11 +405,6 @@ for idx, row in df_strms.iterrows():
         lst_inp_files_to_keep.append(f_inp_to_report)
         lst_rpt_files_to_keep.append(rpt_path)
         __, __, __, freebndry, norain = parse_inp(f_inp_to_report) # this function also returns rz, yr, storm_id which are not needed since they were determined earlier
-        # DCL WORK
-        print("f_inp_to_report")
-        print(f_inp_to_report)
-        print("Freebndry, norain = {}, {}".format(freebndry, norain))
-        # END DCL WORK
         s_node_flooding,total_flooding_system_rpt,runoff_error_rpt,\
             flow_routing_error_rpt,frac_diff_node_minus_system_flood_rpt,flow_units = return_flood_losses_and_continuity_errors(rpt_path, f_inp_to_report)
         
