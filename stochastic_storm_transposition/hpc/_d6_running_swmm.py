@@ -13,7 +13,6 @@ import shutil
 
 use_hotstart_override = False
 hotstart_override_val = False
-
 #%% work
 # sim_year = 251
 # which_models = "all"
@@ -29,9 +28,11 @@ realizations_to_use = str(sys.argv[3])
 if which_models == "all":
     print("Running {} storms for year {}".format(which_models, sim_year))
     remove_previous_runs = True # if rerunning all, remove old simulations and results
-else:
+elif which_models == "failed":
     print("Running a failed simulation for year {}".format(sim_year))
     remove_previous_runs = False
+elif which_models == "previous":
+    print("Generating output netcdfs from previously run SWMM models.")
 delete_swmm_outputs = int(sys.argv[4])
 if delete_swmm_outputs == 1:
     delete_swmm_outputs = True
@@ -61,19 +62,19 @@ if which_models == 'failed': # NOTE THIS SHOULD ONLY BE RUN AFTER SCRIPT D6B HAS
     f_out_runtimes = dir_swmm_sst_models + "_model_performance_year{}_failed_run_id{}.csv".format(sim_year, row_index)
     f_out_modelresults = dir_swmm_sst_models + "_model_outputs_year{}_failed_run_id{}.nc".format(sim_year, row_index)
 # clear all re-run outputs
-elif which_models == "all":
+if which_models == "all":
     fs_re_runs_csvs = glob(dir_swmm_sst_models + "_model_performance_year{}_failed_run_id{}.csv".format("*", "*"))
     fs_re_runs_netcdfs = glob(dir_swmm_sst_models + "_model_outputs_year{}_failed_run_id{}.nc".format("*", "*"))
     for f in fs_re_runs_csvs:
         os.remove(f)
     for f in fs_re_runs_netcdfs:
         os.remove(f)
-else:
-    try:
-        storm_id_to_run = int(which_models)
-    except Exception as e:
-        print("Attempted to run a single storm, but which_models could not be converted to an integer. Check the arguments to the python script.")
-        sys.exit(e)
+# if which_models is an integer indicating to run a single storm id
+try:
+    storm_id_to_run = int(which_models)
+    print("Running a single storm with ID {}".format(storm_id_to_run))
+except Exception as e:
+    pass
 
 try:
     realization_to_run = int(realizations_to_use)
@@ -189,163 +190,195 @@ for idx, row in df_strms.iterrows():
     output_converted_to_dataset = False
     loop_start_time = sim_time = datetime.now()
     sim_runtime_min = np.nan
-    for routing_tstep in lst_alternative_routing_tsteps:
-        routing_tstep_to_report = routing_tstep
-        use_hotstart = False
-        if which_models == "failed":
-            idx_routing_tstep = lst_alternative_routing_tsteps.index(routing_tstep)
-            idx_of_routing_tstep_of_last_attempted_sim = lst_alternative_routing_tsteps.index(row_with_failed_run.routing_timestep)
-            # if a simulation has already been completed previously and was rejected due to high continuity errors, skip it
-            previous_sim_run = False
-            if idx_of_routing_tstep_of_last_attempted_sim > idx_routing_tstep:
-                previous_sim_run = True
-                previous_routing_tstep = routing_tstep
-                f_inp_prevrun = f_inp.split(".inp")[0] + "_rt" + str(previous_routing_tstep) + ".inp"
-                f_out_prevrun = f_inp.split(".inp")[0] + "_rt" + str(previous_routing_tstep) + ".out"
-                f_rpt_prevrun = rpt_copy_fldr + f_inp_prevrun.split("/")[-1].split(".inp")[0] + ".rpt"
-                prev_rpt_file_exists = os.path.exists(f_rpt_prevrun)
-                continue
-            if previous_sim_run:
-                print("Previous simulation was run with a routing timestep of: {}".format(previous_routing_tstep))
-            # if attempting the routing timestep that ran into the runtime limit is the one up for trial, use the hotstart trial
-            if idx_routing_tstep == idx_of_routing_tstep_of_last_attempted_sim:
-                use_hotstart = True
-                first_sim_attempt = True
+    # if using previous results:
+    if which_models == "previous":
+        routing_tstep_to_report = -9999
+        lowest_error = -9999
+        f_inp_name = f_inp.split("/")[-1]
+        rpt_name_pattern = f_inp_name.split(".inp")[0] + "_rt*.rpt"
+        rpt_pattern = rpt_copy_fldr + rpt_name
+        lst_f_rpts = glob(rpt_pattern)
+        # find the rpt output and routing timestep with the lowest error
+        for rpt_path in lst_f_rpts:
+            routing_tstep = int(rpt_name_pattern.split("_rt")[-1].split(".rpt")[0])
+            s_node_flooding,total_flooding_system_rpt,runoff_error_rpt,\
+                        flow_routing_error_rpt,frac_diff_node_minus_system_flood_rpt,flow_units = return_flood_losses_and_continuity_errors(rpt_path, f_inp)
+            if abs(flow_routing_error_rpt) < abs(lowest_error):
+                routing_tstep_to_report = routing_tstep
+                lowest_error = lowest_error
+            # evaluate errors
+            if (abs(flow_routing_error_rpt) <= continuity_error_thresh):
+                flow_continuity_issues = False
             else:
-                first_sim_attempt = False
-            if use_hotstart_override:
-                use_hotstart = hotstart_override_val
-            ## if first sim for failed model AND there has already been a succesful run at a previous timestep
-            if first_sim_attempt and previous_sim_run and prev_rpt_file_exists:
-                __,__,previous_runoff_error_pyswmm,\
-                    previous_flow_routing_error_pyswmm,__,__ = return_flood_losses_and_continuity_errors(f_rpt_prevrun, f_inp_prevrun)
-                first_sim_attempt = False
-        else:
-            first_sim_attempt = (routing_tstep == lst_alternative_routing_tsteps[0])
-        # modify inp file with routing timestep
-        ## define filepath to new inp file
-        f_inp_torun = f_inp.split(".inp")[0] + "_rt" + str(routing_tstep) + ".inp"
-        f_inp_name = f_inp_torun.split("/")[-1]
-        print("Running {}".format(f_inp_name))
-        with open(f_inp, 'r') as file:
-            # Read all lines from the file
-            lines = file.readlines()
-        for i, line in enumerate(lines):
-            if "ROUTING_STEP" in line:
-                line_of_interest = line
-                # Modify the text in that line
-                # write the first part of the line (to make sure I'm getting the spacing right)
-                first_part = ""
-                for substring in line_of_interest.split(' ')[0:-1]:
-                    # spaces are collapsed when splitting by spaces so
-                    # I am adding a space to each substring
-                    first_part += substring + " "
-                # write the full line to replace the original with
-                newline = first_part + str(routing_tstep) + "\n"
-                lines[i] = line.replace(line_of_interest, newline)
-        with open(f_inp_torun, 'w') as file:
-            file.writelines(lines)
-        # run simulation
-        runoff_continuity_issues = np.nan
-        flow_continuity_issues = np.nan
-        runoff_error_pyswmm = -9999
-        flow_routing_error_pyswmm = -9999
-        runoff_error_rpt = -9999
-        flow_routing_error_rpt = -9999
-        tot_flood_losses_rpt_system_m3 = -9999
-        tot_flood_losses_rpt_nodes_m3 = -9999
-        frac_diff_node_minus_system_flood_rpt = -9999
-        success = True
-        try:
-            with Simulation(f_inp_torun) as sim:
-                sim_start_time = datetime.now()
-                f_hotpath = f_inp_torun+".hot"
-                # check to make sure output files exist before using hotstart
-                f_out = f_inp_torun.split('.inp')[0] + '.out'
-                f_out_exists = os.path.exists(f_out)
-                f_hotstart_exists = os.path.exists(f_hotpath)
-                hotstart_used = False
-                if use_hotstart and f_out_exists and f_hotstart_exists:
-                    hotstart_used = True
-                    sim.use_hotstart(f_hotpath)
-                    print("Using hotstart file to save some time on a previously incomplete run.....")
-                for step in sim:
-                    sim_time = datetime.now()
-                    sim_runtime_min = round((sim_time - sim_start_time).seconds / 60, 1)
-                    if sim_runtime_min > max_runtime_min:
-                        problem = "User-defined maximum simulation time limit of {} minutes reached, so simulation was halted.".format(max_runtime_min)
-                        print(problem)
-                        success = False
-                        sim.save_hotstart(f_hotpath) # saving hotstart file so we can resume it when running failed models
-                        sim.terminate_simulation()
-                sim._model.swmm_end() # must call this to accurately report the continuity errors
-                runoff_error_pyswmm = sim.runoff_error
-                flow_routing_error_pyswmm = sim.flow_routing_error
-                # write report file
-                # sim.report()
-                # sim.close()
-        except Exception as e:
-            print("Simulation failed due to error: {}".format(e))
-            # problem = e
-            success = False
-        if success: # check continuity error and re-run if it is worse than a threshold target
-            # remove hotstart file if the simulation completes succesfully
-            if hotstart_used:
-                os.remove(f_hotpath)
-            # save the rpt file to another directory to see if i can figure out what's going on with the dumping thing
-            rpt_path = f_inp_torun.split('.inp')[0] + ".rpt"
-            # rpt_name = rpt_path.split("/")[-1]
-            source_file_path = Path(rpt_path)
-            shutil.copy(source_file_path, rpt_copy_directory)
-            # record runoff error
-            if (abs(runoff_error_pyswmm) <= continuity_error_thresh):
+                flow_continuity_issues = True
+
+            if (abs(runoff_error_rpt) <= continuity_error_thresh):
                 runoff_continuity_issues = False
             else:
                 runoff_continuity_issues = True
-            if (abs(flow_routing_error_pyswmm) <= continuity_error_thresh): # and (abs(runoff_error_pyswmm) <= continuity_error_thresh):
-                # print("Simulation succesfully completed with continuity errors within prespecified threshold of {}% using a routing timestep of {}. Flow routing and runoff errors are {} and {}".format(
-                #     continuity_error_thresh, routing_tstep, flow_routing_error_pyswmm, runoff_error_pyswmm
-                # ))
-                flow_continuity_issues = False
-                break
-            else:
-                flow_continuity_issues = True
-                # is this the first simulation attempt?
-                ## if normal simulation run for all models or specific storms
-                if first_sim_attempt:
-                    previous_flow_routing_error_pyswmm = flow_routing_error_pyswmm
-                    previous_runoff_error_pyswmm = runoff_error_pyswmm
-                    print("The simulation was run with a routing timestep of {}. Runoff and flow continuity errors were {} and {}. Sim runtime was {}. Re-running simulation.".format(
-                        routing_tstep, runoff_error_pyswmm, flow_routing_error_pyswmm, sim_runtime_min))
+            # define values to append later
+            flow_routing_error_pyswmm = np.nan
+            runoff_error_pyswmm = np.nan
+        success = True
+    # if running simulations..
+    else:
+        for routing_tstep in lst_alternative_routing_tsteps:
+            routing_tstep_to_report = routing_tstep
+            use_hotstart = False
+            if which_models == "failed":
+                idx_routing_tstep = lst_alternative_routing_tsteps.index(routing_tstep)
+                idx_of_routing_tstep_of_last_attempted_sim = lst_alternative_routing_tsteps.index(row_with_failed_run.routing_timestep)
+                # if a simulation has already been completed previously and was rejected due to high continuity errors, skip it
+                previous_sim_run = False
+                if idx_of_routing_tstep_of_last_attempted_sim > idx_routing_tstep:
+                    previous_sim_run = True
                     previous_routing_tstep = routing_tstep
-                    routing_tstep_to_report = previous_routing_tstep
-                else: # not first sim attempt
-                    # compute the improvement between the last two attempts
-                    net_improvement = abs(previous_flow_routing_error_pyswmm) - abs(flow_routing_error_pyswmm)
-                    frac_improvement = net_improvement / abs(previous_flow_routing_error_pyswmm)
-                    if frac_improvement < min_improvement_to_warrant_another_sim:
-                        if frac_improvement < 0:
-                            print("The simulation was run with a routing timestep of {}. Flow continuity error was {} which was actually WORSE than the previous run so I won't be trying a smaller routing timestep. Sim runtime was {}.".format(
-                                routing_tstep, flow_routing_error_pyswmm, sim_runtime_min))
-                            note = note + "This routing timestep actually did {}% worse than *{}*s which resulted in a flow continuity error of {}%;".format(
-                                round(frac_improvement*100,1), previous_routing_tstep, previous_flow_routing_error_pyswmm
-                            )
-                            routing_tstep_to_report = previous_routing_tstep
-                            print("Routing timestep being reported: {}".format(routing_tstep_to_report))
-                            flow_routing_error_pyswmm = previous_flow_routing_error_pyswmm
-                            runoff_error_pyswmm = previous_runoff_error_pyswmm
-                        else:
-                            print("The simulation was run with a routing timestep of {}. Flow continuity error was {} which is less than {}% better than the previous run. This does not warrant another simulation. Sim runtime was {}.".format(
-                                routing_tstep, flow_routing_error_pyswmm, min_improvement_to_warrant_another_sim*100, sim_runtime_min))
-                            print("Routing timestep being reported: {}".format(routing_tstep_to_report))
-                        break
-                    else:
+                    f_inp_prevrun = f_inp.split(".inp")[0] + "_rt" + str(previous_routing_tstep) + ".inp"
+                    f_out_prevrun = f_inp.split(".inp")[0] + "_rt" + str(previous_routing_tstep) + ".out"
+                    f_rpt_prevrun = rpt_copy_fldr + f_inp_prevrun.split("/")[-1].split(".inp")[0] + ".rpt"
+                    prev_rpt_file_exists = os.path.exists(f_rpt_prevrun)
+                    continue
+                if previous_sim_run:
+                    print("Previous simulation was run with a routing timestep of: {}".format(previous_routing_tstep))
+                # if attempting the routing timestep that ran into the runtime limit is the one up for trial, use the hotstart trial
+                if idx_routing_tstep == idx_of_routing_tstep_of_last_attempted_sim:
+                    use_hotstart = True
+                    first_sim_attempt = True
+                else:
+                    first_sim_attempt = False
+                if use_hotstart_override:
+                    use_hotstart = hotstart_override_val
+                ## if first sim for failed model AND there has already been a succesful run at a previous timestep
+                if first_sim_attempt and previous_sim_run and prev_rpt_file_exists:
+                    __,__,previous_runoff_error_pyswmm,\
+                        previous_flow_routing_error_pyswmm,__,__ = return_flood_losses_and_continuity_errors(f_rpt_prevrun, f_inp_prevrun)
+                    first_sim_attempt = False
+            else:
+                first_sim_attempt = (routing_tstep == lst_alternative_routing_tsteps[0])
+            # modify inp file with routing timestep
+            ## define filepath to new inp file
+            f_inp_torun = f_inp.split(".inp")[0] + "_rt" + str(routing_tstep) + ".inp"
+            f_inp_name = f_inp_torun.split("/")[-1]
+            print("Running {}".format(f_inp_name))
+            with open(f_inp, 'r') as file:
+                # Read all lines from the file
+                lines = file.readlines()
+            for i, line in enumerate(lines):
+                if "ROUTING_STEP" in line:
+                    line_of_interest = line
+                    # Modify the text in that line
+                    # write the first part of the line (to make sure I'm getting the spacing right)
+                    first_part = ""
+                    for substring in line_of_interest.split(' ')[0:-1]:
+                        # spaces are collapsed when splitting by spaces so
+                        # I am adding a space to each substring
+                        first_part += substring + " "
+                    # write the full line to replace the original with
+                    newline = first_part + str(routing_tstep) + "\n"
+                    lines[i] = line.replace(line_of_interest, newline)
+            with open(f_inp_torun, 'w') as file:
+                file.writelines(lines)
+            # run simulation
+            runoff_continuity_issues = np.nan
+            flow_continuity_issues = np.nan
+            runoff_error_pyswmm = -9999
+            flow_routing_error_pyswmm = -9999
+            runoff_error_rpt = -9999
+            flow_routing_error_rpt = -9999
+            tot_flood_losses_rpt_system_m3 = -9999
+            tot_flood_losses_rpt_nodes_m3 = -9999
+            frac_diff_node_minus_system_flood_rpt = -9999
+            success = True
+            try:
+                with Simulation(f_inp_torun) as sim:
+                    sim_start_time = datetime.now()
+                    f_hotpath = f_inp_torun+".hot"
+                    # check to make sure output files exist before using hotstart
+                    f_out = f_inp_torun.split('.inp')[0] + '.out'
+                    f_out_exists = os.path.exists(f_out)
+                    f_hotstart_exists = os.path.exists(f_hotpath)
+                    hotstart_used = False
+                    if use_hotstart and f_out_exists and f_hotstart_exists:
+                        hotstart_used = True
+                        sim.use_hotstart(f_hotpath)
+                        print("Using hotstart file to save some time on a previously incomplete run.....")
+                    for step in sim:
+                        sim_time = datetime.now()
+                        sim_runtime_min = round((sim_time - sim_start_time).seconds / 60, 1)
+                        if sim_runtime_min > max_runtime_min:
+                            problem = "User-defined maximum simulation time limit of {} minutes reached, so simulation was halted.".format(max_runtime_min)
+                            print(problem)
+                            success = False
+                            sim.save_hotstart(f_hotpath) # saving hotstart file so we can resume it when running failed models
+                            sim.terminate_simulation()
+                    sim._model.swmm_end() # must call this to accurately report the continuity errors
+                    runoff_error_pyswmm = sim.runoff_error
+                    flow_routing_error_pyswmm = sim.flow_routing_error
+                    # write report file
+                    # sim.report()
+                    # sim.close()
+            except Exception as e:
+                print("Simulation failed due to error: {}".format(e))
+                # problem = e
+                success = False
+            if success: # check continuity error and re-run if it is worse than a threshold target
+                # remove hotstart file if the simulation completes succesfully
+                if hotstart_used:
+                    os.remove(f_hotpath)
+                # save the rpt file to another directory to see if i can figure out what's going on with the dumping thing
+                rpt_path = f_inp_torun.split('.inp')[0] + ".rpt"
+                # rpt_name = rpt_path.split("/")[-1]
+                source_file_path = Path(rpt_path)
+                shutil.copy(source_file_path, rpt_copy_directory)
+                # record runoff error
+                if (abs(runoff_error_pyswmm) <= continuity_error_thresh):
+                    runoff_continuity_issues = False
+                else:
+                    runoff_continuity_issues = True
+                if (abs(flow_routing_error_pyswmm) <= continuity_error_thresh): # and (abs(runoff_error_pyswmm) <= continuity_error_thresh):
+                    # print("Simulation succesfully completed with continuity errors within prespecified threshold of {}% using a routing timestep of {}. Flow routing and runoff errors are {} and {}".format(
+                    #     continuity_error_thresh, routing_tstep, flow_routing_error_pyswmm, runoff_error_pyswmm
+                    # ))
+                    flow_continuity_issues = False
+                    break
+                else:
+                    flow_continuity_issues = True
+                    # is this the first simulation attempt?
+                    ## if normal simulation run for all models or specific storms
+                    if first_sim_attempt:
                         previous_flow_routing_error_pyswmm = flow_routing_error_pyswmm
                         previous_runoff_error_pyswmm = runoff_error_pyswmm
+                        print("The simulation was run with a routing timestep of {}. Runoff and flow continuity errors were {} and {}. Sim runtime was {}. Re-running simulation.".format(
+                            routing_tstep, runoff_error_pyswmm, flow_routing_error_pyswmm, sim_runtime_min))
                         previous_routing_tstep = routing_tstep
                         routing_tstep_to_report = previous_routing_tstep
-        else: # if simulation didn't run because of an error or the time limit, don't re-run the sim
-            break
+                    else: # not first sim attempt
+                        # compute the improvement between the last two attempts
+                        net_improvement = abs(previous_flow_routing_error_pyswmm) - abs(flow_routing_error_pyswmm)
+                        frac_improvement = net_improvement / abs(previous_flow_routing_error_pyswmm)
+                        if frac_improvement < min_improvement_to_warrant_another_sim:
+                            if frac_improvement < 0:
+                                print("The simulation was run with a routing timestep of {}. Flow continuity error was {} which was actually WORSE than the previous run so I won't be trying a smaller routing timestep. Sim runtime was {}.".format(
+                                    routing_tstep, flow_routing_error_pyswmm, sim_runtime_min))
+                                note = note + "This routing timestep actually did {}% worse than *{}*s which resulted in a flow continuity error of {}%;".format(
+                                    round(frac_improvement*100,1), previous_routing_tstep, previous_flow_routing_error_pyswmm
+                                )
+                                routing_tstep_to_report = previous_routing_tstep
+                                print("Routing timestep being reported: {}".format(routing_tstep_to_report))
+                                flow_routing_error_pyswmm = previous_flow_routing_error_pyswmm
+                                runoff_error_pyswmm = previous_runoff_error_pyswmm
+                            else:
+                                print("The simulation was run with a routing timestep of {}. Flow continuity error was {} which is less than {}% better than the previous run. This does not warrant another simulation. Sim runtime was {}.".format(
+                                    routing_tstep, flow_routing_error_pyswmm, min_improvement_to_warrant_another_sim*100, sim_runtime_min))
+                                print("Routing timestep being reported: {}".format(routing_tstep_to_report))
+                            break
+                        else:
+                            previous_flow_routing_error_pyswmm = flow_routing_error_pyswmm
+                            previous_runoff_error_pyswmm = runoff_error_pyswmm
+                            previous_routing_tstep = routing_tstep
+                            routing_tstep_to_report = previous_routing_tstep
+            else: # if simulation didn't run because of an error or the time limit, don't re-run the sim
+                break
     notes.append(note)
     problems.append(problem)
     successes.append(success)
