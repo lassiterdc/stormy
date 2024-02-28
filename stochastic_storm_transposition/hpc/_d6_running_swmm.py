@@ -475,18 +475,17 @@ else:
     at_least_1_sim_was_succesfull = False
 if which_models == "failed":
     ds_all_node_fld = ds # single output only
-else:
-    try:
-        ds_all_node_fld = xr.combine_by_coords(lst_ds_node_fld)
-        if at_least_1_sim_was_succesfull:
-            ds_all_node_fld_loaded = ds_all_node_fld.load()
-            ds_all_node_fld_loaded.to_netcdf(f_out_modelresults, encoding= {"node_flooding_cubic_meters":{"zlib":True}}, engine = "h5netcdf")
-            print("exported " + f_out_modelresults)
-    except Exception as e:
-        print("Failed to export node flooding datasets due to error: {}")
-        print("Looping through datasets to see if the issue can be spotted: ")
-        for ds in lst_ds_node_fld:
-            print(ds)
+try:
+    ds_all_node_fld = xr.combine_by_coords(lst_ds_node_fld)
+    if at_least_1_sim_was_succesfull:
+        ds_all_node_fld_loaded = ds_all_node_fld.load()
+        ds_all_node_fld_loaded.to_netcdf(f_out_modelresults, encoding= {"node_flooding_cubic_meters":{"zlib":True}}, engine = "h5netcdf")
+        print("exported " + f_out_modelresults)
+except Exception as e:
+    print("Failed to export node flooding datasets due to error: {}")
+    print("Looping through datasets to see if the issue can be spotted: ")
+    for ds in lst_ds_node_fld:
+        print(ds)
 # export performance info
 df_strms["run_completed"] = successes
 df_strms["routing_timestep"] = lst_routing_timestep_used
