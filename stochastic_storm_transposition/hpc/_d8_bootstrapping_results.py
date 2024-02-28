@@ -71,3 +71,5 @@ if export_raw_bs_samps == True:
     da_bs_loaded.to_netcdf(f_out_bs_results_raw, encoding= {"node_flooding_cubic_meters":{"zlib":True}}, engine = "h5netcdf")
     tot_elapsed_time_min = round((datetime.now() - script_start_time).seconds / 60, 1)
     print("Exported file: {}".format(f_out_bs_results_raw))
+
+ds_sst_all_outputs.close()
