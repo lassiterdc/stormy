@@ -12,7 +12,7 @@
 
 # this script only needs to be run if all the sims ran succesfully but writing results to netcdfs was unsuccessful
 
-# ijob -c 1 -A quinnlab_paid -p standard --time=0-09:00:00 --mem-per-cpu=16000
+# ijob -c 1 -A quinnlab_paid -p standard --time=0-09:00:00
 
 source __directories.sh
 module purge
@@ -27,7 +27,4 @@ source activate running_swmm
 
 # running swmm
 python ${assar_dirs[hpc_d6_py]} ${SLURM_ARRAY_TASK_ID} "previous" 1 1 # arguments: year, which models to run (failed, all, or specific storm number), which realizations to run, and whether to delete swmm .out files
-# python ${assar_dirs[hpc_d6_py]} 764 "all" 2 0
-# python ${assar_dirs[hpc_d6_py]} 99999 "all" 1 0 # this is a duplicate of year 251 that has been causing problems
-# python ${assar_dirs[hpc_d6_py]} 252 "all" 1 0
-# python ${assar_dirs[hpc_d6_py]} 115 2 1 0
+# python ${assar_dirs[hpc_d6_py]} 10 "previous" 1 1
