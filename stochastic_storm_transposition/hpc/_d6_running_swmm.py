@@ -14,11 +14,11 @@ import shutil
 use_hotstart_override = False
 hotstart_override_val = False
 #%% work
-# sim_year = 251
-# which_models = "all"
-# realizations_to_use = "all"
-# delete_swmm_outputs = False
-# realization_to_run = None
+sim_year = 251
+which_models = "high_error"
+realizations_to_use = 1
+delete_swmm_outputs = False
+realization_to_run = None
 #%% end work
 
 sim_year = int(sys.argv[1]) # this is used as the row index of the failed model to run if which_models = "failed" (so there's only 1 simulation per node)
@@ -60,11 +60,11 @@ if which_models == "failed": # NOTE THIS SHOULD ONLY BE RUN AFTER SCRIPT D6B HAS
     if row_index > df_perf.index.max():
         sys.exit("Task number not needed for running simulation because they are all covered by other tasks.")
     # Subset the row with the failed model
-    row_with_failed_run = df_perf.loc[row_index,:]
+    df_perf = df_perf.loc[row_index,:]
     # reset sim year 
-    sim_year = int(row_with_failed_run.year)
-    failed_inp_to_rerun = row_with_failed_run.swmm_inp
-    failed_inp_problem = row_with_failed_run.problem
+    sim_year = int(df_perf.year[0])
+    failed_inp_to_rerun = df_perf.swmm_inp[0]
+    failed_inp_problem = df_perf.problem[0]
     f_out_runtimes = dir_swmm_sst_models + "_model_performance_year{}_failed_run_id{}.csv".format(sim_year, row_index)
     f_out_modelresults = dir_swmm_sst_models + "_model_outputs_year{}_failed_run_id{}.nc".format(sim_year, row_index)
 # clear all re-run outputs
@@ -78,21 +78,17 @@ if which_models == "all":
 if which_models == 'high_error':
     print("Re-running simulations with a routing error of greater than or equal to {} %".format(continuity_error_to_rerun))
     df_perf = pd.read_csv(f_model_perf_summary)
+    df_perf = df_perf[df_perf.year == sim_year]
     df_perf = df_perf[df_perf.flow_continuity_error_rpt.abs() >=  continuity_error_to_rerun]
     df_perf.reset_index(inplace = True)
     max_runtime_min = time_permitted_for_reruns_min # allowing 3 hours per simulation
     # only use needed tasks (NOTE THE TOTAL NUMBER OF TASKS MUST EQUAL OR EXCEED THE NUMBER OF FAILED RUNS)
     row_index = (sim_year-1) # subtract 1 since python is 0-indexed and tasks are 1-indexed
-    if row_index > df_perf.index.max():
-        sys.exit("Task number not needed for running simulation because they are all covered by other tasks.")
-    # Subset the row with the failed model
-    row_to_rerun = df_perf.loc[row_index,:]
-    # reset sim year 
-    sim_year = int(row_to_rerun.year)
-    failed_inp_to_rerun = row_to_rerun.swmm_inp
-    failed_inp_problem = row_to_rerun.problem
-    f_out_runtimes = dir_swmm_sst_models + "_model_performance_year{}_failed_run_id{}.csv".format(sim_year, row_index)
-    f_out_modelresults = dir_swmm_sst_models + "_model_outputs_year{}_failed_run_id{}.nc".format(sim_year, row_index)
+    if len(df_perf) == 0:
+        print("Task number not needed because all sims from this year met flow continuity error threshold.")
+        sys.exit("Task number not needed because all sims from this year met flow continuity error threshold.")
+    f_out_runtimes = dir_swmm_sst_models + "_model_performance_year{}.csv".format(sim_year)
+    f_out_modelresults = dir_swmm_sst_models + "_model_outputs_year{}.nc".format(sim_year)
     lst_alternative_routing_tsteps = lst_tsteps_for_reruns # update to only use new higher timesteps
 # if which_models is an integer indicating to run a single storm id
 try:
@@ -147,7 +143,7 @@ if storm_id_to_run is not None:
     df_strms = df_strms[df_strms.storm_id == storm_id_to_run]
 
 if (which_models == "failed") or (which_models == "high_error"):
-    df_strms = df_strms[df_strms.swmm_inp == row_with_failed_run.swmm_inp]
+    df_strms = df_strms[df_strms.swmm_inp.isin(df_perf.swmm_inp)]
 #%% run simulations 
 lst_ds_node_fld = []
 lst_outputs_converted_to_dataset = [] # to track success
