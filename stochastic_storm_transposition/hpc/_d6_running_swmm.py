@@ -14,11 +14,11 @@ import shutil
 use_hotstart_override = False
 hotstart_override_val = False
 #%% work
-sim_year = 251
-which_models = "high_error"
-realizations_to_use = 1
-delete_swmm_outputs = False
-realization_to_run = None
+# sim_year = 251
+# which_models = "high_error"
+# realizations_to_use = 1
+# delete_swmm_outputs = False
+# realization_to_run = None
 #%% end work
 
 sim_year = int(sys.argv[1]) # this is used as the row index of the failed model to run if which_models = "failed" (so there's only 1 simulation per node)
@@ -141,7 +141,6 @@ if realization_to_run is not None:
     df_strms = df_strms[df_strms.realization == realization_to_run]
 if storm_id_to_run is not None:
     df_strms = df_strms[df_strms.storm_id == storm_id_to_run]
-
 if (which_models == "failed") or (which_models == "high_error"):
     df_strms = df_strms[df_strms.swmm_inp.isin(df_perf.swmm_inp)]
 #%% run simulations 
