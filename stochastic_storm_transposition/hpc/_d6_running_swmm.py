@@ -38,6 +38,9 @@ elif which_models == "previous":
     remove_previous_runs = False
     delete_swmm_outputs = False # no outputs to remove
     print("Generating output netcdfs from previously run SWMM models.")
+elif which_models == "high_error":
+    remove_previous_runs = False
+    delete_swmm_outputs = False
 if delete_swmm_outputs:
     print("Deleting SWMM .out files is set to {}".format(delete_swmm_outputs))
 else:
@@ -45,13 +48,13 @@ else:
 f_out_runtimes = dir_swmm_sst_models + "_model_performance_year{}.csv".format(sim_year)
 f_out_modelresults = dir_swmm_sst_models + "_model_outputs_year{}.nc".format(sim_year)
 storm_id_to_run = None
-if which_models == 'failed': # NOTE THIS SHOULD ONLY BE RUN AFTER SCRIPT D6B HAS BEEN RUN OTHERWISE YOU MIGHT END UP RE-RUNNING SUCCESSFUL SIMULATIONS
+if which_models == "failed": # NOTE THIS SHOULD ONLY BE RUN AFTER SCRIPT D6B HAS BEEN RUN OTHERWISE YOU MIGHT END UP RE-RUNNING SUCCESSFUL SIMULATIONS
     print("Re-running failed simulations.")
     print('NOTE THIS SHOULD ONLY BE RUN AFTER SCRIPT D6B HAS BEEN RUN OTHERWISE YOU MIGHT END UP RE-RUNNING SUCCESSFUL SIMULATIONS')
     df_perf = pd.read_csv(f_model_perf_summary)
     df_perf = df_perf[df_perf.run_completed == False]
     df_perf.reset_index(inplace = True)
-    max_runtime_min = 180 # allowing 3 hours per simulation
+    max_runtime_min = time_permitted_for_reruns_min # allowing 3 hours per simulation
     # only use needed tasks (NOTE THE TOTAL NUMBER OF TASKS MUST EQUAL OR EXCEED THE NUMBER OF FAILED RUNS)
     row_index = (sim_year-1) # subtract 1 since python is 0-indexed and tasks are 1-indexed
     if row_index > df_perf.index.max():
@@ -72,6 +75,25 @@ if which_models == "all":
         os.remove(f)
     for f in fs_re_runs_netcdfs:
         os.remove(f)
+if which_models == 'high_error':
+    print("Re-running simulations with a routing error of greater than or equal to {} %".format(continuity_error_to_rerun))
+    df_perf = pd.read_csv(f_model_perf_summary)
+    df_perf = df_perf[df_perf.flow_continuity_error_rpt.abs() >=  continuity_error_to_rerun]
+    df_perf.reset_index(inplace = True)
+    max_runtime_min = time_permitted_for_reruns_min # allowing 3 hours per simulation
+    # only use needed tasks (NOTE THE TOTAL NUMBER OF TASKS MUST EQUAL OR EXCEED THE NUMBER OF FAILED RUNS)
+    row_index = (sim_year-1) # subtract 1 since python is 0-indexed and tasks are 1-indexed
+    if row_index > df_perf.index.max():
+        sys.exit("Task number not needed for running simulation because they are all covered by other tasks.")
+    # Subset the row with the failed model
+    row_to_rerun = df_perf.loc[row_index,:]
+    # reset sim year 
+    sim_year = int(row_to_rerun.year)
+    failed_inp_to_rerun = row_to_rerun.swmm_inp
+    failed_inp_problem = row_to_rerun.problem
+    f_out_runtimes = dir_swmm_sst_models + "_model_performance_year{}_failed_run_id{}.csv".format(sim_year, row_index)
+    f_out_modelresults = dir_swmm_sst_models + "_model_outputs_year{}_failed_run_id{}.nc".format(sim_year, row_index)
+    lst_alternative_routing_tsteps = lst_tsteps_for_reruns # update to only use new higher timesteps
 # if which_models is an integer indicating to run a single storm id
 try:
     storm_id_to_run = int(which_models)
@@ -124,7 +146,7 @@ if realization_to_run is not None:
 if storm_id_to_run is not None:
     df_strms = df_strms[df_strms.storm_id == storm_id_to_run]
 
-if which_models == "failed":
+if (which_models == "failed") or (which_models == "high_error"):
     df_strms = df_strms[df_strms.swmm_inp == row_with_failed_run.swmm_inp]
 #%% run simulations 
 lst_ds_node_fld = []
@@ -444,13 +466,13 @@ for idx, row in df_strms.iterrows():
                                        routing_timestep = (['realization', 'year', 'storm_id', 'sim_type'], a_routing_timestep),
                                        file_inp = (['realization', 'year', 'storm_id', 'sim_type'], a_inp_file),
                                        file_rpt = (['realization', 'year', 'storm_id', 'sim_type'], a_rpt_file),
-                                       file_rain0_file = (['realization', 'year', 'storm_id', 'sim_type'], a_rain0_file),
-                                       file_rain1_file = (['realization', 'year', 'storm_id', 'sim_type'], a_rain1_file),
-                                       file_rain2_file = (['realization', 'year', 'storm_id', 'sim_type'], a_rain2_file),
-                                       file_rain3_file = (['realization', 'year', 'storm_id', 'sim_type'], a_rain3_file),
-                                       file_rain4_file = (['realization', 'year', 'storm_id', 'sim_type'], a_rain4_file),
-                                       file_rain5_file = (['realization', 'year', 'storm_id', 'sim_type'], a_rain5_file),
-                                       file_waterlevel_file = (['realization', 'year', 'storm_id', 'sim_type'], a_waterlevel_file)),
+                                       file_rain0 = (['realization', 'year', 'storm_id', 'sim_type'], a_rain0_file),
+                                       file_rain1 = (['realization', 'year', 'storm_id', 'sim_type'], a_rain1_file),
+                                       file_rain2 = (['realization', 'year', 'storm_id', 'sim_type'], a_rain2_file),
+                                       file_rain3 = (['realization', 'year', 'storm_id', 'sim_type'], a_rain3_file),
+                                       file_rain4 = (['realization', 'year', 'storm_id', 'sim_type'], a_rain4_file),
+                                       file_rain5 = (['realization', 'year', 'storm_id', 'sim_type'], a_rain5_file),
+                                       file_waterlevel = (['realization', 'year', 'storm_id', 'sim_type'], a_waterlevel_file)),
                         coords = dict(realization = np.atleast_1d(rz),
                                         year = np.atleast_1d(yr),
                                         storm_id = np.atleast_1d(storm_id),
