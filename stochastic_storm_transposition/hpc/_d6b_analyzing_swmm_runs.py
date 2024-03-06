@@ -9,13 +9,14 @@ f_performance = dir_swmm_sst_models + "_model_performance_year{}.csv".format("*"
 # f_summaries = dir_time_series + "_event_summary_year{}.csv".format("*")
 f_summaries = f_swmm_scenarios_catalog.format("*")
 f_performance_reruns = dir_swmm_sst_models + "_model_performance_year{}_failed_run_id{}.csv".format("*", "*")
-
+f_performance_high_error = dir_swmm_sst_models + "_model_performance_year{}_high_error.csv".format("*")
 #%% load performance dataframe
 lst_f_perf = glob(f_performance)
 lst_f_perf_reruns = glob(f_performance_reruns)
+lst_f_perf_high_error_reruns = glob(f_performance_high_error)
 lst_dfs_perf = []
 for f in lst_f_perf:
-    if "failed_run" in f: # skip csvs from failed runs
+    if ("failed_run" in f) or ("high_error" in f): # skip csvs from failed runs and re-runs with high errors
         continue
     df = pd.read_csv(f)
     lst_dfs_perf.append(df)
@@ -31,6 +32,17 @@ if len(lst_f_perf_reruns) > 0:
     df_perf_reruns = pd.concat(lst_dfs_perf_reruns)
     df_perf_reruns = df_perf_reruns.set_index(["swmm_inp"], drop=True)
     for ind, row in df_perf_reruns.iterrows():
+        df_perf.loc[ind, :] = row
+
+# update the dataframe with high error re-runs
+if len(lst_f_perf_high_error_reruns) > 0:
+    lst_dfs_perf_high_error_reruns = []
+    for f in lst_f_perf_high_error_reruns:
+        df_high_error_reruns = pd.read_csv(f)
+        lst_dfs_perf_high_error_reruns.append(df_high_error_reruns)
+    df_perf_high_error_reruns = pd.concat(lst_dfs_perf_high_error_reruns)
+    df_perf_high_error_reruns = df_perf_high_error_reruns.set_index(["swmm_inp"], drop=True)
+    for ind, row in df_perf_high_error_reruns.iterrows():
         df_perf.loc[ind, :] = row
 
 # identify all runs that weren't attempted

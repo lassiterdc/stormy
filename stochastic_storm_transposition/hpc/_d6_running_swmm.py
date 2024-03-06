@@ -87,8 +87,8 @@ if which_models == 'high_error':
     if len(df_perf) == 0:
         print("Task number not needed because all sims from this year met flow continuity error threshold.")
         sys.exit("Task number not needed because all sims from this year met flow continuity error threshold.")
-    f_out_runtimes = dir_swmm_sst_models + "_model_performance_year{}.csv".format(sim_year)
-    f_out_modelresults = dir_swmm_sst_models + "_model_outputs_year{}.nc".format(sim_year)
+    f_out_runtimes = dir_swmm_sst_models + "_model_performance_year{}_high_error.csv".format(sim_year)
+    f_out_modelresults = dir_swmm_sst_models + "_model_outputs_year{}_high_error.nc".format(sim_year)
     lst_alternative_routing_tsteps = lst_tsteps_for_reruns # update to only use new higher timesteps
 # if which_models is an integer indicating to run a single storm id
 try:
