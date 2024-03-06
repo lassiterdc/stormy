@@ -181,7 +181,7 @@ rpt_copy_fldr = swmm_fldr + "rpt_backup/"
 rpt_copy_directory = Path(rpt_copy_fldr)
 rpt_copy_directory.mkdir(parents=True, exist_ok=True)
 
-if remove_previous_runs == True:
+if remove_previous_runs == True: # this can only be toggled on if which_models = "all"
     old_rpt_files = glob(rpt_copy_fldr + "*")
     contents_in_swmm_folder = glob(swmm_fldr + "*")
     files_in_swmm_folder = [path for path in contents_in_swmm_folder if os.path.isfile(path)]
@@ -482,7 +482,7 @@ for idx, row in df_strms.iterrows():
         # print("created xarray dataset with total flooding for each node")
         end_create_dataset = datetime.now()
         create_dataset_time_min = round((end_create_dataset - start_create_dataset).seconds / 60, 1)
-        # delete output file after it's been processed
+        # delete output file
         if delete_swmm_outputs:
             os.remove(f_swmm_out)
     else:
@@ -522,19 +522,19 @@ for idx, row in df_strms.iterrows():
     if which_models == "failed":
         break
 
-# remove all files but swmm input files, rpt files, and .hot files
-## define list of all files
-contents_in_swmm_folder = glob(swmm_fldr + "*")
-### do not include directories in the list
-files_in_swmm_folder = [path for path in contents_in_swmm_folder if os.path.isfile(path)]
-files_in_rpt_backup_folder = glob(rpt_copy_fldr + "*")
-lst_all_files = files_in_swmm_folder + files_in_rpt_backup_folder
-## define list of all files to keep
-lst_hotstarts = glob(swmm_fldr + "*.hot")
-original_swmm_files = list(df_strms.swmm_inp)
-lst_to_keep = lst_hotstarts + original_swmm_files + lst_rpt_files_to_keep + lst_inp_files_to_keep + lst_out_files_to_keep
 
 if which_models == "all": # only remove files if running all models
+    # remove all files but swmm input files, rpt files, and .hot files
+    ## define list of all files
+    contents_in_swmm_folder = glob(swmm_fldr + "*")
+    ### do not include directories in the list
+    files_in_swmm_folder = [path for path in contents_in_swmm_folder if os.path.isfile(path)]
+    files_in_rpt_backup_folder = glob(rpt_copy_fldr + "*")
+    lst_all_files = files_in_swmm_folder + files_in_rpt_backup_folder
+    ## define list of all files to keep
+    lst_hotstarts = glob(swmm_fldr + "*.hot")
+    original_swmm_files = list(df_strms.swmm_inp)
+    lst_to_keep = lst_hotstarts + original_swmm_files + lst_rpt_files_to_keep + lst_inp_files_to_keep + lst_out_files_to_keep
     files_to_remove = []
     for f_compare in lst_all_files:
         keeper = False
