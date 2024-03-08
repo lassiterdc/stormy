@@ -61,6 +61,12 @@ if which_models == "failed": # NOTE THIS SHOULD ONLY BE RUN AFTER SCRIPT D6B HAS
         sys.exit("Task number not needed for running simulation because they are all covered by other tasks.")
     # Subset the row with the failed model
     df_perf = df_perf.loc[row_index,:]
+    if isinstance(df_perf, pd.Series):
+        pass
+    else:
+        print("df_perf should be a pandas series but it's not:")
+        print(df_perf)
+        sys.exit("df_perf should be a pandas series but it's not. See the output file.")
     # reset sim year 
     sim_year = int(df_perf.year)
     failed_inp_to_rerun = df_perf.swmm_inp
@@ -251,7 +257,7 @@ for idx, row in df_strms.iterrows():
             use_hotstart = False
             if which_models == "failed":
                 idx_routing_tstep = lst_alternative_routing_tsteps.index(routing_tstep)
-                idx_of_routing_tstep_of_last_attempted_sim = lst_alternative_routing_tsteps.index(row_with_failed_run.routing_timestep)
+                idx_of_routing_tstep_of_last_attempted_sim = lst_alternative_routing_tsteps.index(df_perf.routing_timestep)
                 # if a simulation has already been completed previously and was rejected due to high continuity errors, skip it
                 previous_sim_run = False
                 if idx_of_routing_tstep_of_last_attempted_sim > idx_routing_tstep:
