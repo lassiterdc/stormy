@@ -230,6 +230,8 @@ def return_rzs_for_yr(fldr_realizations, yr):
 def return_analysis_end_date(f_inp, routing_tstep): # this must match the file naming pattern in _d6_running_swmm.py
     # f_inp_to_report = f_inp.split(".inp")[0] + "_rt" + str(routing_tstep) + ".inp"
     # use the rpt file that was copied to the backup folder
+    if routing_tstep % 1 == 0:
+        routing_tstep = int(routing_tstep)
     inp_name = f_inp.split("/")[-1]
     swmm_fldr = f_inp.split(inp_name)[0]
     rpt_name = inp_name.split(".inp")[0]  + "_rt" + str(routing_tstep) + ".rpt"
