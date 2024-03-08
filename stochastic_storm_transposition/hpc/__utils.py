@@ -227,16 +227,7 @@ def return_rzs_for_yr(fldr_realizations, yr):
     lst_f_ncs.sort()
     return lst_f_ncs
 
-def return_analysis_end_date(f_inp, routing_tstep): # this must match the file naming pattern in _d6_running_swmm.py
-    # f_inp_to_report = f_inp.split(".inp")[0] + "_rt" + str(routing_tstep) + ".inp"
-    # use the rpt file that was copied to the backup folder
-    if routing_tstep % 1 == 0:
-        routing_tstep = int(routing_tstep)
-    inp_name = f_inp.split("/")[-1]
-    swmm_fldr = f_inp.split(inp_name)[0]
-    rpt_name = inp_name.split(".inp")[0]  + "_rt" + str(routing_tstep) + ".rpt"
-    rpt_copy_fldr = swmm_fldr + "rpt_backup/"
-    rpt_path = rpt_copy_fldr + rpt_name
+def return_analysis_end_date(rpt_path):
     with open(rpt_path, 'r', encoding='latin-1') as file:
         # Read all lines from the file
         lines = file.readlines()
@@ -256,6 +247,26 @@ def return_analysis_end_date(f_inp, routing_tstep): # this must match the file n
     time = lst_info_in_line[3]
     datetime_string = "{}-{}-{} {}".format(month, day, assumed_year, time)
     analysis_end_datetime = pd.to_datetime(datetime_string, format='%b-%d-%Y %H:%M:%S')
+    return analysis_end_datetime
+
+def check_rpt_results(f_inp, routing_tstep): # this must match the file naming pattern in _d6_running_swmm.py
+    # f_inp_to_report = f_inp.split(".inp")[0] + "_rt" + str(routing_tstep) + ".inp"
+    # use the rpt file that was copied to the backup folder
+    import os
+    if routing_tstep % 1 == 0:
+        routing_tstep = int(routing_tstep)
+    inp_name = f_inp.split("/")[-1]
+    swmm_fldr = f_inp.split(inp_name)[0]
+    rpt_name = inp_name.split(".inp")[0]  + "_rt" + str(routing_tstep) + ".rpt"
+    rpt_copy_fldr = swmm_fldr + "rpt_backup/"
+    rpt_path_success = rpt_copy_fldr + rpt_name
+    rpt_path_incomplete = swmm_fldr + rpt_name
+    if os.path.exists(rpt_path_success):
+        analysis_end_datetime = return_analysis_end_date(rpt_path_success)
+    elif os.path.exists(rpt_path_incomplete):
+        analysis_end_datetime = return_analysis_end_date(rpt_path_incomplete)
+    else:
+        analysis_end_datetime = np.nan
     return analysis_end_datetime
 
 def return_flood_losses_and_continuity_errors(swmm_rpt, f_inp):
@@ -369,3 +380,5 @@ def return_flood_losses_and_continuity_errors(swmm_rpt, f_inp):
 
 
 
+
+# %%
