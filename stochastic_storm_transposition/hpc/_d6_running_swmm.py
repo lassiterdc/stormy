@@ -62,9 +62,9 @@ if which_models == "failed": # NOTE THIS SHOULD ONLY BE RUN AFTER SCRIPT D6B HAS
     # Subset the row with the failed model
     df_perf = df_perf.loc[row_index,:]
     # reset sim year 
-    sim_year = int(df_perf.year[0])
-    failed_inp_to_rerun = df_perf.swmm_inp[0]
-    failed_inp_problem = df_perf.problem[0]
+    sim_year = int(df_perf.year)
+    failed_inp_to_rerun = df_perf.swmm_inp
+    failed_inp_problem = df_perf.problem
     f_out_runtimes = dir_swmm_sst_models + "_model_performance_year{}_failed_run_id{}.csv".format(sim_year, row_index)
     f_out_modelresults = dir_swmm_sst_models + "_model_outputs_year{}_failed_run_id{}.nc".format(sim_year, row_index)
 # clear all re-run outputs
@@ -90,6 +90,7 @@ if which_models == 'high_error':
     f_out_runtimes = dir_swmm_sst_models + "_model_performance_year{}_high_error.csv".format(sim_year)
     f_out_modelresults = dir_swmm_sst_models + "_model_outputs_year{}_high_error.nc".format(sim_year)
     lst_alternative_routing_tsteps = lst_tsteps_for_reruns # update to only use new higher timesteps
+    continuity_error_thresh = continuity_error_to_rerun # making the threshold to re-run a little higher
 # if which_models is an integer indicating to run a single storm id
 try:
     storm_id_to_run = int(which_models)
@@ -141,8 +142,10 @@ if realization_to_run is not None:
     df_strms = df_strms[df_strms.realization == realization_to_run]
 if storm_id_to_run is not None:
     df_strms = df_strms[df_strms.storm_id == storm_id_to_run]
-if (which_models == "failed") or (which_models == "high_error"):
+if which_models == "high_error":
     df_strms = df_strms[df_strms.swmm_inp.isin(df_perf.swmm_inp)]
+if which_models == "failed":
+    df_strms = df_strms[df_strms.swmm_inp == df_perf.swmm_inp]
 #%% run simulations 
 lst_ds_node_fld = []
 lst_outputs_converted_to_dataset = [] # to track success
