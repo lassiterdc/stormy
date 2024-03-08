@@ -115,13 +115,13 @@ f_swmm_scenarios_catalog = dir_swmm_sst_scenarios + "swmm_scenario_catalogs/" + 
 norain_gage_name = "no_rain"
 
 # # c6
-max_runtime_min = 20 # maximum minutes of runtime allowable for each SWMM simulation
-lst_alternative_routing_tsteps = [2,1,0.5, 0.2] # these are the routing timesteps to try
-continuity_error_thresh = 1.5 # (%) i want the flow routing continuity error to be less than this 
+max_runtime_min = 40 # maximum minutes of runtime allowable for each SWMM simulation
+lst_alternative_routing_tsteps = [1,0.1] # these are the routing timesteps to try
+continuity_error_thresh = 2 # (%) i want the flow routing continuity error to be less than this 
 continuity_error_to_rerun = 2 # (%) this is used when I'm re-running models with smaller timestep
-lst_tsteps_for_reruns = [0.1, 0.05] # these should be smaller than the smallest in the lst_alternative_routing_tsteps if it is found this improves continuity errors
-time_permitted_for_reruns_min = 180 # minutes for either re-running failed models or re-running those with high contuity error
-min_improvement_to_warrant_another_sim = 0.1 # if the improvement to flow continuity error is less than this times the previous flow continuity error, don't bother running another simulation 
+lst_tsteps_for_reruns = [0.05, 0.01] # these should be smaller than the smallest in the lst_alternative_routing_tsteps if it is found this improves continuity errors
+time_permitted_for_reruns_min = 360 # minutes for either re-running failed models or re-running those with high contuity error
+min_improvement_to_warrant_another_sim = 0.1 # only relevant for 3 or more alternative tsteps; if the improvement to flow continuity error is less than this times the previous flow continuity error, don't bother running another simulation 
 cubic_meters_per_gallon = 0.00378541
 
 # # c6b
