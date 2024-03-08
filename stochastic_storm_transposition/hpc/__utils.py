@@ -1,5 +1,6 @@
 #%% import libraries
 from glob import glob
+from datetime import datetime
 # filenames, paths, and directories
 # dir_repo = "/project/quinnlab/dcl3nd/norfolk/stormy/" 
 dir_repo = "/scratch/dcl3nd/stormy/" # MODIFICATION TO RUN ON SCRATCH
@@ -225,6 +226,35 @@ def return_rzs_for_yr(fldr_realizations, yr):
             lst_f_ncs.append(f)
     lst_f_ncs.sort()
     return lst_f_ncs
+
+def return_analysis_end_date(f_inp, routing_tstep): # this must match the file naming pattern in _d6_running_swmm.py
+    # f_inp_to_report = f_inp.split(".inp")[0] + "_rt" + str(routing_tstep) + ".inp"
+    # use the rpt file that was copied to the backup folder
+    inp_name = f_inp.split("/")[-1]
+    swmm_fldr = f_inp.split(inp_name)[0]
+    rpt_name = inp_name.split(".inp")[0]  + "_rt" + str(routing_tstep) + ".rpt"
+    rpt_copy_fldr = swmm_fldr + "rpt_backup/"
+    rpt_path = rpt_copy_fldr + rpt_name
+    with open(rpt_path, 'r', encoding='latin-1') as file:
+        # Read all lines from the file
+        lines = file.readlines()
+    for line in lines:
+        if "Analysis ended on" in line:
+            end_line = line
+    # parse analysis end time
+    lst_end_line = end_line.split("on:")[-1].split(' ')
+    lst_info_in_line = []
+    for substring in lst_end_line:
+        if len(substring) > 0:
+            lst_info_in_line.append(substring)
+    # day_of_week = lst_info_in_line[0]
+    month = lst_info_in_line[1]
+    day = lst_info_in_line[2]
+    assumed_year = datetime.today().year
+    time = lst_info_in_line[3]
+    datetime_string = "{}-{}-{} {}".format(month, day, assumed_year, time)
+    analysis_end_datetime = pd.to_datetime(datetime_string, format='%b-%d-%Y %H:%M:%S')
+    return analysis_end_datetime
 
 def return_flood_losses_and_continuity_errors(swmm_rpt, f_inp):
     # from pyswmm import Nodes
