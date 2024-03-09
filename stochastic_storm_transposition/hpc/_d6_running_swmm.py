@@ -428,6 +428,7 @@ for idx, row in df_strms.iterrows():
     rpt_name = f_inp_to_report.split("/")[-1].split(".inp")[0] + ".rpt"
     rpt_path = rpt_copy_fldr + rpt_name
     if success == True:
+        analysis_end_datetime = return_analysis_end_date(rpt_path)
         lst_inp_files_to_keep.append(f_inp_to_report)
         lst_rpt_files_to_keep.append(rpt_path)
         __, __, __, __, __, sim_type = parse_inp(f_inp_to_report) # this function also returns rz, yr, storm_id which are not needed since they were determined earlier
@@ -460,7 +461,8 @@ for idx, row in df_strms.iterrows():
         a_rain4_file = np.reshape(np.array(row["rainfall_4"]), (1,1,1,1)) # rz, yr, storm, sim_type
         a_rain5_file = np.reshape(np.array(row["rainfall_5"]), (1,1,1,1)) # rz, yr, storm, sim_type
         a_waterlevel_file = np.reshape(np.array(row["water_level"]), (1,1,1,1)) # rz, yr, storm, sim_type
-
+        a_analysis_end_datetime = np.reshape(np.array(analysis_end_datetime), (1,1,1,1)) # rz, yr, storm, sim_type
+        
         # create dataset with the flood values
         ds = xr.Dataset(data_vars=dict(node_flooding_cubic_meters = (['realization', 'year', 'storm_id', 'sim_type', 'node_id'], a_fld_reshaped),
                                        sys_flding_cubic_meters = (['realization', 'year', 'storm_id', 'sim_type'], a_sys_flding),
@@ -468,6 +470,7 @@ for idx, row in df_strms.iterrows():
                                        flow_routing_error_percent = (['realization', 'year', 'storm_id', 'sim_type'], a_flow_routing_error),
                                        runoff_error_percent = (['realization', 'year', 'storm_id', 'sim_type'], a_runoff_error),
                                        routing_timestep = (['realization', 'year', 'storm_id', 'sim_type'], a_routing_timestep),
+                                       analysis_end_datetime = (['realization', 'year', 'storm_id', 'sim_type'], a_analysis_end_datetime),
                                        file_inp = (['realization', 'year', 'storm_id', 'sim_type'], a_inp_file),
                                        file_rpt = (['realization', 'year', 'storm_id', 'sim_type'], a_rpt_file),
                                        file_rain0 = (['realization', 'year', 'storm_id', 'sim_type'], a_rain0_file),
