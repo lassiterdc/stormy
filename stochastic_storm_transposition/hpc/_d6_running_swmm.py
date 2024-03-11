@@ -266,14 +266,15 @@ for idx, row in df_strms.iterrows():
             use_hotstart = False
             first_sim_attempt = True # default assumption is that we are running a first simulation
             if which_models == "failed":
+                print("inspecting existing outputs to see if previous rpt files exist for comparing ")
                 idx_routing_tstep = lst_alternative_routing_tsteps.index(routing_tstep)
-                idx_of_routing_tstep_of_last_attempted_sim = np.nan
                 if df_perf.routing_timestep in lst_alternative_routing_tsteps:
                     idx_of_routing_tstep_of_last_attempted_sim = lst_alternative_routing_tsteps.index(df_perf.routing_timestep)
-                    # print("The routing timestep used in the last simulation is in the listof alternative routing timesteps to try. Looking for hotstart file...")
+                else:
+                    idx_of_routing_tstep_of_last_attempted_sim = np.nan
                 # if a simulation has already been completed previously and was rejected due to high continuity errors, skip it
                 previous_sim_run = False
-                if idx_of_routing_tstep_of_last_attempted_sim > idx_routing_tstep: # won't trigger if the routing timestep used is no longer in the list of alternative routing timesteps
+                if idx_of_routing_tstep_of_last_attempted_sim > idx_routing_tstep:
                     previous_sim_run = True
                     previous_routing_tstep = routing_tstep
                     f_inp_prevrun = f_inp.split(".inp")[0] + "_rt" + str(previous_routing_tstep) + ".inp"
@@ -287,15 +288,23 @@ for idx, row in df_strms.iterrows():
                 if idx_routing_tstep == idx_of_routing_tstep_of_last_attempted_sim:
                     use_hotstart = True
                     first_sim_attempt = True
-                else:
-                    first_sim_attempt = False
+                # else:
+                #     first_sim_attempt = False
+                #     print("idx_routing_tstep")
+                #     print(idx_routing_tstep)
+                #     print("idx_of_routing_tstep_of_last_attempted_sim")
+                #     print(idx_of_routing_tstep_of_last_attempted_sim)
+                #     print("first_sim_attempt = {}".format(first_sim_attempt))
                 if use_hotstart_override:
                     use_hotstart = hotstart_override_val
                 ## if first sim for failed model AND there has already been a succesful run at a previous timestep
-                if first_sim_attempt and previous_sim_run and prev_rpt_file_exists:
+                if previous_sim_run and prev_rpt_file_exists:
                     __,__,previous_runoff_error_pyswmm,\
                         previous_flow_routing_error_pyswmm,__,__ = return_flood_losses_and_continuity_errors(f_rpt_prevrun, f_inp_prevrun)
                     first_sim_attempt = False
+                    print("previous_sim_run: {}".format(previous_sim_run))
+                    print("prev_rpt_file_exists: {}".format(prev_rpt_file_exists))
+                    print("previous_runoff_error_pyswmm: {}".format(previous_runoff_error_pyswmm))
             else:
                 first_sim_attempt = (routing_tstep == lst_alternative_routing_tsteps[0])
             # modify inp file with routing timestep
