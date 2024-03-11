@@ -257,10 +257,12 @@ for idx, row in df_strms.iterrows():
             use_hotstart = False
             if which_models == "failed":
                 idx_routing_tstep = lst_alternative_routing_tsteps.index(routing_tstep)
-                idx_of_routing_tstep_of_last_attempted_sim = lst_alternative_routing_tsteps.index(df_perf.routing_timestep)
+                idx_of_routing_tstep_of_last_attempted_sim = np.nan
+                if df_perf.routing_timestep in lst_alternative_routing_tsteps:
+                    idx_of_routing_tstep_of_last_attempted_sim = lst_alternative_routing_tsteps.index(df_perf.routing_timestep)
                 # if a simulation has already been completed previously and was rejected due to high continuity errors, skip it
                 previous_sim_run = False
-                if idx_of_routing_tstep_of_last_attempted_sim > idx_routing_tstep:
+                if idx_of_routing_tstep_of_last_attempted_sim > idx_routing_tstep: # won't trigger if the routing timestep used is no longer in the list of alternative routing timesteps
                     previous_sim_run = True
                     previous_routing_tstep = routing_tstep
                     f_inp_prevrun = f_inp.split(".inp")[0] + "_rt" + str(previous_routing_tstep) + ".inp"
