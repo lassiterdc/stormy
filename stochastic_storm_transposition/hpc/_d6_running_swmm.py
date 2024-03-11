@@ -73,14 +73,23 @@ if which_models == "failed": # NOTE THIS SHOULD ONLY BE RUN AFTER SCRIPT D6B HAS
     failed_inp_problem = df_perf.problem
     f_out_runtimes = dir_swmm_sst_models + "_model_performance_year{}_failed_run_id{}.csv".format(sim_year, row_index)
     f_out_modelresults = dir_swmm_sst_models + "_model_outputs_year{}_failed_run_id{}.nc".format(sim_year, row_index)
-# clear all re-run outputs
-if which_models == "all":
-    fs_re_runs_csvs = glob(dir_swmm_sst_models + "_model_performance_year{}_failed_run_id{}.csv".format("*", "*"))
-    fs_re_runs_netcdfs = glob(dir_swmm_sst_models + "_model_outputs_year{}_failed_run_id{}.nc".format("*", "*"))
+
+def remove_rerun_outputs():
+    fs_re_runs_higherror_csvs = dir_swmm_sst_models + "_model_performance_year{}_high_error.csv".format("*")
+    fs_re_runs_higherror_netcdfs = dir_swmm_sst_models + "_model_outputs_year{}_high_error.nc".format("*")
+    fs_re_runs_failed_csvs = glob(dir_swmm_sst_models + "_model_performance_year{}_failed_run_id{}.csv".format("*", "*"))
+    fs_re_runs_failed_netcdfs = glob(dir_swmm_sst_models + "_model_outputs_year{}_failed_run_id{}.nc".format("*", "*"))
+    fs_re_runs_csvs = fs_re_runs_higherror_csvs + fs_re_runs_failed_csvs
+    fs_re_runs_netcdfs = fs_re_runs_higherror_netcdfs + fs_re_runs_failed_netcdfs
     for f in fs_re_runs_csvs:
         os.remove(f)
     for f in fs_re_runs_netcdfs:
         os.remove(f)
+
+# clear all re-run outputs
+if which_models == "all":
+    remove_rerun_outputs()
+
 if which_models == 'high_error':
     print("Re-running simulations with a routing error of greater than or equal to {} %".format(continuity_error_to_rerun))
     df_perf = pd.read_csv(f_model_perf_summary)
@@ -260,6 +269,8 @@ for idx, row in df_strms.iterrows():
                 idx_of_routing_tstep_of_last_attempted_sim = np.nan
                 if df_perf.routing_timestep in lst_alternative_routing_tsteps:
                     idx_of_routing_tstep_of_last_attempted_sim = lst_alternative_routing_tsteps.index(df_perf.routing_timestep)
+                else:
+                    first_sim_attempt = True
                 # if a simulation has already been completed previously and was rejected due to high continuity errors, skip it
                 previous_sim_run = False
                 if idx_of_routing_tstep_of_last_attempted_sim > idx_routing_tstep: # won't trigger if the routing timestep used is no longer in the list of alternative routing timesteps
