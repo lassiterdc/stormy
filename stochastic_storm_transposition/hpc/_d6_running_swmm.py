@@ -75,8 +75,8 @@ if which_models == "failed": # NOTE THIS SHOULD ONLY BE RUN AFTER SCRIPT D6B HAS
     f_out_modelresults = dir_swmm_sst_models + "_model_outputs_year{}_failed_run_id{}.nc".format(sim_year, row_index)
 
 def remove_rerun_outputs():
-    fs_re_runs_higherror_csvs = dir_swmm_sst_models + "_model_performance_year{}_high_error.csv".format("*")
-    fs_re_runs_higherror_netcdfs = dir_swmm_sst_models + "_model_outputs_year{}_high_error.nc".format("*")
+    fs_re_runs_higherror_csvs = glob(dir_swmm_sst_models + "_model_performance_year{}_high_error.csv".format("*"))
+    fs_re_runs_higherror_netcdfs = glob(dir_swmm_sst_models + "_model_outputs_year{}_high_error.nc".format("*"))
     fs_re_runs_failed_csvs = glob(dir_swmm_sst_models + "_model_performance_year{}_failed_run_id{}.csv".format("*", "*"))
     fs_re_runs_failed_netcdfs = glob(dir_swmm_sst_models + "_model_outputs_year{}_failed_run_id{}.nc".format("*", "*"))
     fs_re_runs_csvs = fs_re_runs_higherror_csvs + fs_re_runs_failed_csvs
@@ -264,13 +264,13 @@ for idx, row in df_strms.iterrows():
         for routing_tstep in lst_alternative_routing_tsteps:
             routing_tstep_to_report = routing_tstep
             use_hotstart = False
+            first_sim_attempt = True # default assumption is that we are running a first simulation
             if which_models == "failed":
                 idx_routing_tstep = lst_alternative_routing_tsteps.index(routing_tstep)
                 idx_of_routing_tstep_of_last_attempted_sim = np.nan
                 if df_perf.routing_timestep in lst_alternative_routing_tsteps:
                     idx_of_routing_tstep_of_last_attempted_sim = lst_alternative_routing_tsteps.index(df_perf.routing_timestep)
-                else:
-                    first_sim_attempt = True
+                    # print("The routing timestep used in the last simulation is in the listof alternative routing timesteps to try. Looking for hotstart file...")
                 # if a simulation has already been completed previously and was rejected due to high continuity errors, skip it
                 previous_sim_run = False
                 if idx_of_routing_tstep_of_last_attempted_sim > idx_routing_tstep: # won't trigger if the routing timestep used is no longer in the list of alternative routing timesteps
