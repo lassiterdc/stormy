@@ -87,7 +87,7 @@ def remove_rerun_outputs():
         os.remove(f)
 
 # clear all re-run outputs
-if which_models == "all":
+if (which_models == "all") or (which_models == "previous"):
     remove_rerun_outputs()
 
 if which_models == 'high_error':
