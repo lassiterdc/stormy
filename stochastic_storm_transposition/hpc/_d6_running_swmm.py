@@ -247,13 +247,14 @@ for idx, row in df_strms.iterrows():
                 # print("new lowest routing timestep encourntered. Previous error, new error (new tstep): {}, {}, {}".format(lowest_error, flow_routing_error_rpt, routing_tstep))
                 routing_tstep_to_report = routing_tstep
                 lowest_error = flow_routing_error_rpt
+                associated_runoff_error_rpt = runoff_error_rpt
             # evaluate errors
-            if (abs(flow_routing_error_rpt) <= continuity_error_thresh):
+            if (abs(lowest_error) <= continuity_error_thresh):
                 flow_continuity_issues = False
             else:
                 flow_continuity_issues = True
 
-            if (abs(runoff_error_rpt) <= continuity_error_thresh):
+            if (abs(associated_runoff_error_rpt) <= continuity_error_thresh):
                 runoff_continuity_issues = False
             else:
                 runoff_continuity_issues = True
@@ -261,6 +262,7 @@ for idx, row in df_strms.iterrows():
             flow_routing_error_pyswmm = np.nan
             runoff_error_pyswmm = np.nan
         success = True
+        runoff_error_rpt = associated_runoff_error_rpt
     # if running simulations..
     else:
         for routing_tstep in lst_alternative_routing_tsteps:
