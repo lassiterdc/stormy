@@ -12,7 +12,6 @@ f_performance_reruns = dir_swmm_sst_models + "_model_performance_year{}_failed_r
 f_performance_high_error = dir_swmm_sst_models + "_model_performance_year{}_high_error.csv".format("*")
 # define file pattern of rpt files
 
-
 #%% load performance dataframe
 lst_f_perf = glob(f_performance)
 lst_f_perf_reruns = glob(f_performance_reruns)
