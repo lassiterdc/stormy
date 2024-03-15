@@ -240,11 +240,13 @@ for idx, row in df_strms.iterrows():
         # find the rpt output and routing timestep with the lowest error
         for rpt_path in lst_f_rpts:
             routing_tstep = rpt_path.split("_rt")[-1].split(".rpt")[0]
+            # print(routing_tstep)
             s_node_flooding,total_flooding_system_rpt,runoff_error_rpt,\
                         flow_routing_error_rpt,frac_diff_node_minus_system_flood_rpt,flow_units = return_flood_losses_and_continuity_errors(rpt_path, f_inp)
             if abs(flow_routing_error_rpt) < abs(lowest_error):
+                # print("new lowest routing timestep encourntered. Previous error, new error (new tstep): {}, {}, {}".format(lowest_error, flow_routing_error_rpt, routing_tstep))
                 routing_tstep_to_report = routing_tstep
-                lowest_error = lowest_error
+                lowest_error = flow_routing_error_rpt
             # evaluate errors
             if (abs(flow_routing_error_rpt) <= continuity_error_thresh):
                 flow_continuity_issues = False
