@@ -27,4 +27,4 @@ source activate running_swmm
 
 # running swmm
 python ${assar_dirs[hpc_d6_py]} ${SLURM_ARRAY_TASK_ID} "previous" 1 1 # arguments: year, which models to run (failed, all, or specific storm number), which realizations to run, and whether to delete swmm .out files
-# python ${assar_dirs[hpc_d6_py]} 10 "previous" 1 1
+# python ${assar_dirs[hpc_d6_py]} 1 "previous" 1 1
