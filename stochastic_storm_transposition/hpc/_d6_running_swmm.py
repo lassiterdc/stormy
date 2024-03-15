@@ -14,11 +14,11 @@ import shutil
 use_hotstart_override = False
 hotstart_override_val = False
 #%% work
-# sim_year = 251
-# which_models = "high_error"
-# realizations_to_use = 1
-# delete_swmm_outputs = False
-# realization_to_run = None
+sim_year = 1
+which_models = "previous"
+realizations_to_use = 1
+delete_swmm_outputs = False
+realization_to_run = 1
 #%% end work
 
 sim_year = int(sys.argv[1]) # this is used as the row index of the failed model to run if which_models = "failed" (so there's only 1 simulation per node)
@@ -253,7 +253,6 @@ for idx, row in df_strms.iterrows():
                 flow_continuity_issues = False
             else:
                 flow_continuity_issues = True
-
             if (abs(associated_runoff_error_rpt) <= continuity_error_thresh):
                 runoff_continuity_issues = False
             else:
